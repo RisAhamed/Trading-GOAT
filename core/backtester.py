@@ -60,6 +60,11 @@ class BacktestResult:
 class Backtester:
     """Runs a single-symbol long-only backtest."""
 
+    # Extra bars beyond lookback windows to ensure stable indicator warmup.
+    MIN_WARMUP_BUFFER = 5
+    # Sentinel value used when there are profits but no realized losses.
+    INFINITE_PROFIT_FACTOR = 999.0
+
     def __init__(self, config: Optional[ConfigLoader] = None) -> None:
         self.config = config or get_config()
         self.indicators = IndicatorCalculator(self.config)
@@ -84,7 +89,7 @@ class Backtester:
         missing = required_cols - set(df.columns)
         if missing:
             raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
-        if len(df) < max(self.config.timeframes.trend_lookback_bars, self.config.timeframes.entry_lookback_bars) + 5:
+        if len(df) < max(self.config.timeframes.trend_lookback_bars, self.config.timeframes.entry_lookback_bars) + self.MIN_WARMUP_BUFFER:
             raise ValueError("Not enough bars for backtest warmup")
 
         cash = initial_balance
@@ -254,7 +259,11 @@ class Backtester:
 
         gross_wins = sum(t.pnl for t in trade_log if t.pnl > 0)
         gross_losses = abs(sum(t.pnl for t in trade_log if t.pnl < 0))
-        profit_factor = (gross_wins / gross_losses) if gross_losses > 0 else (999.0 if gross_wins > 0 else 0.0)
+        profit_factor = (
+            (gross_wins / gross_losses)
+            if gross_losses > 0
+            else (self.INFINITE_PROFIT_FACTOR if gross_wins > 0 else 0.0)
+        )
 
         return BacktestResult(
             symbol=symbol,
@@ -288,4 +297,3 @@ class Backtester:
                 if dd > max_dd:
                     max_dd = dd
         return max_dd
-
