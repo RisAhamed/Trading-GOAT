@@ -265,7 +265,7 @@ class SignalEngine:
             if trend_tf.overall_trend == "BULLISH":
                 return True, "10-min trend is BULLISH (confirms BUY)"
             elif trend_tf.overall_trend == "SIDEWAYS":
-                adx = getattr(entry_tf, "adx", 0.0)
+                adx = getattr(trend_tf, "adx", 0.0)
                 if trend_tf.macd_histogram_rising and adx > 22:
                     return True, "10-min trend is SIDEWAYS with bullish momentum"
                 return False, "SIDEWAYS + low ADX — insufficient momentum"

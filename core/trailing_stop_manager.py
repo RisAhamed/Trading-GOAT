@@ -148,8 +148,7 @@ class TrailingStopManager:
             elif market_regime == "SIDEWAYS":
                 multiplier = 0.7
 
-            base_trail_distance = self.trail_pct
-            trail_distance = base_trail_distance * multiplier
+            trail_distance = self.trail_pct * multiplier
             logger.info(
                 f"Trail distance: {trail_distance:.4f} (regime={market_regime}, mult={multiplier})"
             )
