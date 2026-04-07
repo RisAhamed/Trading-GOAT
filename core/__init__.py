@@ -11,6 +11,7 @@ from .signal_engine import SignalEngine, SignalResult
 from .risk_manager import RiskManager, RiskParameters
 from .order_executor import OrderExecutor
 from .portfolio_tracker import PortfolioTracker
+from .trade_results import TradeResultsTracker, get_results_tracker
 
 __all__ = [
     "ConfigLoader",
@@ -24,4 +25,6 @@ __all__ = [
     "RiskParameters",
     "OrderExecutor",
     "PortfolioTracker",
+    "TradeResultsTracker",
+    "get_results_tracker",
 ]

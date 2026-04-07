@@ -23,6 +23,7 @@ from core.signal_engine import SignalEngine, SignalResult
 from core.risk_manager import RiskManager, RiskParameters
 from core.order_executor import OrderExecutor, OrderResult
 from core.portfolio_tracker import PortfolioTracker, PortfolioState
+from core.trade_results import get_results_tracker, TradeResultsTracker
 from dashboard.terminal_ui import TerminalUI
 
 
@@ -57,6 +58,7 @@ class AITrader:
         self.risk_manager = RiskManager(self.config)
         self.order_executor = OrderExecutor(self.config)
         self.portfolio_tracker = PortfolioTracker(self.config)
+        self.results_tracker = get_results_tracker()  # Trade results tracking
         self.ui = TerminalUI(self.config)
         
         # Get trading pairs
@@ -75,6 +77,14 @@ class AITrader:
         """Handle shutdown signals."""
         logger.info("Shutdown signal received")
         self._running = False
+        
+        # Generate final report on shutdown
+        try:
+            report_path = self.results_tracker.write_full_report()
+            logger.info(f"Final report saved: {report_path}")
+            self.results_tracker.close_session()
+        except Exception as e:
+            logger.error(f"Error generating final report: {e}")
     
     def _verify_connections(self) -> bool:
         """Verify all API connections."""
@@ -358,6 +368,12 @@ class AITrader:
                 try:
                     # Update portfolio state
                     portfolio_state = self.portfolio_tracker.update()
+                    
+                    # Update results tracker with portfolio value
+                    self.results_tracker.update_portfolio_value(
+                        total_value=portfolio_state.total_value,
+                        cash=portfolio_state.cash,
+                    )
                     
                     # Update risk manager with daily stats
                     self.risk_manager.update_daily_stats(

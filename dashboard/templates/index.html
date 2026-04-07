@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Crypto Trader - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>🤖 AI Crypto Trader</h1>
+                <span class="mode-badge">PAPER TRADING</span>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator" id="bot-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+                <div class="time" id="current-time"></div>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <main class="main-grid">
+            <!-- Portfolio Card -->
+            <section class="card portfolio-card">
+                <div class="card-header">
+                    <h2>💰 Portfolio</h2>
+                    <span class="refresh-indicator" id="portfolio-refresh">●</span>
+                </div>
+                <div class="card-body">
+                    <div class="stat-grid">
+                        <div class="stat">
+                            <span class="stat-label">Total Value</span>
+                            <span class="stat-value" id="total-value">$0.00</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Available Cash</span>
+                            <span class="stat-value" id="cash">$0.00</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Buying Power</span>
+                            <span class="stat-value" id="buying-power">$0.00</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Day P&L</span>
+                            <span class="stat-value pnl" id="day-pnl">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Market Prices Card -->
+            <section class="card prices-card">
+                <div class="card-header">
+                    <h2>📈 Live Prices</h2>
+                </div>
+                <div class="card-body">
+                    <div class="price-grid" id="prices">
+                        <div class="price-item">
+                            <span class="symbol">BTC/USD</span>
+                            <span class="price">Loading...</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="symbol">ETH/USD</span>
+                            <span class="price">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bot Status Card -->
+            <section class="card status-card">
+                <div class="card-header">
+                    <h2>⚙️ Bot Status</h2>
+                </div>
+                <div class="card-body">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="label">Status</span>
+                            <span class="value" id="running-status">—</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Loop Count</span>
+                            <span class="value" id="loop-count">0</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Ollama</span>
+                            <span class="value" id="ollama-status">—</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Alpaca</span>
+                            <span class="value" id="alpaca-status">—</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Today's Stats Card -->
+            <section class="card stats-card">
+                <div class="card-header">
+                    <h2>📊 Today's Stats</h2>
+                </div>
+                <div class="card-body">
+                    <div class="stat-grid">
+                        <div class="stat">
+                            <span class="stat-label">Total Trades</span>
+                            <span class="stat-value" id="total-trades">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Buy Orders</span>
+                            <span class="stat-value" id="buy-trades">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Sell Orders</span>
+                            <span class="stat-value" id="sell-trades">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Open Positions</span>
+                            <span class="stat-value" id="open-positions">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Open Positions Card -->
+            <section class="card positions-card">
+                <div class="card-header">
+                    <h2>📂 Open Positions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Qty</th>
+                                    <th>Entry</th>
+                                    <th>Current</th>
+                                    <th>Value</th>
+                                    <th>P&L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positions-table">
+                                <tr>
+                                    <td colspan="6" class="empty">No open positions</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Signals Card -->
+            <section class="card signals-card">
+                <div class="card-header">
+                    <h2>🎯 Recent Signals</h2>
+                </div>
+                <div class="card-body">
+                    <div class="signals-list" id="signals-list">
+                        <div class="signal-item">
+                            <span class="signal-time">--:--:--</span>
+                            <span class="signal-symbol">---</span>
+                            <span class="signal-action">WAITING</span>
+                            <span class="signal-confidence">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Orders Card -->
+            <section class="card orders-card">
+                <div class="card-header">
+                    <h2>📝 Recent Orders</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Symbol</th>
+                                    <th>Side</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table">
+                                <tr>
+                                    <td colspan="6" class="empty">No orders yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- System Logs Card -->
+            <section class="card logs-card">
+                <div class="card-header">
+                    <h2>📋 System Logs</h2>
+                    <div class="log-filters">
+                        <button class="filter-btn active" data-level="all">All</button>
+                        <button class="filter-btn" data-level="INFO">Info</button>
+                        <button class="filter-btn" data-level="ERROR">Error</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="logs-container" id="logs-container">
+                        <div class="log-entry">
+                            <span class="log-time">--:--:--</span>
+                            <span class="log-level INFO">INFO</span>
+                            <span class="log-message">Waiting for logs...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-left">
+                <span>AI Model: <strong id="ai-model">{{ config.get('ai', {}).get('model', 'unknown') }}</strong></span>
+                <span>Loop Interval: <strong>{{ config.get('bot', {}).get('loop_interval_seconds', 30) }}s</strong></span>
+            </div>
+            <div class="footer-right">
+                <span>Last Update: <span id="last-update">Never</span></span>
+                <span class="auto-refresh">🔄 Auto-refresh: <span id="refresh-countdown">5</span>s</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Dashboard state
+        let refreshInterval = 5000;
+        let countdown = 5;
+        let logFilter = 'all';
+
+        // Format currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value || 0);
+        }
+
+        // Format number
+        function formatNumber(value, decimals = 2) {
+            return new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(value || 0);
+        }
+
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Update countdown
+        function updateCountdown() {
+            countdown--;
+            if (countdown <= 0) {
+                countdown = refreshInterval / 1000;
+            }
+            document.getElementById('refresh-countdown').textContent = countdown;
+        }
+        setInterval(updateCountdown, 1000);
+
+        // Update bot status indicator
+        function updateBotStatus(status) {
+            const indicator = document.getElementById('bot-status');
+            const dot = indicator.querySelector('.status-dot');
+            const text = indicator.querySelector('.status-text');
+            
+            if (status.running) {
+                dot.className = 'status-dot running';
+                text.textContent = 'Running';
+            } else {
+                dot.className = 'status-dot stopped';
+                text.textContent = 'Stopped';
+            }
+            
+            document.getElementById('running-status').textContent = status.running ? '✅ Running' : '⏹️ Stopped';
+            document.getElementById('loop-count').textContent = status.loop_count || 0;
+            document.getElementById('ollama-status').textContent = status.ollama_status === 'connected' ? '✅ Connected' : '⚠️ Fallback';
+            document.getElementById('alpaca-status').textContent = status.alpaca_status === 'connected' ? '✅ Connected' : '❌ Disconnected';
+        }
+
+        // Update portfolio display
+        function updatePortfolio(account, stats) {
+            document.getElementById('total-value').textContent = formatCurrency(account.portfolio_value);
+            document.getElementById('cash').textContent = formatCurrency(account.cash);
+            document.getElementById('buying-power').textContent = formatCurrency(account.buying_power);
+            
+            const dayPnl = stats.day_pnl || 0;
+            const dayPnlPct = stats.day_pnl_pct || 0;
+            const pnlElement = document.getElementById('day-pnl');
+            pnlElement.textContent = `${formatCurrency(dayPnl)} (${dayPnlPct >= 0 ? '+' : ''}${formatNumber(dayPnlPct)}%)`;
+            pnlElement.className = 'stat-value pnl ' + (dayPnl >= 0 ? 'positive' : 'negative');
+        }
+
+        // Update prices display
+        function updatePrices(prices) {
+            const container = document.getElementById('prices');
+            container.innerHTML = '';
+            
+            for (const [symbol, data] of Object.entries(prices)) {
+                if (symbol === 'error') continue;
+                
+                const item = document.createElement('div');
+                item.className = 'price-item';
+                item.innerHTML = `
+                    <span class="symbol">${symbol}</span>
+                    <span class="price">${formatCurrency(data.price)}</span>
+                    <span class="price-time">${data.timestamp || ''}</span>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        // Update stats display
+        function updateStats(stats) {
+            document.getElementById('total-trades').textContent = stats.total_trades || 0;
+            document.getElementById('buy-trades').textContent = stats.buy_trades || 0;
+            document.getElementById('sell-trades').textContent = stats.sell_trades || 0;
+            document.getElementById('open-positions').textContent = stats.open_positions || 0;
+        }
+
+        // Update positions table
+        function updatePositions(positions) {
+            const tbody = document.getElementById('positions-table');
+            
+            if (!positions || positions.length === 0 || positions[0]?.error) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty">No open positions</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = positions.map(pos => {
+                const pnlClass = pos.unrealized_pnl >= 0 ? 'positive' : 'negative';
+                const pnlSign = pos.unrealized_pnl >= 0 ? '+' : '';
+                return `
+                    <tr>
+                        <td class="symbol">${pos.symbol}</td>
+                        <td>${formatNumber(pos.qty, 6)}</td>
+                        <td>${formatCurrency(pos.avg_entry_price)}</td>
+                        <td>${formatCurrency(pos.current_price)}</td>
+                        <td>${formatCurrency(pos.market_value)}</td>
+                        <td class="pnl ${pnlClass}">${pnlSign}${formatCurrency(pos.unrealized_pnl)} (${pnlSign}${formatNumber(pos.unrealized_pnl_pct)}%)</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update signals display
+        function updateSignals(signals) {
+            const container = document.getElementById('signals-list');
+            
+            // Filter to only action signals (BUY/SELL/HOLD)
+            const actionSignals = signals.filter(s => s.action && !s.type);
+            
+            if (actionSignals.length === 0) {
+                container.innerHTML = '<div class="signal-item"><span class="signal-time">--:--:--</span><span class="signal-symbol">---</span><span class="signal-action">WAITING</span><span class="signal-confidence">0%</span></div>';
+                return;
+            }
+            
+            container.innerHTML = actionSignals.slice(-10).reverse().map(signal => {
+                const actionClass = signal.action.toLowerCase();
+                const time = signal.timestamp?.split(' ')[1] || '--:--:--';
+                return `
+                    <div class="signal-item">
+                        <span class="signal-time">${time}</span>
+                        <span class="signal-symbol">${signal.symbol}</span>
+                        <span class="signal-action ${actionClass}">${signal.action}</span>
+                        <span class="signal-confidence">${signal.confidence}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update orders table
+        function updateOrders(orders) {
+            const tbody = document.getElementById('orders-table');
+            
+            if (!orders || orders.length === 0 || orders[0]?.error) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty">No orders yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = orders.slice(0, 10).map(order => {
+                const sideClass = order.side === 'buy' ? 'buy' : 'sell';
+                const statusClass = order.status === 'filled' ? 'filled' : (order.status === 'canceled' ? 'canceled' : 'pending');
+                const time = order.created_at?.split(' ')[1] || '--:--:--';
+                return `
+                    <tr>
+                        <td>${time}</td>
+                        <td class="symbol">${order.symbol}</td>
+                        <td class="side ${sideClass}">${order.side.toUpperCase()}</td>
+                        <td>${formatNumber(order.filled_qty || order.qty, 4)}</td>
+                        <td>${order.filled_price ? formatCurrency(order.filled_price) : '—'}</td>
+                        <td class="status ${statusClass}">${order.status}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update logs display
+        function updateLogs(logs) {
+            const container = document.getElementById('logs-container');
+            
+            if (!logs || logs.length === 0 || logs[0]?.error) {
+                container.innerHTML = '<div class="log-entry"><span class="log-time">--:--:--</span><span class="log-level INFO">INFO</span><span class="log-message">Waiting for logs...</span></div>';
+                return;
+            }
+            
+            const filteredLogs = logFilter === 'all' ? logs : logs.filter(l => l.level === logFilter);
+            
+            container.innerHTML = filteredLogs.slice(-30).reverse().map(log => {
+                const time = log.timestamp?.split(' ')[1] || '--:--:--';
+                const levelClass = log.level || 'INFO';
+                return `
+                    <div class="log-entry">
+                        <span class="log-time">${time}</span>
+                        <span class="log-level ${levelClass}">${log.level}</span>
+                        <span class="log-message">${log.message}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            // Auto-scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Fetch and update dashboard
+        async function fetchDashboard() {
+            try {
+                const response = await fetch('/api/dashboard');
+                const data = await response.json();
+                
+                updateBotStatus(data.status);
+                updatePortfolio(data.account, data.stats);
+                updatePrices(data.prices);
+                updateStats(data.stats);
+                updatePositions(data.positions);
+                updateSignals(data.signals);
+                updateOrders(data.orders);
+                updateLogs(data.logs);
+                
+                document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+                
+                // Flash refresh indicator
+                const indicator = document.getElementById('portfolio-refresh');
+                indicator.classList.add('flash');
+                setTimeout(() => indicator.classList.remove('flash'), 500);
+                
+            } catch (error) {
+                console.error('Error fetching dashboard:', error);
+            }
+            
+            countdown = refreshInterval / 1000;
+        }
+
+        // Log filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                logFilter = btn.dataset.level;
+                fetchDashboard();
+            });
+        });
+
+        // Initial fetch and start auto-refresh
+        fetchDashboard();
+        setInterval(fetchDashboard, refreshInterval);
+    </script>
+</body>
+</html>

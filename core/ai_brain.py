@@ -5,16 +5,19 @@ Connects to Ollama Cloud models (MiniMax M2.7, GLM-4-Plus, GPT-120B, etc.)
 for market analysis and chain-of-thought reasoning.
 
 Ollama Cloud provides access to powerful thinking models without local GPU requirements.
+Uses Ollama's native API format (not OpenAI-compatible).
 """
 
 import json
 import logging
 import re
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
+from ollama import Client as OllamaClient
 
 from .config_loader import get_config, ConfigLoader
 from .indicators import IndicatorValues, SymbolIndicators
@@ -24,36 +27,42 @@ logger = logging.getLogger(__name__)
 
 
 # Ollama Cloud model capabilities mapping
+# Model names for direct API access (without -cloud suffix)
 OLLAMA_CLOUD_MODELS = {
     "minimax-m2.7": {
         "name": "MiniMax M2.7",
+        "api_name": "minimax-m2.7",  # For direct API
         "thinking": True,
         "context_length": 80000,
         "description": "Strong reasoning and analysis capabilities",
     },
-    "glm-4-plus": {
-        "name": "GLM-4 Plus", 
-        "thinking": True,
-        "context_length": 128000,
-        "description": "Advanced analytical reasoning model",
-    },
-    "gpt-120b": {
-        "name": "GPT 120B",
+    "gpt-oss:120b": {
+        "name": "GPT OSS 120B",
+        "api_name": "gpt-oss:120b",
         "thinking": True,
         "context_length": 32000,
         "description": "Large model with deep reasoning",
     },
-    "deepseek-r1": {
-        "name": "DeepSeek R1",
+    "deepseek-v3.1:671b": {
+        "name": "DeepSeek V3.1 671B",
+        "api_name": "deepseek-v3.1:671b",
         "thinking": True,
         "context_length": 64000,
         "description": "Excellent for structured analysis",
     },
-    "qwen-max": {
-        "name": "Qwen Max",
+    "cogito-2.1:671b": {
+        "name": "Cogito 2.1 671B",
+        "api_name": "cogito-2.1:671b",
         "thinking": True,
-        "context_length": 32000,
-        "description": "Good general reasoning capabilities",
+        "context_length": 64000,
+        "description": "Deep reasoning model",
+    },
+    "mistral-large-3:675b": {
+        "name": "Mistral Large 3 675B",
+        "api_name": "mistral-large-3:675b",
+        "thinking": True,
+        "context_length": 128000,
+        "description": "Large Mistral model",
     },
 }
 
@@ -96,21 +105,29 @@ class AIBrain:
         self.config = config or get_config()
         
         self.model = self.config.ai.model
-        self.base_url = self.config.ai.base_url.rstrip('/')
         self.temperature = self.config.ai.temperature
         self.max_tokens = self.config.ai.max_tokens
         self.fallback_models = self.config.ai.fallback_models
         self.timeout = getattr(self.config.ai, 'timeout_seconds', 120)
-        
-        # Ollama Cloud API endpoints (OpenAI-compatible)
-        self.chat_url = f"{self.base_url}/chat/completions"
-        self.models_url = f"{self.base_url}/models"
         
         # Ollama Cloud API key from env
         self.api_key = self.config.env.ollama_api_key
         
         if not self.api_key:
             logger.warning("OLLAMA_API_KEY not set - cloud models may not work")
+        
+        # Initialize Ollama Cloud client using native library
+        # Direct API access to ollama.com (NOT localhost)
+        self.ollama_client = None
+        if self.api_key:
+            try:
+                self.ollama_client = OllamaClient(
+                    host="https://ollama.com",
+                    headers={'Authorization': f'Bearer {self.api_key}'}
+                )
+                logger.info("Ollama Cloud client initialized with API key")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Ollama client: {e}")
         
         # Connection status
         self._connected = False
@@ -121,11 +138,12 @@ class AIBrain:
         self._max_history = 10
         
         logger.info(f"AIBrain initialized with Ollama Cloud model: {self.model}")
-        logger.info(f"API Endpoint: {self.base_url}")
+        logger.info(f"API Host: https://ollama.com")
     
     def check_connection(self) -> Tuple[bool, str]:
         """
         Check if Ollama Cloud API is reachable and authenticate.
+        Uses the native Ollama client library.
         
         Returns:
             Tuple of (connected: bool, message: str)
@@ -134,96 +152,30 @@ class AIBrain:
             self._connected = False
             return False, "OLLAMA_API_KEY not configured in .env file"
         
-        try:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
-            
-            # Try to list available models
-            response = requests.get(
-                self.models_url,
-                headers=headers,
-                timeout=15,
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                available_models = []
-                
-                # Parse model list (OpenAI-compatible format)
-                if isinstance(data, dict) and 'data' in data:
-                    available_models = [m.get('id', '') for m in data.get('data', [])]
-                elif isinstance(data, list):
-                    available_models = [m.get('id', m.get('name', '')) for m in data]
-                
-                # Check if primary model is available
-                if self.model in available_models or not available_models:
-                    # If no model list returned, assume model is available
-                    self._connected = True
-                    self._active_model = self.model
-                    model_info = OLLAMA_CLOUD_MODELS.get(self.model, {})
-                    model_name = model_info.get('name', self.model)
-                    return True, f"Connected to Ollama Cloud: {model_name}"
-                
-                # Try fallback models
-                for fallback in self.fallback_models:
-                    if fallback in available_models:
-                        self._connected = True
-                        self._active_model = fallback
-                        logger.warning(f"Primary model {self.model} not found, using: {fallback}")
-                        return True, f"Connected to Ollama Cloud with fallback: {fallback}"
-                
-                # No exact match, but API is working - try primary anyway
-                self._connected = True
-                self._active_model = self.model
-                return True, f"Connected to Ollama Cloud: {self.model}"
-            
-            elif response.status_code == 401:
-                self._connected = False
-                return False, "Invalid OLLAMA_API_KEY - authentication failed"
-            
-            elif response.status_code == 403:
-                self._connected = False
-                return False, "Access denied - check API key permissions"
-            
-            else:
-                # Try a simple completion to verify
-                return self._verify_with_test_request()
-                
-        except requests.exceptions.Timeout:
+        if not self.ollama_client:
             self._connected = False
-            return False, "Ollama Cloud connection timed out"
-        except requests.exceptions.ConnectionError:
-            self._connected = False
-            return False, "Cannot connect to Ollama Cloud API"
-        except Exception as e:
-            self._connected = False
-            return False, f"Ollama Cloud error: {str(e)}"
+            return False, "Ollama client not initialized"
+        
+        # Directly verify with a test chat - most reliable method
+        return self._verify_with_test_request()
     
     def _verify_with_test_request(self) -> Tuple[bool, str]:
-        """Verify connection by making a simple test request."""
+        """Verify connection by making a simple test chat request using Ollama native client."""
         try:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
+            if not self.ollama_client:
+                self._connected = False
+                return False, "Ollama client not initialized"
             
-            payload = {
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Say 'connected' in one word."}],
-                "max_tokens": 10,
-                "temperature": 0,
-            }
+            # Use the Ollama native chat API
+            messages = [{"role": "user", "content": "Say 'connected' in one word."}]
             
-            response = requests.post(
-                self.chat_url,
-                headers=headers,
-                json=payload,
-                timeout=30,
+            response = self.ollama_client.chat(
+                model=self.model,
+                messages=messages,
+                options={"temperature": 0, "num_predict": 10}
             )
             
-            if response.status_code == 200:
+            if response and 'message' in response:
                 self._connected = True
                 self._active_model = self.model
                 model_info = OLLAMA_CLOUD_MODELS.get(self.model, {})
@@ -231,11 +183,13 @@ class AIBrain:
                 return True, f"Connected to Ollama Cloud: {model_name}"
             else:
                 self._connected = False
-                return False, f"Ollama Cloud API error: {response.status_code}"
+                return False, "Invalid response from Ollama Cloud"
                 
         except Exception as e:
             self._connected = False
-            return False, f"Connection test failed: {str(e)}"
+            error_msg = str(e)
+            logger.warning(f"Ollama test request failed: {error_msg}")
+            return False, f"Connection test failed: {error_msg}"
     
     def get_active_model(self) -> str:
         """Get the currently active model name."""
@@ -393,7 +347,7 @@ Respond with ONLY the JSON, no additional text before or after."""
     
     def _call_ollama_cloud(self, prompt: str) -> Tuple[Optional[str], str]:
         """
-        Call Ollama Cloud API with the prompt using OpenAI-compatible format.
+        Call Ollama Cloud API with the prompt using native Ollama library.
         
         Args:
             prompt: The prompt to send
@@ -405,13 +359,12 @@ Respond with ONLY the JSON, no additional text before or after."""
             logger.error("OLLAMA_API_KEY not configured")
             return None, ""
         
+        if not self.ollama_client:
+            logger.error("Ollama client not initialized")
+            return None, ""
+        
         try:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
-            
-            # Build messages for chat completion (OpenAI-compatible format)
+            # Build messages for chat (Ollama native format)
             messages = [
                 {
                     "role": "system",
@@ -423,33 +376,25 @@ Respond with ONLY the JSON, no additional text before or after."""
                 }
             ]
             
-            payload = {
-                "model": self._active_model,
-                "messages": messages,
-                "temperature": self.temperature,
-                "max_tokens": self.max_tokens,
-                "stream": False,
-            }
-            
             logger.debug(f"Calling Ollama Cloud with model: {self._active_model}")
             
-            response = requests.post(
-                self.chat_url,
-                headers=headers,
-                json=payload,
-                timeout=self.timeout,
+            # Use Ollama native client chat method
+            response = self.ollama_client.chat(
+                model=self._active_model,
+                messages=messages,
+                options={
+                    "temperature": self.temperature,
+                    "num_predict": self.max_tokens,
+                }
             )
             
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Extract response from OpenAI-compatible format
+            if response:
+                # Extract content from Ollama response format
                 content = ""
                 thinking = ""
                 
-                if 'choices' in data and len(data['choices']) > 0:
-                    choice = data['choices'][0]
-                    message = choice.get('message', {})
+                if 'message' in response:
+                    message = response['message']
                     content = message.get('content', '')
                     
                     # Some models return thinking in a separate field
@@ -458,39 +403,32 @@ Respond with ONLY the JSON, no additional text before or after."""
                     elif 'thinking' in message:
                         thinking = message.get('thinking', '')
                 
-                # Fallback for non-standard response formats
-                elif 'response' in data:
-                    content = data.get('response', '')
-                elif 'content' in data:
-                    content = data.get('content', '')
-                elif 'text' in data:
-                    content = data.get('text', '')
+                # Fallback for direct content in response
+                elif 'response' in response:
+                    content = response.get('response', '')
+                elif 'content' in response:
+                    content = response.get('content', '')
                 
                 logger.debug(f"Ollama Cloud response received: {len(content)} chars")
                 return content, thinking
-                
-            elif response.status_code == 401:
-                logger.error("Ollama Cloud authentication failed - invalid API key")
-                return None, ""
             
-            elif response.status_code == 429:
-                logger.warning("Ollama Cloud rate limit exceeded - retrying...")
+            return None, ""
+                
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"Error calling Ollama Cloud: {error_msg}")
+            
+            # Check for specific error types
+            if "401" in error_msg or "unauthorized" in error_msg.lower():
+                logger.error("Ollama Cloud authentication failed - check API key")
+            elif "429" in error_msg or "rate" in error_msg.lower():
+                logger.warning("Ollama Cloud rate limit - retrying in 2s...")
                 import time
                 time.sleep(2)
                 return self._call_ollama_cloud(prompt)  # Retry once
-                
-            else:
-                logger.error(f"Ollama Cloud API error: {response.status_code} - {response.text[:200]}")
-                return None, ""
-                
-        except requests.exceptions.Timeout:
-            logger.error(f"Ollama Cloud request timed out after {self.timeout}s")
-            return None, ""
-        except requests.exceptions.ConnectionError:
-            logger.error("Cannot connect to Ollama Cloud API")
-            return None, ""
-        except Exception as e:
-            logger.error(f"Error calling Ollama Cloud: {e}")
+            elif "timeout" in error_msg.lower():
+                logger.error(f"Ollama Cloud request timed out")
+            
             return None, ""
     
     def _parse_response(self, response: str, symbol: str, thinking: str = "") -> AIDecision:

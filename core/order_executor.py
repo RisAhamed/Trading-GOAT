@@ -22,6 +22,7 @@ from alpaca.common.exceptions import APIError
 
 from .config_loader import get_config, ConfigLoader
 from .risk_manager import RiskParameters
+from .trade_results import get_results_tracker
 
 
 logger = logging.getLogger(__name__)
@@ -220,6 +221,24 @@ class OrderExecutor:
             
             result.success = True
             
+            # Record trade entry in results tracker
+            try:
+                results_tracker = get_results_tracker()
+                filled_price = result.filled_price or risk_params.entry_price
+                results_tracker.record_entry(
+                    symbol=symbol,
+                    side="BUY",
+                    quantity=risk_params.qty,
+                    entry_price=filled_price,
+                    order_type="market",
+                    ai_confidence=getattr(risk_params, 'ai_confidence', None),
+                    ai_reasoning=getattr(risk_params, 'ai_reasoning', None),
+                    order_id=result.order_id,
+                )
+                logger.info(f"Trade entry recorded in results tracker")
+            except Exception as e:
+                logger.warning(f"Failed to record trade result: {e}")
+            
         except APIError as e:
             result.error_message = self._handle_api_error(e)
             result.status = "error"
@@ -326,6 +345,24 @@ class OrderExecutor:
             
             result.success = True
             
+            # Record trade entry in results tracker
+            try:
+                results_tracker = get_results_tracker()
+                filled_price = result.filled_price or risk_params.entry_price
+                results_tracker.record_entry(
+                    symbol=symbol,
+                    side="SELL",
+                    quantity=risk_params.qty,
+                    entry_price=filled_price,
+                    order_type="market",
+                    ai_confidence=getattr(risk_params, 'ai_confidence', None),
+                    ai_reasoning=getattr(risk_params, 'ai_reasoning', None),
+                    order_id=result.order_id,
+                )
+                logger.info(f"Trade entry recorded in results tracker")
+            except Exception as e:
+                logger.warning(f"Failed to record trade result: {e}")
+            
         except APIError as e:
             result.error_message = self._handle_api_error(e)
             result.status = "error"
@@ -382,6 +419,20 @@ class OrderExecutor:
                 result.filled_price = float(order.filled_avg_price)
             
             result.success = True
+            
+            # Record trade exit in results tracker
+            try:
+                results_tracker = get_results_tracker()
+                if result.filled_price:
+                    results_tracker.record_exit(
+                        symbol=symbol,
+                        exit_price=result.filled_price,
+                        quantity=result.qty if result.qty > 0 else None,
+                        reason="SIGNAL",
+                    )
+                    logger.info(f"Trade exit recorded in results tracker")
+            except Exception as e:
+                logger.warning(f"Failed to record trade exit: {e}")
             
             logger.info(f"Position closed: {symbol}")
             

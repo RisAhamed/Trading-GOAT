@@ -136,7 +136,29 @@ The rich terminal dashboard will display:
 - Latest AI trading signals
 - Recent activity log
 
-### 7. Deactivate Virtual Environment (When Done)
+### 7. Run the Web Dashboard (Optional)
+
+For a more detailed monitoring experience, run the web-based dashboard:
+
+```bash
+# In a separate terminal (with venv activated)
+python dashboard/web_ui.py
+```
+
+Then open your browser to **http://127.0.0.1:5000**
+
+The web dashboard shows:
+- 📊 **Real-time Portfolio** - Total value, cash, buying power, daily P&L
+- 📈 **Live Prices** - Current BTC/USD, ETH/USD prices
+- ⚙️ **Bot Status** - Running status, loop count, API connections
+- 📂 **Open Positions** - Entry price, current price, unrealized P&L
+- 🎯 **Recent Signals** - BUY/SELL/HOLD decisions with confidence %
+- 📝 **Recent Orders** - Filled orders with prices
+- 📋 **System Logs** - Real-time log viewer with filtering
+
+**Note**: You can run both the terminal UI (main.py) and web dashboard (web_ui.py) simultaneously. They share the same data.
+
+### 8. Deactivate Virtual Environment (When Done)
 
 ```bash
 deactivate
@@ -317,6 +339,13 @@ Logs rotate daily to prevent disk space issues.
 ## Legal Disclaimer
 
 This software is for educational purposes only. Trading cryptocurrencies and forex carries significant risk. Past performance does not guarantee future results. Never trade with money you cannot afford to lose. This bot is designed for paper trading only and should not be used with real funds.
+
+
+Web Dashboard
+
+URL: http://127.0.0.1:5000
+Auto-refreshes every 5 seconds
+Shows all trading data in real-time
 
 ## License
 

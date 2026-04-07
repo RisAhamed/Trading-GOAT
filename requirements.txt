@@ -23,6 +23,9 @@ pyyaml>=6.0
 # Terminal dashboard
 rich>=13.0.0
 
+# Web dashboard
+flask>=3.0.0
+
 # HTTP requests
 requests>=2.31.0
 
