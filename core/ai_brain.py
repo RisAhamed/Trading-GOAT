@@ -345,9 +345,9 @@ Respond with ONLY the JSON, no additional text before or after."""
 
         return prompt
     
-    def _call_ollama_cloud(self, prompt: str) -> Tuple[Optional[str], str]:
+    def _call_ollama_cloud_with_model(self, prompt: str, model: str) -> Tuple[Optional[str], str]:
         """
-        Call Ollama Cloud API with the prompt using native Ollama library.
+        Call Ollama Cloud API with a specific model.
         
         Args:
             prompt: The prompt to send
@@ -376,11 +376,11 @@ Respond with ONLY the JSON, no additional text before or after."""
                 }
             ]
             
-            logger.debug(f"Calling Ollama Cloud with model: {self._active_model}")
+            logger.debug(f"Calling Ollama Cloud with model: {model}")
             
             # Use Ollama native client chat method
             response = self.ollama_client.chat(
-                model=self._active_model,
+                model=model,
                 messages=messages,
                 options={
                     "temperature": self.temperature,
@@ -422,14 +422,60 @@ Respond with ONLY the JSON, no additional text before or after."""
             if "401" in error_msg or "unauthorized" in error_msg.lower():
                 logger.error("Ollama Cloud authentication failed - check API key")
             elif "429" in error_msg or "rate" in error_msg.lower():
-                logger.warning("Ollama Cloud rate limit - retrying in 2s...")
+                logger.warning(f"Ollama Cloud rate limit on {model} - retrying in 2s...")
                 import time
                 time.sleep(2)
-                return self._call_ollama_cloud(prompt)  # Retry once
+                try:
+                    response = self.ollama_client.chat(
+                        model=model,
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": "You are an expert quantitative trading analyst. Analyze market data and provide precise trading recommendations in JSON format. Use chain-of-thought reasoning to analyze all indicators before making a decision."
+                            },
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ],
+                        options={
+                            "temperature": self.temperature,
+                            "num_predict": self.max_tokens,
+                        }
+                    )
+                    if response and 'message' in response:
+                        message = response['message']
+                        content = message.get('content', '')
+                        thinking = message.get('reasoning', '') or message.get('thinking', '')
+                        return content, thinking
+                except Exception:
+                    pass
             elif "timeout" in error_msg.lower():
                 logger.error(f"Ollama Cloud request timed out")
             
             return None, ""
+
+    def _call_ollama_cloud(self, prompt: str) -> Tuple[Optional[str], str]:
+        """
+        Call Ollama Cloud API with active model and automatic failover models.
+        """
+        model_candidates = [self._active_model] + [
+            m for m in self.fallback_models if m != self._active_model
+        ]
+        last_model_error = ""
+
+        for model in model_candidates:
+            response, thinking = self._call_ollama_cloud_with_model(prompt, model)
+            if response:
+                if model != self._active_model:
+                    logger.warning(f"Switched active model from {self._active_model} to {model}")
+                    self._active_model = model
+                return response, thinking
+            last_model_error = model
+
+        if last_model_error:
+            logger.error(f"All Ollama Cloud model attempts failed (last tried: {last_model_error})")
+        return None, ""
     
     def _parse_response(self, response: str, symbol: str, thinking: str = "") -> AIDecision:
         """

@@ -91,6 +91,8 @@ class RiskConfig:
     take_profit_multiplier: float = 3.0
     max_daily_loss_pct: float = 5.0
     min_signal_confidence: float = 0.65
+    max_portfolio_exposure_pct: float = 60.0
+    max_symbol_exposure_pct: float = 25.0
 
 
 @dataclass
@@ -246,6 +248,8 @@ class ConfigLoader:
             take_profit_multiplier=risk_cfg.get("take_profit_multiplier", 3.0),
             max_daily_loss_pct=risk_cfg.get("max_daily_loss_pct", 5.0),
             min_signal_confidence=risk_cfg.get("min_signal_confidence", 0.65),
+            max_portfolio_exposure_pct=risk_cfg.get("max_portfolio_exposure_pct", 60.0),
+            max_symbol_exposure_pct=risk_cfg.get("max_symbol_exposure_pct", 25.0),
         )
         
         # Signals config
