@@ -20,6 +20,15 @@ bot:
   log_file: "logs/trading.log"
 
 # ─────────────────────────────────────────────────────────────────────────────────
+# WEB DASHBOARD SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+web_ui:
+  enabled: true                    # Enable/disable web dashboard
+  host: "127.0.0.1"                # Host to bind to (127.0.0.1 = localhost only)
+  port: 5000                       # Port for the web dashboard
+  auto_open_browser: true          # Automatically open browser on startup
+
+# ─────────────────────────────────────────────────────────────────────────────────
 # AI MODEL SETTINGS (Ollama Cloud)
 # ─────────────────────────────────────────────────────────────────────────────────
 ai:

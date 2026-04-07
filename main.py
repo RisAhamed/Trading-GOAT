@@ -12,6 +12,8 @@ import logging
 import signal
 import sys
 import time
+import threading
+import webbrowser
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
@@ -27,6 +29,7 @@ from core.trade_results import get_results_tracker, TradeResultsTracker
 from core.trailing_stop_manager import TrailingStopManager
 from core.position_monitor import PositionMonitor
 from dashboard.terminal_ui import TerminalUI
+from dashboard.web_ui import app as web_app
 
 
 # Setup logging
@@ -84,6 +87,10 @@ class AITrader:
         self._running = False
         self._loop_count = 0
         
+        # ═══ WEB UI THREAD ═══════════════════════════════════════════════════
+        self._web_thread: Optional[threading.Thread] = None
+        # ═══ END WEB UI THREAD ═══════════════════════════════════════════════
+        
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -109,6 +116,54 @@ class AITrader:
             self.results_tracker.close_session()
         except Exception as e:
             logger.error(f"Error generating final report: {e}")
+    
+    # ═══ WEB UI METHODS ═══════════════════════════════════════════════════════
+    def _start_web_ui(self) -> None:
+        """Start the web UI in a background thread."""
+        if not self.config.web_ui.enabled:
+            logger.info("Web UI disabled in config")
+            return
+        
+        host = self.config.web_ui.host
+        port = self.config.web_ui.port
+        
+        def run_flask():
+            """Run Flask in a separate thread."""
+            import logging as flask_logging
+            # Suppress Flask's default logging to keep terminal clean
+            flask_log = flask_logging.getLogger('werkzeug')
+            flask_log.setLevel(flask_logging.WARNING)
+            
+            try:
+                web_app.run(
+                    host=host,
+                    port=port,
+                    debug=False,
+                    threaded=True,
+                    use_reloader=False,  # Important: disable reloader in thread
+                )
+            except Exception as e:
+                logger.error(f"Web UI error: {e}")
+        
+        self._web_thread = threading.Thread(target=run_flask, daemon=True)
+        self._web_thread.start()
+        
+        # Give Flask a moment to start
+        time.sleep(1)
+        
+        # Open browser automatically if configured
+        url = f"http://{host}:{port}"
+        logger.info(f"Web dashboard available at: {url}")
+        
+        if self.config.web_ui.auto_open_browser:
+            try:
+                webbrowser.open(url)
+            except Exception as e:
+                logger.warning(f"Could not open browser automatically: {e}")
+                print(f"\n📊 Web Dashboard: {url}")
+        else:
+            print(f"\n📊 Web Dashboard: {url}")
+    # ═══ END WEB UI METHODS ═══════════════════════════════════════════════════
     
     def _verify_connections(self) -> bool:
         """Verify all API connections."""
@@ -471,6 +526,16 @@ class AITrader:
         if self.trailing_manager.is_enabled():
             self.ui.add_log("INFO", "Trailing stop monitor started")
         # ═══ END START POSITION MONITOR ═════════════════════════════════════
+
+        # ═══ START WEB UI ════════════════════════════════════════════════════
+        # Start the web dashboard in background thread and open browser
+        self._start_web_ui()
+        if self.config.web_ui.enabled:
+            self.ui.add_log(
+                "INFO", 
+                f"Web dashboard: http://{self.config.web_ui.host}:{self.config.web_ui.port}"
+            )
+        # ═══ END START WEB UI ════════════════════════════════════════════════
         
         # Initial portfolio display
         self.ui.update_portfolio({

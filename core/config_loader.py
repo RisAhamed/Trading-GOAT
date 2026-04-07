@@ -111,6 +111,15 @@ class SignalConfig:
 
 
 @dataclass
+class WebUIConfig:
+    """Web dashboard settings."""
+    enabled: bool = True
+    host: str = "127.0.0.1"
+    port: int = 5000
+    auto_open_browser: bool = True
+
+
+@dataclass
 class EnvConfig:
     """Environment variables from .env file."""
     ollama_api_key: str = ""
@@ -271,6 +280,15 @@ class ConfigLoader:
             min_rsi_for_buy=sig_cfg.get("min_rsi_for_buy", 35),
             max_rsi_for_sell=sig_cfg.get("max_rsi_for_sell", 65),
             scalping_mode=sig_cfg.get("scalping_mode", False),
+        )
+        
+        # Web UI config
+        web_cfg = self._raw_config.get("web_ui", {})
+        self.web_ui = WebUIConfig(
+            enabled=web_cfg.get("enabled", True),
+            host=web_cfg.get("host", "127.0.0.1"),
+            port=web_cfg.get("port", 5000),
+            auto_open_browser=web_cfg.get("auto_open_browser", True),
         )
     
     def _setup_logging(self) -> None:
