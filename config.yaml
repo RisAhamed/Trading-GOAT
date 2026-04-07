@@ -82,5 +82,5 @@ risk:
 signals:
   require_trend_confirmation: true  # Require 10-min trend confirmation
   require_volume_confirmation: false
-  min_rsi_for_buy: 35
-  max_rsi_for_sell: 65
+  min_rsi_for_buy: 35  # BUYs are favored when RSI is <= this; high RSI is already blocked (>70)
+  max_rsi_for_sell: 65  # SELLs are favored when RSI is >= this; low RSI is already blocked (<30)

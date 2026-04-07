@@ -12,6 +12,7 @@ import json
 import logging
 import re
 import os
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
@@ -364,6 +365,16 @@ Respond with ONLY the JSON, no additional text before or after."""
             return None, ""
         
         try:
+            def call_chat() -> Any:
+                return self.ollama_client.chat(
+                    model=model,
+                    messages=messages,
+                    options={
+                        "temperature": self.temperature,
+                        "num_predict": self.max_tokens,
+                    }
+                )
+
             # Build messages for chat (Ollama native format)
             messages = [
                 {
@@ -379,14 +390,7 @@ Respond with ONLY the JSON, no additional text before or after."""
             logger.debug(f"Calling Ollama Cloud with model: {model}")
             
             # Use Ollama native client chat method
-            response = self.ollama_client.chat(
-                model=model,
-                messages=messages,
-                options={
-                    "temperature": self.temperature,
-                    "num_predict": self.max_tokens,
-                }
-            )
+            response = call_chat()
             
             if response:
                 # Extract content from Ollama response format
@@ -423,26 +427,9 @@ Respond with ONLY the JSON, no additional text before or after."""
                 logger.error("Ollama Cloud authentication failed - check API key")
             elif "429" in error_msg or "rate" in error_msg.lower():
                 logger.warning(f"Ollama Cloud rate limit on {model} - retrying in 2s...")
-                import time
                 time.sleep(2)
                 try:
-                    response = self.ollama_client.chat(
-                        model=model,
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": "You are an expert quantitative trading analyst. Analyze market data and provide precise trading recommendations in JSON format. Use chain-of-thought reasoning to analyze all indicators before making a decision."
-                            },
-                            {
-                                "role": "user",
-                                "content": prompt
-                            }
-                        ],
-                        options={
-                            "temperature": self.temperature,
-                            "num_predict": self.max_tokens,
-                        }
-                    )
+                    response = call_chat()
                     if response and 'message' in response:
                         message = response['message']
                         content = message.get('content', '')

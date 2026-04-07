@@ -89,8 +89,19 @@ class Backtester:
         missing = required_cols - set(df.columns)
         if missing:
             raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
-        if len(df) < max(self.config.timeframes.trend_lookback_bars, self.config.timeframes.entry_lookback_bars) + self.MIN_WARMUP_BUFFER:
+        required_bars = (
+            max(
+                self.config.timeframes.trend_lookback_bars,
+                self.config.timeframes.entry_lookback_bars,
+            )
+            + self.MIN_WARMUP_BUFFER
+        )
+        if len(df) < required_bars:
             raise ValueError("Not enough bars for backtest warmup")
+        if slippage_bps < 0:
+            raise ValueError("slippage_bps must be >= 0")
+        if fee_bps < 0:
+            raise ValueError("fee_bps must be >= 0")
 
         cash = initial_balance
         qty = 0.0
