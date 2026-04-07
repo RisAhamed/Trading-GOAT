@@ -53,10 +53,6 @@ markets:
     pairs:                         # Add or remove crypto pairs
       - "BTC/USD"                  # Bitcoin
       - "ETH/USD"                  # Ethereum
-      # - "SOL/USD"                # Solana (uncomment to enable)
-      # - "AVAX/USD"               # Avalanche
-      # - "DOGE/USD"               # Dogecoin
-      # - "LTC/USD"                # Litecoin
     exchange: "alpaca"
   
   forex:
@@ -67,6 +63,37 @@ markets:
       # - "USD/JPY"
       # - "AUD/USD"
     exchange: "alpaca"
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# DYNAMIC SYMBOL SCANNER
+# ─────────────────────────────────────────────────────────────────────────────────
+symbol_scanner:
+  enabled: true
+  scan_interval_seconds: 120        # Re-rank coins every 2 minutes
+  min_score_to_trade: 40            # Symbol needs 40/100 to be tradeable
+  max_symbols_to_trade: 3           # Never open more than 3 symbols simultaneously
+  candidate_pool:                   # Full pool of symbols to rank from
+    - "BTC/USD"
+    - "ETH/USD"
+    - "SOL/USD"
+    - "AVAX/USD"
+    - "DOGE/USD"
+    - "LNK/USD"
+    - "LTC/USD"
+    - "MATIC/USD"
+  btc_correlation_guard: true       # Apply BTC penalty to altcoins when BTC drops
+  log_rankings: true                # Log full ranking table each scan
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# POLITICAL DISCLOSURE SIGNALS
+# ─────────────────────────────────────────────────────────────────────────────────
+political_signals:
+  enabled: true
+  fetch_interval_seconds: 3600   # Refresh political trades every 60 minutes
+  lookback_days: 30              # Only use trades from last 30 days
+  min_trade_size: 1000           # Only consider trades >= $1,000
+  apply_to_crypto: true          # Apply bias to crypto symbols
+  log_signals: true              # Log when political signals affect score
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # TIMEFRAMES FOR ANALYSIS

@@ -15,6 +15,7 @@ from .trade_results import TradeResultsTracker, get_results_tracker
 from .backtester import Backtester, BacktestResult, BacktestTrade
 from .market_regime import MarketRegimeDetector
 from .bearish_scalp_strategy import BearishScalpStrategy
+from .symbol_scanner import SymbolScanner
 
 __all__ = [
     "ConfigLoader",
@@ -35,4 +36,5 @@ __all__ = [
     "BacktestTrade",
     "MarketRegimeDetector",
     "BearishScalpStrategy",
+    "SymbolScanner",
 ]

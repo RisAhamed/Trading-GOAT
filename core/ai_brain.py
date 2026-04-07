@@ -214,6 +214,7 @@ class AIBrain:
         indicators: SymbolIndicators,
         current_position: Optional[Dict[str, Any]] = None,
         portfolio_state: Optional[Dict[str, Any]] = None,
+        symbol_meta: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Build a detailed prompt for the LLM.
@@ -230,6 +231,7 @@ class AIBrain:
         # Extract indicator data
         trend = indicators.trend_tf
         entry = indicators.entry_tf
+        symbol_meta = symbol_meta or {}
         
         prompt = f"""You are an expert quantitative trading analyst with deep knowledge of technical analysis.
 Analyze the following market data for {symbol} and provide a trading decision.
@@ -330,6 +332,32 @@ IMPORTANT: This position has dynamic trailing stop protection.
 - Total Value: ${total_value:,.2f}
 - Available Cash: ${cash:,.2f}
 - Open Positions: {open_positions} / {max_positions} max
+"""
+
+        prompt += f"""
+=== SYMBOL QUALITY CONTEXT ===
+This symbol was selected by the scanner with the following scores:
+- Momentum Score: {symbol_meta.get('momentum_pct', 0):+.2f}% (10-bar price change)
+- Volume Surge: {symbol_meta.get('vol_ratio', 1.0):.2f}x above 20-period average
+- ATR Quality: {symbol_meta.get('atr_pct', 0):.2f}% (ideal range: 0.3%–1.5%)
+- BTC Market Condition: BTC {symbol_meta.get('btc_change_pct', 0):+.2f}% (3-bar)
+- Scanner Rank: #{symbol_meta.get('rank', 'N/A')} out of {symbol_meta.get('pool_size', 2)} candidates
+- Total Score: {symbol_meta.get('total_score', 0)}/100
+
+This context means the scanner found this to be the best current opportunity.
+Use this momentum and volume data in your analysis.
+"""
+
+        if symbol_meta.get('political_bias', 1.0) != 1.0:
+            bias = symbol_meta.get('political_bias', 1.0)
+            bonus = symbol_meta.get('political_bonus', 0)
+            direction = "BUYING" if bias > 1.0 else "SELLING"
+            prompt += f"""
+=== POLITICAL SIGNAL CONTEXT ===
+US Congress members are currently {direction} this asset class.
+Political bias multiplier: {bias:.2f} (score adjustment: {bonus:+d} pts)
+Note: Congress members often receive sector briefings before public news.
+Factor this as a secondary confirmation signal, not a primary one.
 """
 
         # Get scalping settings from config
@@ -759,6 +787,7 @@ Respond with ONLY the JSON, no additional text before or after."""
         indicators: SymbolIndicators,
         current_position: Optional[Dict[str, Any]] = None,
         portfolio_state: Optional[Dict[str, Any]] = None,
+        symbol_meta: Optional[Dict[str, Any]] = None,
     ) -> AIDecision:
         """
         Get an AI decision for a trading symbol using Ollama Cloud.
@@ -791,7 +820,13 @@ Respond with ONLY the JSON, no additional text before or after."""
         # Try to get AI decision from Ollama Cloud
         if self._connected:
             try:
-                prompt = self._build_prompt(symbol, indicators, current_position, portfolio_state)
+                prompt = self._build_prompt(
+                    symbol,
+                    indicators,
+                    current_position,
+                    portfolio_state,
+                    symbol_meta=symbol_meta,
+                )
                 logger.debug(f"AI prompt for {symbol}:\n{prompt}")
                 
                 # Call Ollama Cloud API

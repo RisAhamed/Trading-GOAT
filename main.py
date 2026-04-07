@@ -74,6 +74,8 @@ class AITrader:
 
         # Market regime detector
         self.regime_detector = MarketRegimeDetector(self.market_data, self.config)
+        from core.symbol_scanner import SymbolScanner
+        self.symbol_scanner = SymbolScanner(self.market_data, self.config)
         self.bearish_scalp = BearishScalpStrategy(self.config)
         self._market_regime: str = "UNKNOWN"
         self._regime_summary: dict = {}
@@ -89,6 +91,7 @@ class AITrader:
         
         # Get trading pairs
         self.trading_pairs = self.config.markets.get_all_pairs()
+        self._active_trading_pairs: List[str] = list(self.trading_pairs)
         logger.info(f"Trading Pairs: {', '.join(self.trading_pairs)}")
         
         # Loop control
@@ -360,6 +363,52 @@ class AITrader:
         except Exception as e:
             logger.error(f"[REGIME EXIT] Fatal error: {e}")
         return exits
+
+    def _update_active_symbols(self) -> None:
+        """
+        Use the SymbolScanner to dynamically update which symbols
+        we're actively trading this loop cycle.
+        Only updates if scanner is enabled in config.
+        """
+        try:
+            scanner_cfg = getattr(self.config, 'symbol_scanner', None)
+            if not getattr(scanner_cfg, 'enabled', False):
+                return
+
+            tradeable = self.symbol_scanner.get_tradeable_symbols()
+            max_symbols = getattr(scanner_cfg, 'max_symbols_to_trade', 3)
+            self._active_trading_pairs = tradeable[:max_symbols]
+
+            # Always include symbols with open positions (don't abandon open trades)
+            open_symbols = {pos.symbol for pos in self.portfolio_tracker.get_positions()}
+            for sym in open_symbols:
+                if sym not in self._active_trading_pairs:
+                    self._active_trading_pairs.append(sym)
+
+            rankings = self.symbol_scanner.get_ranking_summary()
+            top3 = rankings[:3]
+            rank_str = " | ".join(
+                [f"{r['symbol']}={r['total_score']}" for r in top3]
+            )
+            self.ui.add_log(
+                "INFO",
+                f"📊 Symbol scan: Top3 → {rank_str} | Active: {self._active_trading_pairs}"
+            )
+            logger.info(f"[SCANNER] Active pairs updated: {self._active_trading_pairs}")
+
+            if hasattr(self, 'symbol_scanner') and hasattr(
+                self.symbol_scanner, 'political_scanner'
+            ):
+                try:
+                    summary = self.symbol_scanner.political_scanner.get_signal_summary()
+                    if summary:
+                        self.ui.add_log("INFO", summary)
+                except Exception as e:
+                    logger.debug(f"[SCANNER] Political summary unavailable: {e}")
+
+        except Exception as e:
+            logger.error(f"[SCANNER] Symbol update error: {e}")
+            # Keep existing pairs on error — never crash the main loop
 
     def _check_max_hold_exits(self) -> int:
         exits = 0
@@ -633,12 +682,22 @@ class AITrader:
                 "cash": portfolio_state.cash,
                 "open_positions": portfolio_state.open_positions,
             }
+
+            symbol_meta = {}
+            if hasattr(self, 'symbol_scanner'):
+                rankings = self.symbol_scanner.get_ranking_summary()
+                for r in rankings:
+                    if r['symbol'] == symbol:
+                        symbol_meta = dict(r)
+                        symbol_meta['pool_size'] = len(rankings)
+                        break
             
             ai_decision = self.ai_brain.get_decision(
                 symbol,
                 symbol_indicators,
                 current_position,
                 portfolio_dict,
+                symbol_meta=symbol_meta,
             )
             
             self.ui.set_ai_thinking(False)
@@ -944,6 +1003,9 @@ class AITrader:
                     # 4) Update market regime + session
                     self._update_market_regime()
 
+                    # 4b) Dynamically rank and select best trading symbols
+                    self._update_active_symbols()
+
                     # 5) Exit losing longs on BEARISH regime
                     regime_exits = self._check_regime_change_exits()
                     if regime_exits > 0:
@@ -984,7 +1046,7 @@ class AITrader:
                     indicators_map: Dict[str, SymbolIndicators] = {}
                     trades_executed = quick_exits  # Count quick exits as trades
                     
-                    for symbol in self.trading_pairs:
+                    for symbol in self._active_trading_pairs:
                         if not self._running:
                             break
                         
@@ -1025,7 +1087,7 @@ class AITrader:
                     self.ui.add_log(
                         "INFO",
                         f"Loop #{self._loop_count} complete. "
-                        f"Scanned {len(self.trading_pairs)} symbols. "
+                        f"Scanned {len(self._active_trading_pairs)} symbols. "
                         f"{trades_executed} trades executed."
                     )
                     
