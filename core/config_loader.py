@@ -98,6 +98,7 @@ class RiskConfig:
     trailing_stop_pct: float = 0.25      # Trail stop at 0.25%
     max_hold_minutes: int = 30           # Max hold time
     min_profit_to_exit: float = 3.0      # Exit if profit >= $3
+    max_hold_seconds: int = 600          # Force exit stale positions (seconds)
 
 
 @dataclass
@@ -108,6 +109,31 @@ class SignalConfig:
     min_rsi_for_buy: int = 35
     max_rsi_for_sell: int = 65
     scalping_mode: bool = False  # Enable aggressive scalping
+
+
+@dataclass
+class RegimeDetectionConfig:
+    """Market regime detection settings."""
+    primary_symbol: str = "BTC/USD"
+    timeframe: str = "1Hour"
+    lookback_bars: int = 100
+    ema_fast: int = 20
+    ema_slow: int = 50
+    adx_period: int = 14
+    adx_trending_threshold: float = 20.0
+    cache_seconds: int = 300
+
+
+@dataclass
+class BearishScalpConfig:
+    """Bearish bounce scalp settings."""
+    enabled: bool = True
+    rsi_entry_max: float = 25.0
+    adx_entry_max: float = 30.0
+    profit_target_pct: float = 0.8
+    stop_loss_pct: float = 0.4
+    max_hold_seconds: int = 300
+    position_size_multiplier: float = 0.5
 
 
 @dataclass
@@ -270,6 +296,7 @@ class ConfigLoader:
             trailing_stop_pct=risk_cfg.get("trailing_stop_pct", 0.25),
             max_hold_minutes=risk_cfg.get("max_hold_minutes", 30),
             min_profit_to_exit=risk_cfg.get("min_profit_to_exit", 3.0),
+            max_hold_seconds=risk_cfg.get("max_hold_seconds", 600),
         )
         
         # Signals config
@@ -280,6 +307,31 @@ class ConfigLoader:
             min_rsi_for_buy=sig_cfg.get("min_rsi_for_buy", 35),
             max_rsi_for_sell=sig_cfg.get("max_rsi_for_sell", 65),
             scalping_mode=sig_cfg.get("scalping_mode", False),
+        )
+
+        # Regime detection config
+        regime_cfg = self._raw_config.get("regime_detection", {})
+        self.regime_detection = RegimeDetectionConfig(
+            primary_symbol=regime_cfg.get("primary_symbol", "BTC/USD"),
+            timeframe=regime_cfg.get("timeframe", "1Hour"),
+            lookback_bars=regime_cfg.get("lookback_bars", 100),
+            ema_fast=regime_cfg.get("ema_fast", 20),
+            ema_slow=regime_cfg.get("ema_slow", 50),
+            adx_period=regime_cfg.get("adx_period", 14),
+            adx_trending_threshold=regime_cfg.get("adx_trending_threshold", 20.0),
+            cache_seconds=regime_cfg.get("cache_seconds", 300),
+        )
+
+        # Bearish scalp config
+        bearish_scalp_cfg = self._raw_config.get("bearish_scalp", {})
+        self.bearish_scalp = BearishScalpConfig(
+            enabled=bearish_scalp_cfg.get("enabled", True),
+            rsi_entry_max=bearish_scalp_cfg.get("rsi_entry_max", 25.0),
+            adx_entry_max=bearish_scalp_cfg.get("adx_entry_max", 30.0),
+            profit_target_pct=bearish_scalp_cfg.get("profit_target_pct", 0.8),
+            stop_loss_pct=bearish_scalp_cfg.get("stop_loss_pct", 0.4),
+            max_hold_seconds=bearish_scalp_cfg.get("max_hold_seconds", 300),
+            position_size_multiplier=bearish_scalp_cfg.get("position_size_multiplier", 0.5),
         )
         
         # Web UI config

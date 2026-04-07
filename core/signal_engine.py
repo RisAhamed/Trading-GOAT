@@ -146,6 +146,14 @@ class SignalEngine:
             confirmations.append(macd_reason)
         else:
             rejections.append(macd_reason)
+
+        # 4b. ADX gate — block trades in choppy/ranging market
+        adx = indicators.entry_tf.adx if hasattr(indicators.entry_tf, "adx") else 25.0
+        if proposed_action in ["BUY", "SELL"] and adx < 20:
+            rejections.append(f"ADX at {adx:.1f} below 20 — market is ranging, no directional trade")
+        else:
+            if proposed_action in ["BUY", "SELL"]:
+                confirmations.append(f"ADX at {adx:.1f} confirms trending market")
         
         # 5. Volume confirmation (if required)
         if self.require_volume_confirmation and proposed_action in ["BUY", "SELL"]:
@@ -173,7 +181,7 @@ class SignalEngine:
         
         # Count critical rejections (confidence, trend, RSI)
         critical_rejections = len([r for r in rejections if any(
-            x in r.lower() for x in ['confidence', 'trend', 'rsi']
+            x in r.lower() for x in ['confidence', 'trend', 'rsi', 'adx']
         )])
         
         if proposed_action in ["BUY", "SELL"]:
@@ -250,8 +258,13 @@ class SignalEngine:
             if trend_tf.overall_trend == "BULLISH":
                 return True, "10-min trend is BULLISH (confirms BUY)"
             elif trend_tf.overall_trend == "SIDEWAYS":
-                # Check for bullish momentum in sideways
-                if trend_tf.macd_histogram_rising and trend_tf.ema_trend != "BEARISH":
+                # Check for bullish momentum in sideways + ADX support
+                adx = trend_tf.adx if hasattr(trend_tf, "adx") else 0.0
+                # Requirement: SIDEWAYS BUY needs stronger confirmation than the
+                # general ADX gate, so use >22 here.
+                if adx <= 22:
+                    return False, "SIDEWAYS trend with low ADX — insufficient momentum for BUY"
+                if trend_tf.macd_histogram_rising:
                     return True, "10-min trend is SIDEWAYS with bullish momentum"
                 else:
                     return False, "10-min trend is SIDEWAYS without bullish momentum"

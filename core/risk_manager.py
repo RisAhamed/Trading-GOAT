@@ -41,6 +41,7 @@ class RiskParameters:
     entry_price: float
     symbol: str
     side: str  # "long" or "short"
+    position_size_override: float = 1.0
 
 
 @dataclass
