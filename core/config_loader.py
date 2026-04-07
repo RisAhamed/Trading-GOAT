@@ -151,6 +151,31 @@ class SessionFilterConfig:
 
 
 @dataclass
+class SymbolScannerConfig:
+    """Symbol scanner and ranking configuration."""
+    enabled: bool = True
+    scan_interval_seconds: int = 120
+    min_score_to_trade: int = 40
+    max_symbols_to_trade: int = 3
+    candidate_pool: List[str] = field(
+        default_factory=lambda: ["BTC/USD", "ETH/USD", "SOL/USD"]
+    )
+    btc_correlation_guard: bool = True
+    log_rankings: bool = True
+
+
+@dataclass
+class PoliticalSignalConfig:
+    """Political signal scanner configuration."""
+    enabled: bool = True
+    fetch_interval_seconds: int = 3600
+    lookback_days: int = 30
+    min_trade_size: int = 1000
+    apply_to_crypto: bool = True
+    log_signals: bool = True
+
+
+@dataclass
 class WebUIConfig:
     """Web dashboard settings."""
     enabled: bool = True
@@ -360,6 +385,29 @@ class ConfigLoader:
             prefer_high_volume_sessions=session_filter_cfg.get("prefer_high_volume_sessions", True),
             allowed_sessions=session_filter_cfg.get("allowed_sessions", ["ASIAN", "LONDON", "US"]),
             off_peak_mode=session_filter_cfg.get("off_peak_mode", "HOLD_ONLY"),
+        )
+
+        # Symbol scanner config
+        scanner_cfg = self._raw_config.get("symbol_scanner", {})
+        self.symbol_scanner = SymbolScannerConfig(
+            enabled=scanner_cfg.get("enabled", True),
+            scan_interval_seconds=scanner_cfg.get("scan_interval_seconds", 120),
+            min_score_to_trade=scanner_cfg.get("min_score_to_trade", 40),
+            max_symbols_to_trade=scanner_cfg.get("max_symbols_to_trade", 3),
+            candidate_pool=scanner_cfg.get("candidate_pool", ["BTC/USD", "ETH/USD"]),
+            btc_correlation_guard=scanner_cfg.get("btc_correlation_guard", True),
+            log_rankings=scanner_cfg.get("log_rankings", True),
+        )
+
+        # Political signals config
+        pol_cfg = self._raw_config.get("political_signals", {})
+        self.political_signals = PoliticalSignalConfig(
+            enabled=pol_cfg.get("enabled", True),
+            fetch_interval_seconds=pol_cfg.get("fetch_interval_seconds", 3600),
+            lookback_days=pol_cfg.get("lookback_days", 30),
+            min_trade_size=pol_cfg.get("min_trade_size", 1000),
+            apply_to_crypto=pol_cfg.get("apply_to_crypto", True),
+            log_signals=pol_cfg.get("log_signals", True),
         )
         
         # Web UI config
