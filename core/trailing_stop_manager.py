@@ -123,6 +123,7 @@ class TrailingStopManager:
         symbol: str,
         entry_price: float,
         qty: float,
+        market_regime: str = "BULLISH",
     ) -> Optional[TrailingPosition]:
         """
         Register a new position for trailing stop tracking.
@@ -131,6 +132,7 @@ class TrailingStopManager:
             symbol: Trading pair (e.g., "BTC/USD")
             entry_price: Fill price of the entry order
             qty: Quantity bought
+            market_regime: Current regime context to tune trail aggressiveness
             
         Returns:
             TrailingPosition object, or None if trailing is disabled
@@ -140,6 +142,15 @@ class TrailingStopManager:
             return None
         
         try:
+            multiplier = 1.0
+            if market_regime == "BEARISH":
+                multiplier = 0.5
+            elif market_regime == "SIDEWAYS":
+                multiplier = 0.7
+
+            logger.info(f"Trail distance multiplier: {multiplier} (regime: {market_regime})")
+            adjusted_trail_pct = self.trail_pct * multiplier
+
             # Calculate initial floor = entry × (1 - initial_stop_loss_pct/100)
             initial_floor = entry_price * (1 - self.initial_stop_loss_pct / 100)
             
@@ -155,7 +166,7 @@ class TrailingStopManager:
                 peak_price=entry_price,
                 floor_price=initial_floor,
                 hard_stop_price=hard_stop,
-                current_trail_pct=self.trail_pct,
+                current_trail_pct=adjusted_trail_pct,
                 unrealized_pnl_usd=0.0,
                 unrealized_pnl_pct=0.0,
                 max_profit_seen_pct=0.0,

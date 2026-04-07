@@ -13,6 +13,8 @@ from .order_executor import OrderExecutor
 from .portfolio_tracker import PortfolioTracker
 from .trade_results import TradeResultsTracker, get_results_tracker
 from .backtester import Backtester, BacktestResult, BacktestTrade
+from .market_regime import MarketRegimeDetector
+from .bearish_scalp_strategy import BearishScalpStrategy
 
 __all__ = [
     "ConfigLoader",
@@ -31,4 +33,6 @@ __all__ = [
     "Backtester",
     "BacktestResult",
     "BacktestTrade",
+    "MarketRegimeDetector",
+    "BearishScalpStrategy",
 ]
