@@ -137,6 +137,12 @@ risk:
   max_hold_minutes: 30             # Force exit after this many minutes
   min_profit_to_exit: 3.0          # Exit if profit >= this $ amount
   max_hold_seconds: 600            # Force-exit stale positions after N seconds
+  loss_cooldown_minutes: 10
+  profit_lock_trigger_pct: 1.5
+  profit_lock_ratio: 0.5
+  min_profit_lock_pct: 0.3
+  confluence_min_score: 70
+  atr_volatility_max_multiplier: 2.5
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # SIGNAL GENERATION SETTINGS
@@ -178,6 +184,11 @@ bearish_scalp:
   stop_loss_pct: 0.4
   max_hold_seconds: 300
   position_size_multiplier: 0.5
+
+session_filter:
+  prefer_high_volume_sessions: true
+  allowed_sessions: ["ASIAN", "LONDON", "US"]
+  off_peak_mode: "HOLD_ONLY"    # HOLD_ONLY or DISABLED
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # TRAILING STOP STRATEGY - Complete configuration

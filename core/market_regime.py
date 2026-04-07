@@ -4,6 +4,7 @@ Market regime detector for bullish/bearish/sideways classification.
 
 import logging
 import time
+from datetime import datetime, timezone
 from typing import Optional, TypedDict
 
 import pandas as pd
@@ -24,6 +25,7 @@ class RegimeSummary(TypedDict):
     adx: float
     rsi: float
     safe_to_buy: bool
+    session: str
 
 
 class MarketRegimeDetector:
@@ -63,6 +65,7 @@ class MarketRegimeDetector:
             "adx": 0.0,
             "rsi": 50.0,
             "safe_to_buy": False,
+            "session": "OFF_PEAK",
         }
 
     def _calculate_rsi(self, close: pd.Series, period: int = 14) -> float:
@@ -118,13 +121,74 @@ class MarketRegimeDetector:
 
     def _detect_regime(self) -> RegimeSummary:
         """Fetch bars, compute indicators, and classify current market regime."""
-        bars = self.market_data.fetch_bars(
-            self.primary_symbol,
-            self.timeframe,
-            self.lookback_bars,
-        )
-        if bars is None or bars.empty:
-            logger.warning("Regime detection fallback: no market data available")
+        try:
+            bars = self.market_data.fetch_bars(
+                self.primary_symbol,
+                self.timeframe,
+                self.lookback_bars,
+            )
+            session = self.get_current_session()
+            if bars is None or bars.empty:
+                logger.warning("Regime detection fallback: no market data available")
+                return {
+                    "regime": "SIDEWAYS",
+                    "ema20": 0.0,
+                    "ema50": 0.0,
+                    "adx": 0.0,
+                    "rsi": 50.0,
+                    "safe_to_buy": False,
+                    "session": session,
+                }
+
+            required_cols = {"high", "low", "close"}
+            if not required_cols.issubset(set(bars.columns)):
+                logger.warning("Regime detection fallback: missing required OHLC columns")
+                return {
+                    "regime": "SIDEWAYS",
+                    "ema20": 0.0,
+                    "ema50": 0.0,
+                    "adx": 0.0,
+                    "rsi": 50.0,
+                    "safe_to_buy": False,
+                    "session": session,
+                }
+
+            close = pd.to_numeric(bars["close"], errors="coerce")
+            ema_fast_val = float(close.ewm(span=self.ema_fast, adjust=False).mean().iloc[-1])
+            ema_slow_val = float(close.ewm(span=self.ema_slow, adjust=False).mean().iloc[-1])
+            adx_val = self._calculate_adx(bars, self.adx_period)
+            rsi_val = self._calculate_rsi(close, 14)
+
+            if adx_val <= self.adx_threshold:
+                regime = "SIDEWAYS"
+            elif ema_fast_val > ema_slow_val:
+                regime = "BULLISH"
+            else:
+                regime = "BEARISH"
+
+            summary = {
+                "regime": regime,
+                "ema20": float(ema_fast_val),
+                "ema50": float(ema_slow_val),
+                "adx": float(adx_val),
+                "rsi": float(rsi_val),
+                "safe_to_buy": regime == "BULLISH",
+                "session": session,
+            }
+
+            logger.info(
+                "Market regime detected: %s | EMA%d=%.2f EMA%d=%.2f ADX=%.2f RSI=%.2f",
+                regime,
+                self.ema_fast,
+                ema_fast_val,
+                self.ema_slow,
+                ema_slow_val,
+                adx_val,
+                rsi_val,
+            )
+            return summary
+        except Exception as e:
+            logger.error(f"Regime detection error: {e}")
             return {
                 "regime": "SIDEWAYS",
                 "ema20": 0.0,
@@ -132,79 +196,78 @@ class MarketRegimeDetector:
                 "adx": 0.0,
                 "rsi": 50.0,
                 "safe_to_buy": False,
+                "session": "OFF_PEAK",
             }
-
-        required_cols = {"high", "low", "close"}
-        if not required_cols.issubset(set(bars.columns)):
-            logger.warning("Regime detection fallback: missing required OHLC columns")
-            return {
-                "regime": "SIDEWAYS",
-                "ema20": 0.0,
-                "ema50": 0.0,
-                "adx": 0.0,
-                "rsi": 50.0,
-                "safe_to_buy": False,
-            }
-
-        close = pd.to_numeric(bars["close"], errors="coerce")
-        ema_fast_val = float(close.ewm(span=self.ema_fast, adjust=False).mean().iloc[-1])
-        ema_slow_val = float(close.ewm(span=self.ema_slow, adjust=False).mean().iloc[-1])
-        adx_val = self._calculate_adx(bars, self.adx_period)
-        rsi_val = self._calculate_rsi(close, 14)
-
-        if adx_val <= self.adx_threshold:
-            regime = "SIDEWAYS"
-        elif ema_fast_val > ema_slow_val:
-            regime = "BULLISH"
-        else:
-            regime = "BEARISH"
-
-        summary = {
-            "regime": regime,
-            "ema20": float(ema_fast_val),
-            "ema50": float(ema_slow_val),
-            "adx": float(adx_val),
-            "rsi": float(rsi_val),
-            "safe_to_buy": regime == "BULLISH",
-        }
-
-        logger.info(
-            "Market regime detected: %s | EMA%d=%.2f EMA%d=%.2f ADX=%.2f RSI=%.2f",
-            regime,
-            self.ema_fast,
-            ema_fast_val,
-            self.ema_slow,
-            ema_slow_val,
-            adx_val,
-            rsi_val,
-        )
-        return summary
 
     def _get_summary(self) -> RegimeSummary:
         """Return cached regime summary or refresh if cache has expired."""
-        if (time.time() - self._cached_at) < self.cache_seconds and self._cached_at > 0:
-            return dict(self._cached_summary)
+        try:
+            if (time.time() - self._cached_at) < self.cache_seconds and self._cached_at > 0:
+                return dict(self._cached_summary)
 
-        self._cached_summary = self._detect_regime()
-        self._cached_at = time.time()
-        return dict(self._cached_summary)
+            self._cached_summary = self._detect_regime()
+            self._cached_at = time.time()
+            return dict(self._cached_summary)
+        except Exception as e:
+            logger.error(f"Regime summary error: {e}")
+            return dict(self._cached_summary)
 
     def get_regime(self) -> str:
         """Get current market regime string."""
-        return str(self._get_summary()["regime"])
+        try:
+            return str(self._get_summary()["regime"])
+        except Exception as e:
+            logger.error(f"Get regime error: {e}")
+            return "SIDEWAYS"
 
     def is_safe_to_buy(self) -> bool:
         """Return True only when regime is BULLISH."""
-        return bool(self._get_summary()["safe_to_buy"])
+        try:
+            return self.get_regime() == "BULLISH"
+        except Exception as e:
+            logger.error(f"Safe-to-buy check error: {e}")
+            return False
 
     def get_regime_summary(self) -> dict:
         """Get full regime summary payload."""
-        summary = self._get_summary()
-        return {
-            "regime": str(summary["regime"]),
-            "ema20": float(summary["ema20"]),
-            "ema50": float(summary["ema50"]),
-            "adx": float(summary["adx"]),
-            "rsi": float(summary["rsi"]),
-            "safe_to_buy": bool(summary["safe_to_buy"]),
-        }
+        try:
+            summary = self._get_summary()
+            return {
+                "regime": str(summary["regime"]),
+                "ema20": float(summary["ema20"]),
+                "ema50": float(summary["ema50"]),
+                "adx": float(summary["adx"]),
+                "rsi": float(summary["rsi"]),
+                "safe_to_buy": bool(summary["safe_to_buy"]),
+                "session": str(summary.get("session", self.get_current_session())),
+            }
+        except Exception as e:
+            logger.error(f"Get regime summary error: {e}")
+            return {
+                "regime": "SIDEWAYS",
+                "ema20": 0.0,
+                "ema50": 0.0,
+                "adx": 0.0,
+                "rsi": 50.0,
+                "safe_to_buy": False,
+                "session": "OFF_PEAK",
+            }
+
+    def get_current_session(self) -> str:
+        """Get the current UTC market session."""
+        try:
+            hour = datetime.now(timezone.utc).hour
+            if 0 <= hour <= 4:
+                session = "ASIAN"
+            elif 7 <= hour <= 11:
+                session = "LONDON"
+            elif 13 <= hour <= 18:
+                session = "US"
+            else:
+                session = "OFF_PEAK"
+
+            logger.info(f"Current session detected: {session}")
+            return session
+        except Exception as e:
+            logger.error(f"Session detection error: {e}")
+            return "OFF_PEAK"

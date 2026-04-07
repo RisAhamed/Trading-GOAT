@@ -148,8 +148,11 @@ class TrailingStopManager:
             elif market_regime == "SIDEWAYS":
                 multiplier = 0.7
 
-            logger.info(f"Trail distance multiplier: {multiplier} (regime: {market_regime})")
-            adjusted_trail_pct = self.trail_pct * multiplier
+            base_trail_distance = self.trail_pct
+            trail_distance = base_trail_distance * multiplier
+            logger.info(
+                f"Trail distance: {trail_distance:.4f} (regime={market_regime}, mult={multiplier})"
+            )
 
             # Calculate initial floor = entry × (1 - initial_stop_loss_pct/100)
             initial_floor = entry_price * (1 - self.initial_stop_loss_pct / 100)
@@ -166,7 +169,7 @@ class TrailingStopManager:
                 peak_price=entry_price,
                 floor_price=initial_floor,
                 hard_stop_price=hard_stop,
-                current_trail_pct=adjusted_trail_pct,
+                current_trail_pct=trail_distance,
                 unrealized_pnl_usd=0.0,
                 unrealized_pnl_pct=0.0,
                 max_profit_seen_pct=0.0,
@@ -192,6 +195,32 @@ class TrailingStopManager:
         except Exception as e:
             logger.error(f"Error registering position {symbol}: {e}")
             return None
+
+    def update_floor_price(self, symbol: str, new_floor: float) -> bool:
+        """Update tracked floor price only when new floor is higher."""
+        try:
+            with self._lock:
+                if symbol not in self._positions:
+                    logger.debug(f"Floor update skipped for {symbol}: not tracked")
+                    return False
+
+                pos = self._positions[symbol]
+                current_floor = pos.floor_price
+                if new_floor <= current_floor:
+                    logger.info(
+                        f"Floor update skipped for {symbol}: "
+                        f"new={new_floor:.4f} <= current={current_floor:.4f}"
+                    )
+                    return False
+
+                pos.floor_price = float(new_floor)
+                logger.info(
+                    f"Floor updated for {symbol}: {current_floor:.4f} -> {pos.floor_price:.4f}"
+                )
+                return True
+        except Exception as e:
+            logger.error(f"Error updating floor for {symbol}: {e}")
+            return False
     
     def update_position(self, symbol: str, current_price: float) -> TrailingAction:
         """

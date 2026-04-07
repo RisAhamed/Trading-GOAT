@@ -99,6 +99,12 @@ class RiskConfig:
     max_hold_minutes: int = 30           # Max hold time
     min_profit_to_exit: float = 3.0      # Exit if profit >= $3
     max_hold_seconds: int = 600          # Force exit stale positions (seconds)
+    loss_cooldown_minutes: int = 10
+    profit_lock_trigger_pct: float = 1.5
+    profit_lock_ratio: float = 0.5
+    min_profit_lock_pct: float = 0.3
+    confluence_min_score: int = 70
+    atr_volatility_max_multiplier: float = 2.5
 
 
 @dataclass
@@ -134,6 +140,14 @@ class BearishScalpConfig:
     stop_loss_pct: float = 0.4
     max_hold_seconds: int = 300
     position_size_multiplier: float = 0.5
+
+
+@dataclass
+class SessionFilterConfig:
+    """Session preference settings."""
+    prefer_high_volume_sessions: bool = True
+    allowed_sessions: List[str] = field(default_factory=lambda: ["ASIAN", "LONDON", "US"])
+    off_peak_mode: str = "HOLD_ONLY"
 
 
 @dataclass
@@ -297,6 +311,12 @@ class ConfigLoader:
             max_hold_minutes=risk_cfg.get("max_hold_minutes", 30),
             min_profit_to_exit=risk_cfg.get("min_profit_to_exit", 3.0),
             max_hold_seconds=risk_cfg.get("max_hold_seconds", 600),
+            loss_cooldown_minutes=risk_cfg.get("loss_cooldown_minutes", 10),
+            profit_lock_trigger_pct=risk_cfg.get("profit_lock_trigger_pct", 1.5),
+            profit_lock_ratio=risk_cfg.get("profit_lock_ratio", 0.5),
+            min_profit_lock_pct=risk_cfg.get("min_profit_lock_pct", 0.3),
+            confluence_min_score=risk_cfg.get("confluence_min_score", 70),
+            atr_volatility_max_multiplier=risk_cfg.get("atr_volatility_max_multiplier", 2.5),
         )
         
         # Signals config
@@ -332,6 +352,14 @@ class ConfigLoader:
             stop_loss_pct=bearish_scalp_cfg.get("stop_loss_pct", 0.4),
             max_hold_seconds=bearish_scalp_cfg.get("max_hold_seconds", 300),
             position_size_multiplier=bearish_scalp_cfg.get("position_size_multiplier", 0.5),
+        )
+
+        # Session filter config
+        session_filter_cfg = self._raw_config.get("session_filter", {})
+        self.session_filter = SessionFilterConfig(
+            prefer_high_volume_sessions=session_filter_cfg.get("prefer_high_volume_sessions", True),
+            allowed_sessions=session_filter_cfg.get("allowed_sessions", ["ASIAN", "LONDON", "US"]),
+            off_peak_mode=session_filter_cfg.get("off_peak_mode", "HOLD_ONLY"),
         )
         
         # Web UI config
