@@ -58,6 +58,11 @@ class TerminalUI:
         
         # Positions
         self._positions: List[Dict[str, Any]] = []
+
+        # ═══ TRAILING STOP DATA ═══════════════════════════════════════════
+        # Trailing stop positions data from TrailingStopManager
+        self._trailing_positions: List[Dict[str, Any]] = []
+        # ═══ END TRAILING STOP DATA ═══════════════════════════════════════
         
         # Market scan data
         self._market_scan: List[Dict[str, Any]] = []
@@ -112,6 +117,7 @@ class TerminalUI:
         layout["left"].split_column(
             Layout(name="portfolio", size=7),
             Layout(name="positions"),
+            Layout(name="trailing_stops", size=12),  # NEW: Trailing stop panel
             Layout(name="market_scan"),
         )
         
@@ -232,7 +238,98 @@ class TerminalUI:
             table.add_row("", "[dim]No open positions[/]", "", "", "", "")
         
         return Panel(table, title="[bold]📈 OPEN POSITIONS[/bold]", border_style="cyan")
-    
+
+    # ═══ TRAILING STOP PANEL ═══════════════════════════════════════════════
+    def _generate_trailing_stops(self) -> Panel:
+        """Generate the trailing stop status panel."""
+        table = Table(show_header=True, header_style="bold", box=None, padding=(0, 1))
+        table.add_column("Symbol", style="cyan", width=9)
+        table.add_column("Entry", justify="right", width=8)
+        table.add_column("Current", justify="right", width=8)
+        table.add_column("Floor", justify="right", width=8)
+        table.add_column("Trail%", justify="right", width=6)
+        table.add_column("P&L", justify="right", width=9)
+        table.add_column("Mode", width=8)
+
+        if self._trailing_positions:
+            for pos in self._trailing_positions[:5]:  # Max 5 positions
+                symbol = pos.get("symbol", "")
+                entry = pos.get("entry_price", 0)
+                current = pos.get("current_price", 0)
+                floor = pos.get("floor_price", 0)
+                trail_pct = pos.get("trail_pct", 0)
+                pnl_usd = pos.get("pnl_usd", 0)
+                pnl_pct = pos.get("pnl_pct", 0)
+                status = pos.get("status", "INIT")
+
+                # Color code P&L
+                pnl_color = "green" if pnl_usd >= 0 else "red"
+                pnl_sign = "+" if pnl_usd >= 0 else ""
+
+                # Status emoji and color
+                status_display = {
+                    "INIT": ("🟢", "green", "INIT"),
+                    "TRAILING": ("🔵", "blue", "TRAIL"),
+                    "PROFIT_LOCK": ("🔒", "green", "LOCK"),
+                    "WATCH": ("⚠️", "yellow", "WATCH"),
+                    "HARD": ("🛑", "red", "HARD"),
+                    "PROFIT": ("💰", "green", "PROFIT"),
+                }.get(status, ("⚪", "white", status[:6]))
+
+                emoji, color, label = status_display
+
+                table.add_row(
+                    symbol,
+                    f"${entry:,.2f}",
+                    f"${current:,.2f}",
+                    f"${floor:,.2f}",
+                    f"{trail_pct:.2f}%",
+                    f"[{pnl_color}]{pnl_sign}${pnl_usd:,.1f}[/]",
+                    f"[{color}]{emoji} {label}[/]",
+                )
+
+            # Summary row with peak and DCA info
+            if self._trailing_positions:
+                summary_lines = []
+                for pos in self._trailing_positions[:2]:  # Show 2 summaries max
+                    symbol = pos.get("symbol", "")
+                    peak = pos.get("peak_price", 0)
+                    max_profit = pos.get("max_profit_pct", 0)
+                    ladder_count = pos.get("ladder_count", 0)
+                    max_ladder = pos.get("max_ladder", 2)
+                    next_dca = pos.get("next_dca_price", 0)
+
+                    summary = f"{symbol}: Peak=${peak:,.2f} ({max_profit:+.2f}%)"
+                    if ladder_count > 0:
+                        summary += f" | DCA {ladder_count}/{max_ladder}"
+                    else:
+                        summary += f" | Next DCA @ ${next_dca:,.2f}"
+                    summary_lines.append(summary)
+
+                summary_text = Text("\n".join(summary_lines), style="dim")
+                table.add_row("", "", "", "", "", "", "")
+                table.add_row(
+                    Text(summary_text, style="dim italic"),
+                    "", "", "", "", "", ""
+                )
+        else:
+            table.add_row(
+                "",
+                "[dim]No trailing stops active[/]",
+                "",
+                "",
+                "",
+                "",
+                ""
+            )
+
+        return Panel(
+            table,
+            title="[bold]🎯 TRAILING STOP STATUS[/bold]",
+            border_style="yellow"
+        )
+    # ═══ END TRAILING STOP PANEL ═══════════════════════════════════════════
+
     def _generate_market_scan(self) -> Panel:
         """Generate the market scan panel."""
         table = Table(show_header=True, header_style="bold", box=None)
@@ -376,6 +473,7 @@ class TerminalUI:
         layout["header"].update(self._generate_header())
         layout["portfolio"].update(self._generate_portfolio())
         layout["positions"].update(self._generate_positions())
+        layout["trailing_stops"].update(self._generate_trailing_stops())  # NEW: Trailing stop panel
         layout["market_scan"].update(self._generate_market_scan())
         layout["ai_reasoning"].update(self._generate_ai_reasoning())
         layout["recent_trades"].update(self._generate_recent_trades())
@@ -440,7 +538,19 @@ class TerminalUI:
         """Update positions data."""
         self._positions = positions
         self.refresh()
-    
+
+    # ═══ TRAILING STOP UPDATE METHOD ═══════════════════════════════════════
+    def update_trailing_stops(self, trailing_data: Dict[str, Any]) -> None:
+        """
+        Update trailing stop positions data.
+
+        Args:
+            trailing_data: Dictionary from TrailingStopManager.get_position_summary()
+        """
+        self._trailing_positions = trailing_data.get("positions", [])
+        self.refresh()
+    # ═══ END TRAILING STOP UPDATE METHOD ═══════════════════════════════════
+
     def update_market_scan(self, scan_data: List[Dict[str, Any]]) -> None:
         """Update market scan data."""
         self._market_scan = scan_data

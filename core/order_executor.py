@@ -380,13 +380,14 @@ class OrderExecutor:
         
         return result
     
-    def close_position(self, symbol: str) -> OrderResult:
+    def close_position(self, symbol: str, reason: str = "MANUAL") -> OrderResult:
         """
         Close an existing position.
-        
+
         Args:
             symbol: Trading pair to close
-            
+            reason: Reason for closing (e.g., "TRAIL_STOP_HIT", "HARD_STOP", "MANUAL")
+
         Returns:
             OrderResult with close order details
         """
@@ -429,13 +430,13 @@ class OrderExecutor:
                         symbol=symbol,
                         exit_price=result.filled_price,
                         quantity=result.qty if result.qty > 0 else None,
-                        reason="SIGNAL",
+                        reason=reason,
                     )
                     logger.info(f"Trade exit recorded in results tracker")
             except Exception as e:
                 logger.warning(f"Failed to record trade exit: {e}")
             
-            logger.info(f"Position closed: {symbol}")
+            logger.info(f"Position closed: {symbol} (reason: {reason})")
             
         except APIError as e:
             error_msg = self._handle_api_error(e)

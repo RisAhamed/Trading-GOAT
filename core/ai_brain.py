@@ -273,7 +273,7 @@ Analyze the following market data for {symbol} and provide a trading decision.
             unrealized_pnl = current_position.get('unrealized_pnl', 0)
             unrealized_pnl_pct = current_position.get('unrealized_pnl_pct', 0)
             side = current_position.get('side', 'long')
-            
+
             prompt += f"""
 === CURRENT POSITION ===
 - Side: {side.upper()}
@@ -281,6 +281,37 @@ Analyze the following market data for {symbol} and provide a trading decision.
 - Quantity: {qty}
 - Unrealized P&L: ${unrealized_pnl:,.2f} ({unrealized_pnl_pct:+.2f}%)
 """
+
+            # ═══ ADD TRAILING STOP CONTEXT ═════════════════════════════════
+            # Check if trailing stop is enabled and position is tracked
+            try:
+                from .trailing_stop_manager import get_trailing_manager
+                trailing_mgr = get_trailing_manager(self.config)
+
+                if trailing_mgr and trailing_mgr.is_enabled():
+                    trailing_pos = trailing_mgr.get_position(symbol)
+                    if trailing_pos:
+                        prompt += f"""
+=== TRAILING STOP ACTIVE ===
+- Current Floor: ${trailing_pos.floor_price:,.4f} (trail at {trailing_pos.current_trail_pct:.2f}%)
+- Hard Stop (absolute floor): ${trailing_pos.hard_stop_price:,.4f}
+- Peak Price Reached: ${trailing_pos.peak_price:,.4f}
+- Max Profit Seen: {trailing_pos.max_profit_seen_pct:+.2f}%
+- Position Held For: {trailing_pos.hold_minutes:.0f} minutes
+- DCA Additions: {trailing_pos.ladder_count}/{trailing_mgr.max_ladder_count}
+- Status: {trailing_pos.status}
+
+IMPORTANT: This position has dynamic trailing stop protection.
+- The floor ONLY moves UP as price rises, locking in profit
+- If price drops to floor, position will auto-exit
+- If profit reaches quick target ({trailing_mgr.quick_profit_pct}%), will auto-exit
+- Consider this protection when recommending HOLD vs CLOSE
+"""
+            except Exception as e:
+                # Silently fail if trailing manager not available
+                pass
+            # ═══ END ADD TRAILING STOP CONTEXT ═════════════════════════════
+
         else:
             prompt += """
 === CURRENT POSITION ===

@@ -2,6 +2,7 @@
 """
 Risk management module for position sizing, stop loss, and take profit calculations.
 Enforces trading limits and daily loss limits.
+Integrates with trailing stop manager for dynamic stop loss management.
 """
 
 import logging
@@ -157,13 +158,26 @@ class RiskManager:
             return result
         
         try:
+            # ═══ TRAILING STOP INTEGRATION ═══════════════════════════════════════
+            # Check if trailing stop is enabled - use those settings for stop loss
+            trailing_config = self.config._raw_config.get("trailing_stop", {})
+            trailing_enabled = trailing_config.get("enabled", False)
+
             # Calculate risk amount in USD
             # risk_per_trade_pct is the % of portfolio we're willing to lose on this trade
             risk_amount_usd = portfolio_value * (self.risk_per_trade_pct / 100)
-            
+
             # Calculate stop loss distance
-            # If ATR is provided, use it for dynamic stop loss
-            if atr and atr > 0:
+            if trailing_enabled:
+                # Use hard_stop_pct from trailing stop config as the worst-case stop
+                hard_stop_pct = trailing_config.get("hard_stop_pct", 1.5)
+                stop_loss_pct = hard_stop_pct
+                stop_loss_distance = entry_price * (stop_loss_pct / 100)
+                logger.debug(
+                    f"Using trailing stop hard_stop as risk calc: {hard_stop_pct}% "
+                    f"(trailing stop will manage dynamically)"
+                )
+            elif atr and atr > 0:
                 # Use 2x ATR for stop loss distance
                 stop_loss_distance = atr * 2
                 stop_loss_pct = (stop_loss_distance / entry_price) * 100

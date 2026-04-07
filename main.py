@@ -24,6 +24,8 @@ from core.risk_manager import RiskManager, RiskParameters
 from core.order_executor import OrderExecutor, OrderResult
 from core.portfolio_tracker import PortfolioTracker, PortfolioState
 from core.trade_results import get_results_tracker, TradeResultsTracker
+from core.trailing_stop_manager import TrailingStopManager
+from core.position_monitor import PositionMonitor
 from dashboard.terminal_ui import TerminalUI
 
 
@@ -60,6 +62,19 @@ class AITrader:
         self.portfolio_tracker = PortfolioTracker(self.config)
         self.results_tracker = get_results_tracker()  # Trade results tracking
         self.ui = TerminalUI(self.config)
+
+        # ═══ TRAILING STOP COMPONENTS ═══════════════════════════════════════
+        # Initialize trailing stop manager
+        self.trailing_manager = TrailingStopManager(self.config)
+
+        # Initialize position monitor (will be started in run())
+        self.position_monitor = PositionMonitor(
+            trailing_manager=self.trailing_manager,
+            order_executor=self.order_executor,
+            market_data=self.market_data,
+            config=self.config,
+        )
+        # ═══ END TRAILING STOP COMPONENTS ═══════════════════════════════════
         
         # Get trading pairs
         self.trading_pairs = self.config.markets.get_all_pairs()
@@ -77,7 +92,16 @@ class AITrader:
         """Handle shutdown signals."""
         logger.info("Shutdown signal received")
         self._running = False
-        
+
+        # ═══ STOP POSITION MONITOR ═════════════════════════════════════════
+        # Stop the position monitor thread
+        try:
+            self.position_monitor.stop()
+            logger.info("Position monitor stopped")
+        except Exception as e:
+            logger.error(f"Error stopping position monitor: {e}")
+        # ═══ END STOP POSITION MONITOR ═════════════════════════════════════
+
         # Generate final report on shutdown
         try:
             report_path = self.results_tracker.write_full_report()
@@ -338,7 +362,29 @@ class AITrader:
                         take_profit=risk_params.take_profit_price,
                     )
                     self.ui.add_log("INFO", f"Order executed: {signal.action} {symbol}")
-                    
+
+                    # ═══ REGISTER WITH TRAILING STOP MANAGER ═══════════════════
+                    # Register the new position for trailing stop tracking
+                    if signal.action == "BUY":
+                        fill_price = result.filled_price or entry_price
+                        trailing_pos = self.trailing_manager.register_new_position(
+                            symbol=symbol,
+                            entry_price=fill_price,
+                            qty=risk_params.qty,
+                        )
+                        if trailing_pos:
+                            logger.info(
+                                f"Trailing stop registered for {symbol}: "
+                                f"floor=${trailing_pos.floor_price:,.4f}, "
+                                f"hard_stop=${trailing_pos.hard_stop_price:,.4f}"
+                            )
+                            self.ui.add_log(
+                                "INFO",
+                                f"Trailing stop active for {symbol} "
+                                f"(floor=${trailing_pos.floor_price:,.2f})"
+                            )
+                    # ═══ END REGISTER WITH TRAILING STOP MANAGER ═══════════════
+
                     # Update position stops in tracker
                     self.portfolio_tracker.set_position_stops(
                         symbol,
@@ -418,6 +464,13 @@ class AITrader:
         self.ui.start()
         self.ui.set_bot_status("RUNNING")
         self.ui.add_log("INFO", "AI Trader started successfully")
+
+        # ═══ START POSITION MONITOR ═════════════════════════════════════════
+        # Start the position monitor thread
+        self.position_monitor.start()
+        if self.trailing_manager.is_enabled():
+            self.ui.add_log("INFO", "Trailing stop monitor started")
+        # ═══ END START POSITION MONITOR ═════════════════════════════════════
         
         # Initial portfolio display
         self.ui.update_portfolio({
@@ -480,6 +533,12 @@ class AITrader:
                     # Update positions display
                     positions_summary = self.portfolio_tracker.get_portfolio_summary()
                     self.ui.update_positions(positions_summary.get("positions", []))
+
+                    # ═══ UPDATE TRAILING STOP DISPLAY ═══════════════════════════
+                    # Update trailing stop panel with current positions
+                    trailing_summary = self.trailing_manager.get_position_summary()
+                    self.ui.update_trailing_stops(trailing_summary)
+                    # ═══ END UPDATE TRAILING STOP DISPLAY ═══════════════════════
                     
                     # ═══════════════════════════════════════════════════════════════
                     # SCALPING: Check for quick profit exits FIRST (before new trades)
