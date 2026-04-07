@@ -75,10 +75,12 @@ risk:
   stop_loss_pct: 2.0  # % below entry for stop loss
   take_profit_multiplier: 3.0  # take profit = stop_loss × 3 (6%)
   max_daily_loss_pct: 5.0  # halt trading if daily loss exceeds this
-  min_signal_confidence: 0.50  # AI must be ≥50% confident to trade (lowered for testing)
+  min_signal_confidence: 0.65  # AI must be ≥65% confident to trade
+  max_portfolio_exposure_pct: 60.0  # cap total open exposure across all positions
+  max_symbol_exposure_pct: 25.0  # cap exposure per symbol
 
 signals:
-  require_trend_confirmation: false  # Disabled for testing - 10-min trend confirmation
+  require_trend_confirmation: true  # Require 10-min trend confirmation
   require_volume_confirmation: false
-  min_rsi_for_buy: 70  # Relaxed - don't buy only if RSI > 70 (overbought)
-  max_rsi_for_sell: 30  # Relaxed - don't sell only if RSI < 30 (oversold)
+  min_rsi_for_buy: 35  # BUYs are favored when RSI is <= this; high RSI is already blocked (>70)
+  max_rsi_for_sell: 65  # SELLs are favored when RSI is >= this; low RSI is already blocked (<30)

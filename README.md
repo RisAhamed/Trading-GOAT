@@ -266,6 +266,8 @@ risk:
   take_profit_multiplier: 3.0 # 3x the stop loss
   max_daily_loss_pct: 5.0    # Halt if exceeded
   min_signal_confidence: 0.65 # AI must be ≥65% confident
+  max_portfolio_exposure_pct: 60.0 # Max total open exposure
+  max_symbol_exposure_pct: 25.0 # Max exposure per symbol
 ```
 
 ## Changing AI Models
@@ -327,6 +329,24 @@ All activity is logged to `logs/trading.log`:
 - P&L updates
 
 Logs rotate daily to prevent disk space issues.
+
+## Backtesting
+
+Use the built-in deterministic backtester to validate strategy behavior on historical bars.
+
+### Backtest using Alpaca historical bars
+
+```bash
+python backtest.py --symbol BTC/USD --interval 5Min --lookback 1500 --out logs/results/backtest_btc.json
+```
+
+### Backtest using CSV data
+
+CSV must contain `open,high,low,close,volume` and optional `timestamp`.
+
+```bash
+python backtest.py --csv /absolute/path/to/bars.csv --symbol BTC/USD --initial-balance 100000 --fee-bps 5 --slippage-bps 2
+```
 
 ## Safety Features
 

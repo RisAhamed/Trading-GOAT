@@ -119,7 +119,7 @@ class AITrader:
         self,
         symbol: str,
         portfolio_state: PortfolioState,
-    ) -> Optional[OrderResult]:
+    ) -> tuple[Optional[OrderResult], Optional[SymbolIndicators]]:
         """
         Process a single trading symbol through the full pipeline.
         
@@ -128,7 +128,7 @@ class AITrader:
             portfolio_state: Current portfolio state
             
         Returns:
-            OrderResult if a trade was executed, None otherwise
+            Tuple of (OrderResult if executed, SymbolIndicators for scan display)
         """
         try:
             # 1. Fetch market data for both timeframes
@@ -146,7 +146,7 @@ class AITrader:
                 self.ui.set_data_fetch_status(symbol, "❌ NO DATA")
                 self.ui.add_error(f"{symbol}: Failed to fetch market data")
                 logger.warning(f"Failed to fetch data for {symbol}")
-                return None
+                return None, None
             
             self.ui.set_data_fetch_status(symbol, f"✓ {len(trend_bars)} bars")
             
@@ -210,7 +210,7 @@ class AITrader:
             
             # 6. Check if action is required
             if signal.action == "HOLD" or not signal.is_confirmed:
-                return None
+                return None, symbol_indicators
             
             # 7. Calculate risk parameters
             if signal.action in ["BUY", "SELL"]:
@@ -244,7 +244,7 @@ class AITrader:
                     self.ui.add_log("WARN", f"{symbol}: {rejection}")
                     risk_params.is_allowed = False
                     risk_params.rejection_reason = rejection
-                    return None
+                    return None, symbol_indicators
                 
                 # 8. Execute order
                 if signal.action == "BUY":
@@ -277,7 +277,7 @@ class AITrader:
                     logger.error(f"Order failed: {result.error_message}")
                     self.ui.add_log("ERROR", f"Order failed: {result.error_message}")
                 
-                return result
+                return result, symbol_indicators
             
             elif signal.action == "CLOSE":
                 # Close existing position
@@ -296,14 +296,14 @@ class AITrader:
                         )
                     self.ui.add_log("INFO", f"Position closed: {symbol}")
                 
-                return result
+                return result, symbol_indicators
             
         except Exception as e:
             logger.error(f"Error processing {symbol}: {e}")
             self.ui.add_log("ERROR", f"Error processing {symbol}: {str(e)[:50]}")
-            return None
+            return None, None
         
-        return None
+        return None, None
     
     def _update_market_scan(self, indicators_map: Dict[str, SymbolIndicators]) -> None:
         """Update the market scan display."""
@@ -417,26 +417,28 @@ class AITrader:
                         
                         # Skip if trading is halted (but still collect indicators for display)
                         if not self.risk_manager.is_halted():
-                            result = self._process_symbol(symbol, portfolio_state)
+                            result, symbol_indicators = self._process_symbol(symbol, portfolio_state)
                             if result and result.success:
                                 trades_executed += 1
-                        
-                        # Collect indicators for market scan
-                        trend_bars = self.market_data.fetch_bars(
-                            symbol,
-                            self.config.timeframes.trend_interval,
-                            self.config.timeframes.trend_lookback_bars,
-                        )
-                        entry_bars = self.market_data.fetch_bars(
-                            symbol,
-                            self.config.timeframes.entry_interval,
-                            self.config.timeframes.entry_lookback_bars,
-                        )
-                        
-                        if trend_bars is not None and entry_bars is not None:
-                            indicators_map[symbol] = self.indicators.calculate_for_symbol(
-                                symbol, trend_bars, entry_bars
+                            if symbol_indicators is not None:
+                                indicators_map[symbol] = symbol_indicators
+                        else:
+                            # Still collect indicators for display while halted
+                            trend_bars = self.market_data.fetch_bars(
+                                symbol,
+                                self.config.timeframes.trend_interval,
+                                self.config.timeframes.trend_lookback_bars,
                             )
+                            entry_bars = self.market_data.fetch_bars(
+                                symbol,
+                                self.config.timeframes.entry_interval,
+                                self.config.timeframes.entry_lookback_bars,
+                            )
+                            
+                            if trend_bars is not None and entry_bars is not None:
+                                indicators_map[symbol] = self.indicators.calculate_for_symbol(
+                                    symbol, trend_bars, entry_bars
+                                )
                     
                     # Update market scan display
                     self._update_market_scan(indicators_map)

@@ -12,6 +12,7 @@ from .risk_manager import RiskManager, RiskParameters
 from .order_executor import OrderExecutor
 from .portfolio_tracker import PortfolioTracker
 from .trade_results import TradeResultsTracker, get_results_tracker
+from .backtester import Backtester, BacktestResult, BacktestTrade
 
 __all__ = [
     "ConfigLoader",
@@ -27,4 +28,7 @@ __all__ = [
     "PortfolioTracker",
     "TradeResultsTracker",
     "get_results_tracker",
+    "Backtester",
+    "BacktestResult",
+    "BacktestTrade",
 ]

@@ -86,6 +86,8 @@ class RiskManager:
         self.stop_loss_pct = self.config.risk.stop_loss_pct
         self.take_profit_multiplier = self.config.risk.take_profit_multiplier
         self.max_daily_loss_pct = self.config.risk.max_daily_loss_pct
+        self.max_portfolio_exposure_pct = self.config.risk.max_portfolio_exposure_pct
+        self.max_symbol_exposure_pct = self.config.risk.max_symbol_exposure_pct
         
         # Trading state
         self._is_halted = False
@@ -295,7 +297,31 @@ class RiskManager:
         # Check cash available
         if action == "BUY" and position_value > cash_available:
             return False, f"Insufficient cash (${cash_available:.2f} < ${position_value:.2f})"
-        
+
+        # Check portfolio-level exposure
+        total_current_exposure = sum(
+            abs(float(pos.get('market_value', 0))) for pos in current_positions
+        )
+        proposed_total_exposure = total_current_exposure + position_value
+        if portfolio_value > 0:
+            proposed_exposure_pct = (proposed_total_exposure / portfolio_value) * 100
+            if proposed_exposure_pct > self.max_portfolio_exposure_pct:
+                return (
+                    False,
+                    f"Portfolio exposure {proposed_exposure_pct:.1f}% exceeds max "
+                    f"{self.max_portfolio_exposure_pct:.1f}%"
+                )
+
+        # Check symbol-level exposure
+        if portfolio_value > 0:
+            symbol_exposure_pct = (position_value / portfolio_value) * 100
+            if symbol_exposure_pct > self.max_symbol_exposure_pct:
+                return (
+                    False,
+                    f"Symbol exposure {symbol_exposure_pct:.1f}% exceeds max "
+                    f"{self.max_symbol_exposure_pct:.1f}%"
+                )
+
         # Check minimum position value
         min_position = 10.0  # Minimum $10 position
         if position_value < min_position:
