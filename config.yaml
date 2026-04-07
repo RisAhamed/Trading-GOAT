@@ -1,0 +1,85 @@
+# config.yaml
+# AI Crypto & Forex Paper Trading Bot Configuration
+# This is the single source of truth for all configurable parameters
+
+bot:
+  name: "AI Crypto Trader"
+  mode: "paper"  # paper | live (NEVER change to live)
+  base_currency: "USD"
+  loop_interval_seconds: 30  # how often the main loop runs
+  log_level: "INFO"
+  log_file: "logs/trading.log"
+
+ai:
+  provider: "ollama_cloud"  # Ollama Cloud API — no local models
+  # Ollama Cloud models with strong thinking/reasoning capabilities for trading
+  # Available: "minimax-m2.7", "glm-4-plus", "gpt-120b", "deepseek-r1", "qwen-max"
+  model: "minimax-m2.7"  # MiniMax M2.7 - Strong reasoning model for trading decisions
+  base_url: "https://api.ollama.com/v1"  # Ollama Cloud API endpoint
+  temperature: 0.3  # low = more deterministic decisions
+  max_tokens: 1000  # More tokens for chain-of-thought reasoning
+  reasoning_prompt_style: "chain_of_thought"
+  timeout_seconds: 120  # Longer timeout for thinking models
+  # Fallback models in order of preference (all Ollama Cloud models with thinking capability)
+  fallback_models:
+    - "glm-4-plus"      # GLM-4 Plus - Strong analytical reasoning
+    - "gpt-120b"        # GPT 120B - Large model with deep reasoning
+    - "deepseek-r1"     # DeepSeek R1 - Excellent for analysis
+    - "qwen-max"        # Qwen Max - Good general reasoning
+
+markets:
+  crypto:
+    enabled: true
+    pairs:
+      - "BTC/USD"
+      - "ETH/USD"
+      # Note: SOL and AVAX available but may have lower liquidity
+      # - "SOL/USD"
+      # - "AVAX/USD"
+    exchange: "alpaca"
+  forex:
+    enabled: false  # Requires paid Alpaca subscription for SIP data
+    pairs:
+      - "EUR/USD"
+      - "GBP/USD"
+    exchange: "alpaca"
+
+timeframes:
+  trend:
+    interval: "10Min"  # 10-minute bars for trend direction
+    lookback_bars: 50  # how many bars to analyze
+  entry:
+    interval: "5Min"  # 5-minute bars for entry timing
+    lookback_bars: 30
+
+indicators:
+  rsi:
+    period: 14
+    oversold: 30
+    overbought: 70
+  macd:
+    fast: 12
+    slow: 26
+    signal: 9
+  ema:
+    short: 9
+    long: 21
+  bollinger_bands:
+    period: 20
+    std_dev: 2.0
+  atr:
+    period: 14  # for dynamic stop loss sizing
+
+risk:
+  max_positions: 3  # max concurrent open trades
+  risk_per_trade_pct: 1.5  # % of portfolio risked per trade
+  stop_loss_pct: 2.0  # % below entry for stop loss
+  take_profit_multiplier: 3.0  # take profit = stop_loss × 3 (6%)
+  max_daily_loss_pct: 5.0  # halt trading if daily loss exceeds this
+  min_signal_confidence: 0.50  # AI must be ≥50% confident to trade (lowered for testing)
+
+signals:
+  require_trend_confirmation: false  # Disabled for testing - 10-min trend confirmation
+  require_volume_confirmation: false
+  min_rsi_for_buy: 70  # Relaxed - don't buy only if RSI > 70 (overbought)
+  max_rsi_for_sell: 30  # Relaxed - don't sell only if RSI < 30 (oversold)
