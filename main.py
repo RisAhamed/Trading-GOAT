@@ -403,8 +403,8 @@ class AITrader:
                     summary = self.symbol_scanner.political_scanner.get_signal_summary()
                     if summary:
                         self.ui.add_log("INFO", summary)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"[SCANNER] Political summary unavailable: {e}")
 
         except Exception as e:
             logger.error(f"[SCANNER] Symbol update error: {e}")

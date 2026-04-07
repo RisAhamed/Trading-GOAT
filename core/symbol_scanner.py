@@ -21,27 +21,38 @@ class SymbolScanner:
     """Scores and ranks candidate symbols for dynamic trade selection."""
 
     def __init__(self, market_data: MarketDataFetcher, config: ConfigLoader) -> None:
-        self.market_data = market_data
-        self.config = config
+        try:
+            self.market_data = market_data
+            self.config = config
 
-        scanner_cfg = getattr(self.config, "symbol_scanner", None)
-        default_pool = list(getattr(self.config.markets, "crypto_pairs", ["BTC/USD", "ETH/USD"]))
-        self._candidate_pool: List[str] = list(
-            getattr(scanner_cfg, "candidate_pool", default_pool)
-        )
-        self._ranked_symbols: List[dict] = []
-        self._last_scan_time: float = 0.0
-        self._scan_interval: int = int(
-            getattr(scanner_cfg, "scan_interval_seconds", 120)
-        )
-        self._btc_price_cache: dict = {}
+            scanner_cfg = getattr(self.config, "symbol_scanner", None)
+            default_pool = list(getattr(self.config.markets, "crypto_pairs", ["BTC/USD", "ETH/USD"]))
+            self._candidate_pool: List[str] = list(
+                getattr(scanner_cfg, "candidate_pool", default_pool)
+            )
+            self._ranked_symbols: List[dict] = []
+            self._last_scan_time: float = 0.0
+            self._scan_interval: int = int(
+                getattr(scanner_cfg, "scan_interval_seconds", 120)
+            )
+            self._btc_price_cache: dict = {}
 
-        self.political_scanner = PoliticalSignalScanner(config)
-        if not hasattr(config, "political_signals") or getattr(
-            config.political_signals, "enabled", False
-        ):
-            self._political_enabled = True
-        else:
+            self.political_scanner = PoliticalSignalScanner(config)
+            political_cfg = getattr(config, "political_signals", None)
+            if political_cfg is None or bool(getattr(political_cfg, "enabled", False)):
+                self._political_enabled = True
+            else:
+                self._political_enabled = False
+        except Exception as e:
+            logger.error(f"[SCANNER] init error: {e}")
+            self.market_data = market_data
+            self.config = config
+            self._candidate_pool = ["BTC/USD", "ETH/USD"]
+            self._ranked_symbols = []
+            self._last_scan_time = 0.0
+            self._scan_interval = 120
+            self._btc_price_cache = {}
+            self.political_scanner = PoliticalSignalScanner(config)
             self._political_enabled = False
 
     def _get_btc_change_pct(self) -> float:
