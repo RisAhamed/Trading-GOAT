@@ -533,6 +533,12 @@ class AITrader:
                     # Update positions display
                     positions_summary = self.portfolio_tracker.get_portfolio_summary()
                     self.ui.update_positions(positions_summary.get("positions", []))
+
+                    # ═══ UPDATE TRAILING STOP DISPLAY ═══════════════════════════
+                    # Update trailing stop panel with current positions
+                    trailing_summary = self.trailing_manager.get_position_summary()
+                    self.ui.update_trailing_stops(trailing_summary)
+                    # ═══ END UPDATE TRAILING STOP DISPLAY ═══════════════════════
                     
                     # ═══════════════════════════════════════════════════════════════
                     # SCALPING: Check for quick profit exits FIRST (before new trades)
