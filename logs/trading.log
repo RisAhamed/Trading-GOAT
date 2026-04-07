@@ -17712,3 +17712,1049 @@ data"}
 2026-04-07 17:36:55 | INFO     | core.signal_engine | Signal for ETH/USD: HOLD (conf: 40%) - Confirmed: True
 2026-04-07 17:36:55 | INFO     | __main__ | ETH/USD: HOLD (conf: 40%) - Confirmed: True
 2026-04-07 17:36:55 | INFO     | __main__ | Loop #30 complete in 8.0s. Trades: 0. Next run: 17:37:10
+2026-04-07 17:37:10 | INFO     | __main__ | --- Loop #31 started ---
+2026-04-07 17:37:15 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:37:15 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:37:15 | INFO     | __main__ | BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:37:15 | INFO     | core.risk_manager | Position value $432122.45 exceeds max $31130.83, capping to max
+2026-04-07 17:37:17 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.456367 order_id=6ca6a96e-af60-40c8-aa19-db583255cdf0 status=OrderStatus.PENDING_NEW
+2026-04-07 17:37:17 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:37:17 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.455226126","balance":"0.455226126","code":40310000,"message":"insufficient balance for BTC (requested: 0.456367045, available: 0.455226126)","symbol":"USD"}
+2026-04-07 17:37:17 | INFO     | core.trade_results | Trade entry recorded: BUY 0.456367 BTC/USD @ $68214.45
+2026-04-07 17:37:17 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:37:17 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.456367
+2026-04-07 17:37:21 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:37:21 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:37:21 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:37:21 | INFO     | core.risk_manager | Position value $296506.68 exceeds max $31130.83, capping to max
+2026-04-07 17:37:21 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.968914 order_id=f24daff9-32b5-4e63-a490-64c75aff6fd7 status=OrderStatus.PENDING_NEW
+2026-04-07 17:37:21 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:37:22 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.931491237","balance":"14.931491237","code":40310000,"message":"insufficient balance for ETH (requested: 14.968913522, available: 14.931491237)","symbol":"USD"}
+2026-04-07 17:37:22 | INFO     | core.trade_results | Trade entry recorded: BUY 14.968914 ETH/USD @ $2079.70
+2026-04-07 17:37:22 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:37:22 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.968914
+2026-04-07 17:37:22 | INFO     | __main__ | Loop #31 complete in 11.9s. Trades: 2. Next run: 17:37:37
+2026-04-07 17:37:37 | INFO     | __main__ | --- Loop #32 started ---
+2026-04-07 17:37:38 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $61.43 >= $3.0
+2026-04-07 17:37:38 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:37:38 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$61.43
+2026-04-07 17:37:38 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:37:39 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $61.43
+2026-04-07 17:37:39 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+61.43 (+0.2%) | WIN
+2026-04-07 17:37:42 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:37:42 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 80%) - Confirmed: True
+2026-04-07 17:37:42 | INFO     | __main__ | BTC/USD: CLOSE (conf: 80%) - Confirmed: True
+2026-04-07 17:37:42 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:37:42 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:37:46 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:37:46 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:37:46 | INFO     | __main__ | ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:37:46 | INFO     | core.risk_manager | Position value $295459.63 exceeds max $31040.95, capping to max
+2026-04-07 17:37:46 | WARNING  | __main__ | ETH/USD trade rejected: Portfolio exposure 70.0% exceeds max 60.0%
+2026-04-07 17:37:46 | INFO     | __main__ | Loop #32 complete in 9.1s. Trades: 2. Next run: 17:38:01
+2026-04-07 17:38:01 | INFO     | __main__ | --- Loop #33 started ---
+2026-04-07 17:38:01 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-10.69
+2026-04-07 17:38:01 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-10.69 (-0.0%) | LOSS
+2026-04-07 17:38:06 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:38:06 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:06 | INFO     | __main__ | BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:06 | INFO     | core.risk_manager | Position value $429874.92 exceeds max $31001.95, capping to max
+2026-04-07 17:38:07 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.454963 order_id=9dfed515-07e9-44eb-b5e1-0b9b9d33c554 status=OrderStatus.PENDING_NEW
+2026-04-07 17:38:07 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:38:07 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.453825307","balance":"0.453825307","code":40310000,"message":"insufficient balance for BTC (requested: 0.454962714, available: 0.453825307)","symbol":"USD"}
+2026-04-07 17:38:07 | INFO     | core.trade_results | Trade entry recorded: BUY 0.454963 BTC/USD @ $68141.75
+2026-04-07 17:38:07 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:38:07 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.454963
+2026-04-07 17:38:11 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:38:11 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:11 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:11 | INFO     | core.risk_manager | Position value $294911.70 exceeds max $31001.95, capping to max
+2026-04-07 17:38:11 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.925523 order_id=733c07f3-af5c-45ae-9cc1-fd6ccd5bce8e status=OrderStatus.PENDING_NEW
+2026-04-07 17:38:11 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:38:12 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.888209393","balance":"14.888209393","code":40310000,"message":"insufficient balance for ETH (requested: 14.925523202, available: 14.888209393)","symbol":"USD"}
+2026-04-07 17:38:12 | INFO     | core.trade_results | Trade entry recorded: BUY 14.925523 ETH/USD @ $2077.11
+2026-04-07 17:38:12 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:38:12 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.925523
+2026-04-07 17:38:12 | INFO     | __main__ | Loop #33 complete in 10.8s. Trades: 2. Next run: 17:38:27
+2026-04-07 17:38:27 | INFO     | __main__ | --- Loop #34 started ---
+2026-04-07 17:38:28 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $83.88 >= $3.0
+2026-04-07 17:38:28 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:38:28 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$83.88
+2026-04-07 17:38:28 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:38:29 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $83.88
+2026-04-07 17:38:29 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+83.88 (+0.3%) | WIN
+2026-04-07 17:38:34 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:38:34 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:38:34 | INFO     | __main__ | BTC/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:38:34 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:38:34 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:38:38 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:38:38 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:38 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:38 | INFO     | core.risk_manager | Position value $278285.90 exceeds max $30894.78, capping to max
+2026-04-07 17:38:38 | WARNING  | __main__ | ETH/USD trade rejected: Portfolio exposure 70.0% exceeds max 60.0%
+2026-04-07 17:38:38 | INFO     | __main__ | Loop #34 complete in 11.5s. Trades: 2. Next run: 17:38:53
+2026-04-07 17:38:53 | INFO     | __main__ | --- Loop #35 started ---
+2026-04-07 17:38:54 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-24.24
+2026-04-07 17:38:54 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-24.24 (-0.1%) | LOSS
+2026-04-07 17:38:57 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:38:57 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:57 | INFO     | __main__ | BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:38:57 | INFO     | core.risk_manager | Position value $393941.86 exceeds max $30858.89, capping to max
+2026-04-07 17:38:57 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.453078 order_id=c74eba7c-b11f-4502-b8c4-c564028a9c03 status=OrderStatus.PENDING_NEW
+2026-04-07 17:38:58 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:38:58 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.4519458","balance":"0.4519458","code":40310000,"message":"insufficient balance for BTC (requested: 0.453078497, available: 0.4519458)","symbol":"USD"}
+2026-04-07 17:38:58 | INFO     | core.trade_results | Trade entry recorded: BUY 0.453078 BTC/USD @ $68109.37
+2026-04-07 17:38:58 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:38:58 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.453078
+2026-04-07 17:39:01 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:39:01 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:39:01 | INFO     | __main__ | ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:39:01 | INFO     | core.risk_manager | Position value $278008.01 exceeds max $30858.89, capping to max
+2026-04-07 17:39:02 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.868820 order_id=2a048083-1e61-4087-8dc0-907c38be593f status=OrderStatus.PENDING_NEW
+2026-04-07 17:39:02 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:39:02 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.831648294","balance":"14.831648294","code":40310000,"message":"insufficient balance for ETH (requested: 14.868820346, available: 14.831648294)","symbol":"USD"}
+2026-04-07 17:39:02 | INFO     | core.trade_results | Trade entry recorded: BUY 14.868820 ETH/USD @ $2075.41
+2026-04-07 17:39:02 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:39:02 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.868820
+2026-04-07 17:39:02 | INFO     | __main__ | Loop #35 complete in 9.1s. Trades: 2. Next run: 17:39:17
+2026-04-07 17:39:17 | INFO     | __main__ | --- Loop #36 started ---
+2026-04-07 17:39:23 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:39:23 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:39:23 | INFO     | __main__ | BTC/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:39:23 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:39:23 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:39:28 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:39:28 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 80%) - Confirmed: True
+2026-04-07 17:39:28 | INFO     | __main__ | ETH/USD: CLOSE (conf: 80%) - Confirmed: True
+2026-04-07 17:39:28 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:39:28 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:39:28 | INFO     | __main__ | Loop #36 complete in 11.1s. Trades: 2. Next run: 17:39:43
+2026-04-07 17:39:43 | INFO     | __main__ | --- Loop #37 started ---
+2026-04-07 17:39:44 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-44.61
+2026-04-07 17:39:44 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-44.61 (-0.1%) | LOSS
+2026-04-07 17:39:44 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-46.50
+2026-04-07 17:39:44 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-46.50 (-0.2%) | LOSS
+2026-04-07 17:39:49 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:39:49 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:39:49 | INFO     | __main__ | BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:39:49 | INFO     | core.risk_manager | Position value $377800.69 exceeds max $30745.23, capping to max
+2026-04-07 17:39:50 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.450971 order_id=f61b3bf6-f12f-4b71-b4c2-3879d8f244f2 status=OrderStatus.PENDING_NEW
+2026-04-07 17:39:50 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:39:50 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.449843835","balance":"0.449843835","code":40310000,"message":"insufficient balance for BTC (requested: 0.450971264, available: 0.449843835)","symbol":"USD"}
+2026-04-07 17:39:50 | INFO     | core.trade_results | Trade entry recorded: BUY 0.450971 BTC/USD @ $68175.59
+2026-04-07 17:39:50 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:39:50 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.450971
+2026-04-07 17:39:54 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:39:54 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:39:54 | INFO     | __main__ | ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:39:54 | INFO     | core.risk_manager | Position value $277818.35 exceeds max $30745.23, capping to max
+2026-04-07 17:39:54 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.788116 order_id=c79007a7-28f7-47e0-bb6d-dd560939ef57 status=OrderStatus.PENDING_NEW
+2026-04-07 17:39:54 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:39:55 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.751145435","balance":"14.751145435","code":40310000,"message":"insufficient balance for ETH (requested: 14.788115725, available: 14.751145435)","symbol":"USD"}
+2026-04-07 17:39:55 | INFO     | core.trade_results | Trade entry recorded: BUY 14.788116 ETH/USD @ $2079.05
+2026-04-07 17:39:55 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:39:55 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.788116
+2026-04-07 17:39:55 | INFO     | __main__ | Loop #37 complete in 11.2s. Trades: 2. Next run: 17:40:10
+2026-04-07 17:40:10 | INFO     | __main__ | --- Loop #38 started ---
+2026-04-07 17:40:14 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:40:14 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:40:14 | INFO     | __main__ | BTC/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:40:15 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:40:15 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:40:20 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:40:20 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:40:20 | INFO     | __main__ | ETH/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:40:20 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:40:20 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:40:20 | INFO     | __main__ | Loop #38 complete in 10.5s. Trades: 2. Next run: 17:40:35
+2026-04-07 17:40:35 | INFO     | __main__ | --- Loop #39 started ---
+2026-04-07 17:40:36 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-93.64
+2026-04-07 17:40:36 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-93.64 (-0.3%) | LOSS
+2026-04-07 17:40:36 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-73.20
+2026-04-07 17:40:36 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-73.20 (-0.2%) | LOSS
+2026-04-07 17:40:40 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:40:40 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:40:40 | INFO     | __main__ | BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:40:40 | INFO     | core.risk_manager | Position value $375942.22 exceeds max $30607.43, capping to max
+2026-04-07 17:40:40 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.449147 order_id=97421717-ff3c-4de6-92ec-9a3979274c45 status=OrderStatus.PENDING_NEW
+2026-04-07 17:40:40 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:40:41 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.448024329","balance":"0.448024329","code":40310000,"message":"insufficient balance for BTC (requested: 0.449147198, available: 0.448024329)","symbol":"USD"}
+2026-04-07 17:40:41 | INFO     | core.trade_results | Trade entry recorded: BUY 0.449147 BTC/USD @ $68145.65
+2026-04-07 17:40:41 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:40:41 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.449147
+2026-04-07 17:40:44 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:40:44 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:40:44 | INFO     | __main__ | ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:40:44 | INFO     | core.risk_manager | Position value $276329.78 exceeds max $30607.43, capping to max
+2026-04-07 17:40:44 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.734801 order_id=47543b0a-76b1-4aec-9d80-ba643d5c0927 status=OrderStatus.PENDING_NEW
+2026-04-07 17:40:44 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:40:44 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.697963659","balance":"14.697963659","code":40310000,"message":"insufficient balance for ETH (requested: 14.734800662, available: 14.697963659)","symbol":"USD"}
+2026-04-07 17:40:44 | INFO     | core.trade_results | Trade entry recorded: BUY 14.734801 ETH/USD @ $2077.22
+2026-04-07 17:40:44 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:40:44 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.734801
+2026-04-07 17:40:44 | INFO     | __main__ | Loop #39 complete in 9.2s. Trades: 2. Next run: 17:40:59
+2026-04-07 17:40:59 | INFO     | __main__ | --- Loop #40 started ---
+2026-04-07 17:41:00 | INFO     | __main__ | 🎯 SCALP EXIT BTC/USD: Min profit: $12.73 >= $3.0
+2026-04-07 17:41:01 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:41:01 | INFO     | __main__ | ✅ Quick profit taken: BTC/USD P&L=$12.73
+2026-04-07 17:41:01 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:41:01 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $12.73
+2026-04-07 17:41:01 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $+12.73 (+0.0%) | WIN
+2026-04-07 17:41:05 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:41:05 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:41:05 | INFO     | __main__ | BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:41:05 | INFO     | core.risk_manager | Position value $352571.30 exceeds max $30496.14, capping to max
+2026-04-07 17:41:05 | WARNING  | __main__ | BTC/USD trade rejected: Portfolio exposure 70.0% exceeds max 60.0%
+2026-04-07 17:41:09 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:41:09 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:41:09 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:41:09 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:41:09 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:41:09 | INFO     | __main__ | Loop #40 complete in 9.8s. Trades: 2. Next run: 17:41:24
+2026-04-07 17:41:24 | INFO     | __main__ | --- Loop #41 started ---
+2026-04-07 17:41:25 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-71.46
+2026-04-07 17:41:25 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-71.46 (-0.2%) | LOSS
+2026-04-07 17:41:29 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:41:29 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:41:29 | INFO     | __main__ | BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:41:29 | INFO     | core.risk_manager | Position value $352656.23 exceeds max $30490.09, capping to max
+2026-04-07 17:41:29 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.447030 order_id=2d485554-73cd-470a-9b63-47d38f1426ef status=OrderStatus.PENDING_NEW
+2026-04-07 17:41:29 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:41:30 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.445912276","balance":"0.445912276","code":40310000,"message":"insufficient balance for BTC (requested: 0.447029851, available: 0.445912276)","symbol":"USD"}
+2026-04-07 17:41:30 | INFO     | core.trade_results | Trade entry recorded: BUY 0.447030 BTC/USD @ $68205.93
+2026-04-07 17:41:30 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:41:30 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.447030
+2026-04-07 17:41:33 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:41:33 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:41:33 | INFO     | __main__ | ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:41:33 | INFO     | core.risk_manager | Position value $285228.01 exceeds max $30490.09, capping to max
+2026-04-07 17:41:33 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.660480 order_id=2acab34a-30c2-496d-bc03-3b4ed51023a1 status=OrderStatus.PENDING_NEW
+2026-04-07 17:41:33 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:41:34 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.623828656","balance":"14.623828656","code":40310000,"message":"insufficient balance for ETH (requested: 14.660479856, available: 14.623828656)","symbol":"USD"}
+2026-04-07 17:41:34 | INFO     | core.trade_results | Trade entry recorded: BUY 14.660480 ETH/USD @ $2079.75
+2026-04-07 17:41:34 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:41:34 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.660480
+2026-04-07 17:41:34 | INFO     | __main__ | Loop #41 complete in 9.5s. Trades: 2. Next run: 17:41:49
+2026-04-07 17:41:49 | INFO     | __main__ | --- Loop #42 started ---
+2026-04-07 17:41:53 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:41:53 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:41:53 | INFO     | __main__ | BTC/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:41:53 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:41:53 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:41:56 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:41:56 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:41:56 | INFO     | __main__ | ETH/USD: CLOSE (conf: 85%) - Confirmed: True
+2026-04-07 17:41:57 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:41:57 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:41:57 | INFO     | __main__ | Loop #42 complete in 8.1s. Trades: 2. Next run: 17:42:12
+2026-04-07 17:42:12 | INFO     | __main__ | --- Loop #43 started ---
+2026-04-07 17:42:12 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-61.28
+2026-04-07 17:42:12 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-61.28 (-0.2%) | LOSS
+2026-04-07 17:42:12 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-36.74
+2026-04-07 17:42:12 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-36.74 (-0.1%) | LOSS
+2026-04-07 17:42:16 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:42:16 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:42:16 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:42:21 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:42:21 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:42:21 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:42:21 | INFO     | core.risk_manager | Position value $266593.40 exceeds max $30365.15, capping to max
+2026-04-07 17:42:21 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.577716 order_id=9b2eecc4-6170-4020-8b63-2c57535e2bc1 status=OrderStatus.PENDING_NEW
+2026-04-07 17:42:21 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:42:22 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.54127186","balance":"14.54127186","code":40310000,"message":"insufficient balance for ETH (requested: 14.577716151, available: 14.54127186)","symbol":"USD"}
+2026-04-07 17:42:22 | INFO     | core.trade_results | Trade entry recorded: BUY 14.577716 ETH/USD @ $2082.98
+2026-04-07 17:42:22 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:42:22 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.577716
+2026-04-07 17:42:22 | INFO     | __main__ | Loop #43 complete in 10.0s. Trades: 1. Next run: 17:42:37
+2026-04-07 17:42:37 | INFO     | __main__ | --- Loop #44 started ---
+2026-04-07 17:42:41 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:42:41 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:42:41 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:42:46 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:42:46 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:42:46 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:42:46 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:42:46 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:42:46 | INFO     | __main__ | Loop #44 complete in 9.4s. Trades: 1. Next run: 17:43:01
+2026-04-07 17:43:01 | INFO     | __main__ | --- Loop #45 started ---
+2026-04-07 17:43:02 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-42.82
+2026-04-07 17:43:02 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-42.82 (-0.1%) | LOSS
+2026-04-07 17:43:06 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:43:06 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:43:06 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:43:09 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:43:09 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:43:09 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:43:09 | INFO     | core.risk_manager | Position value $266280.40 exceeds max $30306.71, capping to max
+2026-04-07 17:43:10 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.538732 order_id=97391673-d92e-43f3-940c-59b4f678c886 status=OrderStatus.PENDING_NEW
+2026-04-07 17:43:10 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:43:10 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.50238503","balance":"14.50238503","code":40310000,"message":"insufficient balance for ETH (requested: 14.53873186, available: 14.50238503)","symbol":"USD"}
+2026-04-07 17:43:10 | INFO     | core.trade_results | Trade entry recorded: BUY 14.538732 ETH/USD @ $2084.55
+2026-04-07 17:43:10 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:43:10 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.538732
+2026-04-07 17:43:10 | INFO     | __main__ | Loop #45 complete in 9.1s. Trades: 1. Next run: 17:43:25
+2026-04-07 17:43:25 | INFO     | __main__ | --- Loop #46 started ---
+2026-04-07 17:43:30 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:43:30 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:43:30 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:43:34 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:43:34 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:43:34 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:43:34 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:43:34 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:43:34 | INFO     | __main__ | Loop #46 complete in 9.2s. Trades: 1. Next run: 17:43:49
+2026-04-07 17:43:49 | INFO     | __main__ | --- Loop #47 started ---
+2026-04-07 17:43:50 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-21.03
+2026-04-07 17:43:50 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-21.03 (-0.1%) | LOSS
+2026-04-07 17:43:54 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:43:54 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:43:54 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:43:57 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:43:57 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:43:57 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:43:57 | INFO     | core.risk_manager | Position value $256716.17 exceeds max $30235.56, capping to max
+2026-04-07 17:43:57 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.515216 order_id=be9e7214-13c6-4ded-afb2-bac81d1dfe2a status=OrderStatus.PENDING_NEW
+2026-04-07 17:43:58 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:43:58 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.478928291","balance":"14.478928291","code":40310000,"message":"insufficient balance for ETH (requested: 14.515216332, available: 14.478928291)","symbol":"USD"}
+2026-04-07 17:43:58 | INFO     | core.trade_results | Trade entry recorded: BUY 14.515216 ETH/USD @ $2083.03
+2026-04-07 17:43:58 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:43:58 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.515216
+2026-04-07 17:43:58 | INFO     | __main__ | Loop #47 complete in 8.6s. Trades: 1. Next run: 17:44:13
+2026-04-07 17:44:13 | INFO     | __main__ | --- Loop #48 started ---
+2026-04-07 17:44:18 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:44:18 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:44:18 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:44:22 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:44:22 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:44:22 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:44:23 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:44:23 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:44:23 | INFO     | __main__ | Loop #48 complete in 9.7s. Trades: 1. Next run: 17:44:38
+2026-04-07 17:44:38 | INFO     | __main__ | --- Loop #49 started ---
+2026-04-07 17:44:38 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-7.42
+2026-04-07 17:44:38 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-7.42 (-0.0%) | LOSS
+2026-04-07 17:44:42 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:44:42 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:44:42 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:44:46 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:44:46 | INFO     | core.signal_engine | Signal for ETH/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:44:46 | INFO     | __main__ | ETH/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:44:46 | INFO     | __main__ | Loop #49 complete in 8.3s. Trades: 0. Next run: 17:45:01
+2026-04-07 17:45:01 | INFO     | __main__ | --- Loop #50 started ---
+2026-04-07 17:45:05 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:45:05 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:45:05 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:45:08 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:45:08 | INFO     | core.signal_engine | Signal for ETH/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:45:08 | INFO     | __main__ | ETH/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:45:08 | INFO     | __main__ | Loop #50 complete in 6.6s. Trades: 0. Next run: 17:45:23
+2026-04-07 17:45:23 | INFO     | __main__ | --- Loop #51 started ---
+2026-04-07 17:45:27 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:45:27 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:45:27 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:45:30 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:45:30 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:45:30 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:45:30 | INFO     | core.risk_manager | Position value $279683.05 exceeds max $30170.98, capping to max
+2026-04-07 17:45:31 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.493783 order_id=63f0cad3-84dd-4892-b71b-380c1db292de status=OrderStatus.PENDING_NEW
+2026-04-07 17:45:31 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:45:31 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.457548598","balance":"14.457548598","code":40310000,"message":"insufficient balance for ETH (requested: 14.493783056, available: 14.457548598)","symbol":"USD"}
+2026-04-07 17:45:31 | INFO     | core.trade_results | Trade entry recorded: BUY 14.493783 ETH/USD @ $2081.65
+2026-04-07 17:45:31 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:45:31 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.493783
+2026-04-07 17:45:31 | INFO     | __main__ | Loop #51 complete in 8.7s. Trades: 1. Next run: 17:45:46
+2026-04-07 17:45:46 | INFO     | __main__ | --- Loop #52 started ---
+2026-04-07 17:45:47 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $8.41 >= $3.0
+2026-04-07 17:45:48 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:45:48 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$8.41
+2026-04-07 17:45:48 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:45:48 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $8.41
+2026-04-07 17:45:48 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+8.41 (+0.0%) | WIN
+2026-04-07 17:45:52 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:45:52 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:45:52 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:45:56 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:45:56 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:45:56 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:45:56 | INFO     | core.risk_manager | Position value $278736.52 exceeds max $30094.54, capping to max
+2026-04-07 17:45:56 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.469397 order_id=841ab59e-33c4-4260-a988-7307039bbd5c status=OrderStatus.PENDING_NEW
+2026-04-07 17:45:56 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:45:56 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.433223226","balance":"14.433223226","code":40310000,"message":"insufficient balance for ETH (requested: 14.469396718, available: 14.433223226)","symbol":"USD"}
+2026-04-07 17:45:56 | INFO     | core.trade_results | Trade entry recorded: BUY 14.469397 ETH/USD @ $2079.88
+2026-04-07 17:45:56 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:45:56 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.469397
+2026-04-07 17:45:56 | INFO     | __main__ | Loop #52 complete in 10.3s. Trades: 2. Next run: 17:46:11
+2026-04-07 17:46:11 | INFO     | __main__ | --- Loop #53 started ---
+2026-04-07 17:46:13 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $37.64 >= $3.0
+2026-04-07 17:46:13 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:46:13 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$37.64
+2026-04-07 17:46:13 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:46:13 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $37.64
+2026-04-07 17:46:13 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+37.64 (+0.1%) | WIN
+2026-04-07 17:46:17 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:46:17 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:46:17 | INFO     | __main__ | BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:46:17 | INFO     | core.risk_manager | Position value $367285.12 exceeds max $30026.07, capping to max
+2026-04-07 17:46:18 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.440161 order_id=6be66925-70cc-4d1a-8989-3b4d783b614e status=OrderStatus.PENDING_NEW
+2026-04-07 17:46:18 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:46:18 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.439060697","balance":"0.439060697","code":40310000,"message":"insufficient balance for BTC (requested: 0.4401611, available: 0.439060697)","symbol":"USD"}
+2026-04-07 17:46:18 | INFO     | core.trade_results | Trade entry recorded: BUY 0.440161 BTC/USD @ $68216.09
+2026-04-07 17:46:18 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:46:18 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.440161
+2026-04-07 17:46:25 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:46:25 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:46:25 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:46:25 | INFO     | core.risk_manager | Position value $277965.32 exceeds max $30026.07, capping to max
+2026-04-07 17:46:25 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.443596 order_id=6368b5cb-9050-4f90-b5aa-a82cbf65aefa status=OrderStatus.PENDING_NEW
+2026-04-07 17:46:25 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:46:26 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.407486988","balance":"14.407486988","code":40310000,"message":"insufficient balance for ETH (requested: 14.443595978, available: 14.407486988)","symbol":"USD"}
+2026-04-07 17:46:26 | INFO     | core.trade_results | Trade entry recorded: BUY 14.443596 ETH/USD @ $2078.85
+2026-04-07 17:46:26 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:46:26 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.443596
+2026-04-07 17:46:26 | INFO     | __main__ | Loop #53 complete in 14.1s. Trades: 3. Next run: 17:46:41
+2026-04-07 17:46:41 | INFO     | __main__ | --- Loop #54 started ---
+2026-04-07 17:46:42 | INFO     | __main__ | 🎯 SCALP EXIT BTC/USD: Min profit: $23.94 >= $3.0
+2026-04-07 17:46:42 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:46:42 | INFO     | __main__ | ✅ Quick profit taken: BTC/USD P&L=$23.94
+2026-04-07 17:46:42 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $59.38 >= $3.0
+2026-04-07 17:46:42 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:46:42 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$59.38
+2026-04-07 17:46:42 | INFO     | __main__ | 🎯 Quick profit exits: 2 positions closed
+2026-04-07 17:46:43 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $59.38
+2026-04-07 17:46:43 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+59.38 (+0.2%) | WIN
+2026-04-07 17:46:43 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $23.94
+2026-04-07 17:46:43 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $+23.94 (+0.1%) | WIN
+2026-04-07 17:46:47 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:46:47 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:46:47 | INFO     | __main__ | BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:46:47 | INFO     | core.risk_manager | Position value $365712.58 exceeds max $29903.94, capping to max
+2026-04-07 17:46:47 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.438465 order_id=6d38d754-d173-4e5b-976e-c13d95e14f19 status=OrderStatus.PENDING_NEW
+2026-04-07 17:46:48 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:46:48 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.437368972","balance":"0.437368972","code":40310000,"message":"insufficient balance for BTC (requested: 0.438465135, available: 0.437368972)","symbol":"USD"}
+2026-04-07 17:46:48 | INFO     | core.trade_results | Trade entry recorded: BUY 0.438465 BTC/USD @ $68201.42
+2026-04-07 17:46:48 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:46:48 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.438465
+2026-04-07 17:46:51 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:46:51 | INFO     | core.signal_engine | Signal for ETH/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:46:51 | INFO     | __main__ | ETH/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:46:51 | INFO     | __main__ | Loop #54 complete in 10.5s. Trades: 3. Next run: 17:47:06
+2026-04-07 17:47:06 | INFO     | __main__ | --- Loop #55 started ---
+2026-04-07 17:47:07 | INFO     | __main__ | 🎯 SCALP EXIT BTC/USD: Min profit: $8.49 >= $3.0
+2026-04-07 17:47:07 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:47:07 | INFO     | __main__ | ✅ Quick profit taken: BTC/USD P&L=$8.49
+2026-04-07 17:47:07 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:47:08 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $8.49
+2026-04-07 17:47:08 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $+8.49 (+0.0%) | WIN
+2026-04-07 17:47:14 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:47:14 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:47:14 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:47:19 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:47:19 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:47:19 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:47:19 | INFO     | core.risk_manager | Position value $293219.00 exceeds max $29834.34, capping to max
+2026-04-07 17:47:19 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.351365 order_id=96b4d05b-665e-4946-b82a-0e34dbe6c889 status=OrderStatus.PENDING_NEW
+2026-04-07 17:47:19 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:47:20 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.315487004","balance":"14.315487004","code":40310000,"message":"insufficient balance for ETH (requested: 14.351365418, available: 14.315487004)","symbol":"USD"}
+2026-04-07 17:47:20 | INFO     | core.trade_results | Trade entry recorded: BUY 14.351365 ETH/USD @ $2078.85
+2026-04-07 17:47:20 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:47:20 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.351365
+2026-04-07 17:47:20 | INFO     | __main__ | Loop #55 complete in 13.7s. Trades: 2. Next run: 17:47:35
+2026-04-07 17:47:35 | INFO     | __main__ | --- Loop #56 started ---
+2026-04-07 17:47:36 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $7.30 >= $3.0
+2026-04-07 17:47:36 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:47:36 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$7.30
+2026-04-07 17:47:36 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:47:37 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $7.30
+2026-04-07 17:47:37 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+7.30 (+0.0%) | WIN
+2026-04-07 17:47:40 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:47:40 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:47:40 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:47:46 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:47:46 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:47:46 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:47:46 | INFO     | core.risk_manager | Position value $292682.39 exceeds max $29767.42, capping to max
+2026-04-07 17:47:46 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.313257 order_id=2fc0ae6e-fe54-4ce1-a626-e6acf1ba2ed9 status=OrderStatus.PENDING_NEW
+2026-04-07 17:47:47 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:47:47 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.277473513","balance":"14.277473513","code":40310000,"message":"insufficient balance for ETH (requested: 14.313256655, available: 14.277473513)","symbol":"USD"}
+2026-04-07 17:47:47 | INFO     | core.trade_results | Trade entry recorded: BUY 14.313257 ETH/USD @ $2079.71
+2026-04-07 17:47:47 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:47:47 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.313257
+2026-04-07 17:47:47 | INFO     | __main__ | Loop #56 complete in 12.3s. Trades: 2. Next run: 17:48:02
+2026-04-07 17:48:02 | INFO     | __main__ | --- Loop #57 started ---
+2026-04-07 17:48:03 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $13.84 >= $3.0
+2026-04-07 17:48:03 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:48:03 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$13.84
+2026-04-07 17:48:03 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:48:04 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $13.84
+2026-04-07 17:48:04 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+13.84 (+0.0%) | WIN
+2026-04-07 17:48:07 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:48:07 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:48:07 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:48:10 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:48:10 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:48:10 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:48:10 | INFO     | core.risk_manager | Position value $292228.72 exceeds max $29705.58, capping to max
+2026-04-07 17:48:10 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.275972 order_id=1be05ea7-2b15-4e5b-80f5-3fdb8cd404d4 status=OrderStatus.PENDING_NEW
+2026-04-07 17:48:10 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:48:11 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.240281992","balance":"14.240281992","code":40310000,"message":"insufficient balance for ETH (requested: 14.275971923, available: 14.240281992)","symbol":"USD"}
+2026-04-07 17:48:11 | INFO     | core.trade_results | Trade entry recorded: BUY 14.275972 ETH/USD @ $2080.81
+2026-04-07 17:48:11 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:48:11 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.275972
+2026-04-07 17:48:11 | INFO     | __main__ | Loop #57 complete in 8.7s. Trades: 2. Next run: 17:48:26
+2026-04-07 17:48:26 | INFO     | __main__ | --- Loop #58 started ---
+2026-04-07 17:48:33 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:48:33 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:48:33 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:48:37 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:48:37 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:48:37 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:48:37 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:48:37 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:48:37 | INFO     | __main__ | Loop #58 complete in 11.5s. Trades: 1. Next run: 17:48:52
+2026-04-07 17:48:52 | INFO     | __main__ | --- Loop #59 started ---
+2026-04-07 17:48:53 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-22.22
+2026-04-07 17:48:53 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-22.22 (-0.1%) | LOSS
+2026-04-07 17:48:57 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:48:57 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:48:57 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:49:01 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:49:01 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:49:01 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:49:01 | INFO     | core.risk_manager | Position value $296535.02 exceeds max $29643.46, capping to max
+2026-04-07 17:49:01 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.229807 order_id=db3a6a75-6034-4b9c-a86d-0c2b03322783 status=OrderStatus.PENDING_NEW
+2026-04-07 17:49:02 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:49:02 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.19423282","balance":"14.19423282","code":40310000,"message":"insufficient balance for ETH (requested: 14.229807339, available: 14.19423282)","symbol":"USD"}
+2026-04-07 17:49:02 | INFO     | core.trade_results | Trade entry recorded: BUY 14.229807 ETH/USD @ $2083.19
+2026-04-07 17:49:02 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:49:02 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.229807
+2026-04-07 17:49:02 | INFO     | __main__ | Loop #59 complete in 9.6s. Trades: 1. Next run: 17:49:17
+2026-04-07 17:49:17 | INFO     | __main__ | --- Loop #60 started ---
+2026-04-07 17:49:21 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:49:21 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:49:21 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:49:23 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:49:23 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:49:23 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:49:24 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:49:24 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:49:24 | INFO     | __main__ | Loop #60 complete in 6.9s. Trades: 1. Next run: 17:49:39
+2026-04-07 17:49:39 | INFO     | __main__ | --- Loop #61 started ---
+2026-04-07 17:49:39 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-50.38
+2026-04-07 17:49:39 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-50.38 (-0.2%) | LOSS
+2026-04-07 17:49:43 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:49:43 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:49:43 | INFO     | __main__ | BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:49:43 | INFO     | core.risk_manager | Position value $349190.45 exceeds max $29586.52, capping to max
+2026-04-07 17:49:43 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.432982 order_id=156b7508-6798-4d23-aef7-497356d6d8ce status=OrderStatus.PENDING_NEW
+2026-04-07 17:49:44 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:49:44 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.431899087","balance":"0.431899087","code":40310000,"message":"insufficient balance for BTC (requested: 0.432981541, available: 0.431899087)","symbol":"USD"}
+2026-04-07 17:49:44 | INFO     | core.trade_results | Trade entry recorded: BUY 0.432982 BTC/USD @ $68332.06
+2026-04-07 17:49:44 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:49:44 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.432982
+2026-04-07 17:49:48 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:49:48 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:49:48 | INFO     | __main__ | ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:49:48 | INFO     | core.risk_manager | Position value $286209.13 exceeds max $29586.52, capping to max
+2026-04-07 17:49:49 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.199972 order_id=48d25fb7-a1b3-42dc-8556-123dcacff5a0 status=OrderStatus.PENDING_NEW
+2026-04-07 17:49:49 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:49:49 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.164472041","balance":"14.164472041","code":40310000,"message":"insufficient balance for ETH (requested: 14.199971971, available: 14.164472041)","symbol":"USD"}
+2026-04-07 17:49:49 | INFO     | core.trade_results | Trade entry recorded: BUY 14.199972 ETH/USD @ $2083.56
+2026-04-07 17:49:49 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:49:49 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.199972
+2026-04-07 17:49:49 | INFO     | __main__ | Loop #61 complete in 10.4s. Trades: 2. Next run: 17:50:04
+2026-04-07 17:50:04 | INFO     | __main__ | --- Loop #62 started ---
+2026-04-07 17:50:10 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:50:10 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:50:10 | INFO     | __main__ | BTC/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:50:10 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:50:10 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:50:13 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:50:13 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:50:13 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:50:14 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:50:14 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:50:14 | INFO     | __main__ | Loop #62 complete in 9.6s. Trades: 2. Next run: 17:50:29
+2026-04-07 17:50:29 | INFO     | __main__ | --- Loop #63 started ---
+2026-04-07 17:50:29 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-41.09
+2026-04-07 17:50:29 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-41.09 (-0.1%) | LOSS
+2026-04-07 17:50:29 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-25.59
+2026-04-07 17:50:29 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-25.59 (-0.1%) | LOSS
+2026-04-07 17:50:33 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:50:33 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:50:33 | INFO     | __main__ | BTC/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:50:33 | INFO     | core.risk_manager | Position value $347354.15 exceeds max $29449.45, capping to max
+2026-04-07 17:50:33 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.431247 order_id=661cf9be-f42b-4f42-af5c-d552970bed26 status=OrderStatus.PENDING_NEW
+2026-04-07 17:50:33 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:50:33 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.430168735","balance":"0.430168735","code":40310000,"message":"insufficient balance for BTC (requested: 0.431246853, available: 0.430168735)","symbol":"USD"}
+2026-04-07 17:50:33 | INFO     | core.trade_results | Trade entry recorded: BUY 0.431247 BTC/USD @ $68289.09
+2026-04-07 17:50:33 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:50:33 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.431247
+2026-04-07 17:50:36 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:50:36 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:50:36 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:50:36 | INFO     | core.risk_manager | Position value $284603.31 exceeds max $29449.45, capping to max
+2026-04-07 17:50:37 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.148087 order_id=887f5438-6dfe-4349-add2-d2a07538d4bc status=OrderStatus.PENDING_NEW
+2026-04-07 17:50:37 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:50:37 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.112716632","balance":"14.112716632","code":40310000,"message":"insufficient balance for ETH (requested: 14.14808685, available: 14.112716632)","symbol":"USD"}
+2026-04-07 17:50:37 | INFO     | core.trade_results | Trade entry recorded: BUY 14.148087 ETH/USD @ $2081.52
+2026-04-07 17:50:37 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:50:37 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.148087
+2026-04-07 17:50:37 | INFO     | __main__ | Loop #63 complete in 8.6s. Trades: 2. Next run: 17:50:52
+2026-04-07 17:50:52 | INFO     | __main__ | --- Loop #64 started ---
+2026-04-07 17:50:57 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:50:57 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:50:57 | INFO     | __main__ | BTC/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:50:57 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:50:57 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:51:02 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:51:02 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:51:02 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:51:02 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:51:02 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:51:02 | INFO     | __main__ | Loop #64 complete in 9.7s. Trades: 2. Next run: 17:51:17
+2026-04-07 17:51:17 | INFO     | __main__ | --- Loop #65 started ---
+2026-04-07 17:51:17 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-12.62
+2026-04-07 17:51:17 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-12.62 (-0.0%) | LOSS
+2026-04-07 17:51:17 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-2.67
+2026-04-07 17:51:17 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-2.67 (-0.0%) | LOSS
+2026-04-07 17:51:21 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:51:21 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:51:21 | INFO     | __main__ | BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:51:21 | INFO     | core.risk_manager | Position value $343133.01 exceeds max $29323.21, capping to max
+2026-04-07 17:51:22 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.429297 order_id=94e4fb19-98ca-4913-88c9-92f3a74d576a status=OrderStatus.PENDING_NEW
+2026-04-07 17:51:22 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:51:22 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.428224005","balance":"0.428224005","code":40310000,"message":"insufficient balance for BTC (requested: 0.429297249, available: 0.428224005)","symbol":"USD"}
+2026-04-07 17:51:22 | INFO     | core.trade_results | Trade entry recorded: BUY 0.429297 BTC/USD @ $68305.14
+2026-04-07 17:51:22 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:51:22 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.429297
+2026-04-07 17:51:26 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:51:26 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:51:26 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:51:26 | INFO     | core.risk_manager | Position value $281505.43 exceeds max $29323.21, capping to max
+2026-04-07 17:51:27 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.084107 order_id=13607389-6080-47f2-9371-b259bf878301 status=OrderStatus.PENDING_NEW
+2026-04-07 17:51:27 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:51:27 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"14.048897037","balance":"14.048897037","code":40310000,"message":"insufficient balance for ETH (requested: 14.084107306, available: 14.048897037)","symbol":"USD"}
+2026-04-07 17:51:27 | INFO     | core.trade_results | Trade entry recorded: BUY 14.084107 ETH/USD @ $2082.01
+2026-04-07 17:51:27 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:51:27 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.084107
+2026-04-07 17:51:27 | INFO     | __main__ | Loop #65 complete in 10.3s. Trades: 2. Next run: 17:51:42
+2026-04-07 17:51:42 | INFO     | __main__ | --- Loop #66 started ---
+2026-04-07 17:51:46 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:51:46 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:51:46 | INFO     | __main__ | BTC/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:51:46 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:51:46 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:51:50 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:51:50 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:51:50 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:51:50 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:51:50 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:51:50 | INFO     | __main__ | Loop #66 complete in 8.1s. Trades: 2. Next run: 17:52:05
+2026-04-07 17:52:05 | INFO     | __main__ | --- Loop #67 started ---
+2026-04-07 17:52:06 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-25.16
+2026-04-07 17:52:06 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-25.16 (-0.1%) | LOSS
+2026-04-07 17:52:06 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-17.64
+2026-04-07 17:52:06 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-17.64 (-0.1%) | LOSS
+2026-04-07 17:52:21 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:52:21 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:52:21 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:52:25 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:52:25 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:52:25 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:52:25 | INFO     | core.risk_manager | Position value $286557.28 exceeds max $29201.39, capping to max
+2026-04-07 17:52:26 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=14.019544 order_id=c0de6db6-9a1f-4c06-879b-a438c2f9f678 status=OrderStatus.PENDING_NEW
+2026-04-07 17:52:26 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:52:26 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.984495232","balance":"13.984495232","code":40310000,"message":"insufficient balance for ETH (requested: 14.019544093, available: 13.984495232)","symbol":"USD"}
+2026-04-07 17:52:26 | INFO     | core.trade_results | Trade entry recorded: BUY 14.019544 ETH/USD @ $2082.91
+2026-04-07 17:52:26 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:52:26 | INFO     | __main__ | Order executed: BUY ETH/USD qty=14.019544
+2026-04-07 17:52:26 | INFO     | __main__ | Loop #67 complete in 20.9s. Trades: 1. Next run: 17:52:41
+2026-04-07 17:52:41 | INFO     | __main__ | --- Loop #68 started ---
+2026-04-07 17:52:45 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:52:45 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:52:45 | INFO     | __main__ | BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:52:45 | INFO     | core.risk_manager | Position value $340495.97 exceeds max $29166.56, capping to max
+2026-04-07 17:52:45 | WARNING  | __main__ | BTC/USD trade rejected: Portfolio exposure 70.0% exceeds max 60.0%
+2026-04-07 17:52:48 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:52:48 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:52:48 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:52:48 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:52:48 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:52:49 | INFO     | __main__ | Loop #68 complete in 7.3s. Trades: 1. Next run: 17:53:03
+2026-04-07 17:53:04 | INFO     | __main__ | --- Loop #69 started ---
+2026-04-07 17:53:04 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-26.39
+2026-04-07 17:53:04 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-26.39 (-0.1%) | LOSS
+2026-04-07 17:53:11 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:53:11 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:53:11 | INFO     | __main__ | BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:53:11 | INFO     | core.risk_manager | Position value $340148.08 exceeds max $29137.43, capping to max
+2026-04-07 17:53:11 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.425970 order_id=627df2b0-e6d5-4eac-b29f-1350f7719dc0 status=OrderStatus.PENDING_NEW
+2026-04-07 17:53:12 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:53:12 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.424905012","balance":"0.424905012","code":40310000,"message":"insufficient balance for BTC (requested: 0.425969938, available: 0.424905012)","symbol":"USD"}
+2026-04-07 17:53:12 | INFO     | core.trade_results | Trade entry recorded: BUY 0.425970 BTC/USD @ $68402.55
+2026-04-07 17:53:12 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:53:12 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.425970
+2026-04-07 17:53:16 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:53:16 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:53:16 | INFO     | __main__ | ETH/USD: BUY (conf: 65%) - Confirmed: True
+2026-04-07 17:53:16 | INFO     | core.risk_manager | Position value $286296.55 exceeds max $29137.43, capping to max
+2026-04-07 17:53:16 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.970914 order_id=d914ff06-399f-49da-842f-e3efc2d8bf70 status=OrderStatus.PENDING_NEW
+2026-04-07 17:53:16 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:53:17 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.935986294","balance":"13.935986294","code":40310000,"message":"insufficient balance for ETH (requested: 13.970913578, available: 13.935986294)","symbol":"USD"}
+2026-04-07 17:53:17 | INFO     | core.trade_results | Trade entry recorded: BUY 13.970914 ETH/USD @ $2085.58
+2026-04-07 17:53:17 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:53:17 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.970914
+2026-04-07 17:53:17 | INFO     | __main__ | Loop #69 complete in 13.2s. Trades: 2. Next run: 17:53:32
+2026-04-07 17:53:32 | INFO     | __main__ | --- Loop #70 started ---
+2026-04-07 17:53:38 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:53:38 | INFO     | core.signal_engine | Signal for BTC/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:53:38 | INFO     | __main__ | BTC/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:53:39 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:53:39 | INFO     | __main__ | Position closed: BTC/USD
+2026-04-07 17:53:42 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:53:42 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:53:42 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:53:42 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:53:42 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:53:42 | INFO     | __main__ | Loop #70 complete in 10.7s. Trades: 2. Next run: 17:53:57
+2026-04-07 17:53:57 | INFO     | __main__ | --- Loop #71 started ---
+2026-04-07 17:53:58 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-28.46
+2026-04-07 17:53:58 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-28.46 (-0.1%) | LOSS
+2026-04-07 17:53:58 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $-57.63
+2026-04-07 17:53:58 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $-57.63 (-0.2%) | LOSS
+2026-04-07 17:54:01 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:54:01 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:54:01 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:54:04 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:54:04 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:54:04 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:54:04 | INFO     | core.risk_manager | Position value $279111.55 exceeds max $29003.59, capping to max
+2026-04-07 17:54:04 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.918270 order_id=298540b1-0e34-4f55-8431-ccb6aedbb5ee status=OrderStatus.PENDING_NEW
+2026-04-07 17:54:04 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:54:04 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.883474114","balance":"13.883474114","code":40310000,"message":"insufficient balance for ETH (requested: 13.918269789, available: 13.883474114)","symbol":"USD"}
+2026-04-07 17:54:04 | INFO     | core.trade_results | Trade entry recorded: BUY 13.918270 ETH/USD @ $2083.85
+2026-04-07 17:54:04 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:54:04 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.918270
+2026-04-07 17:54:04 | INFO     | __main__ | Loop #71 complete in 7.1s. Trades: 1. Next run: 17:54:19
+2026-04-07 17:54:19 | INFO     | __main__ | --- Loop #72 started ---
+2026-04-07 17:54:25 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:54:25 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:54:25 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:54:28 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:54:28 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:54:28 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:54:28 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:54:28 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:54:28 | INFO     | __main__ | Loop #72 complete in 8.5s. Trades: 1. Next run: 17:54:43
+2026-04-07 17:54:43 | INFO     | __main__ | --- Loop #73 started ---
+2026-04-07 17:54:44 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-17.45
+2026-04-07 17:54:44 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-17.45 (-0.1%) | LOSS
+2026-04-07 17:54:53 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:54:53 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:54:53 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:54:57 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:54:57 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:54:57 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:54:57 | INFO     | core.risk_manager | Position value $287423.97 exceeds max $28942.43, capping to max
+2026-04-07 17:54:57 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.876680 order_id=845cffc0-cdb1-4546-8ef5-58086a03b1bf status=OrderStatus.PENDING_NEW
+2026-04-07 17:54:57 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:54:58 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.841987872","balance":"13.841987872","code":40310000,"message":"insufficient balance for ETH (requested: 13.876679571, available: 13.841987872)","symbol":"USD"}
+2026-04-07 17:54:58 | INFO     | core.trade_results | Trade entry recorded: BUY 13.876680 ETH/USD @ $2085.69
+2026-04-07 17:54:58 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:54:58 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.876680
+2026-04-07 17:54:58 | INFO     | __main__ | Loop #73 complete in 14.5s. Trades: 1. Next run: 17:55:13
+2026-04-07 17:55:13 | INFO     | __main__ | --- Loop #74 started ---
+2026-04-07 17:55:18 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:55:18 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:55:18 | INFO     | __main__ | BTC/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:55:18 | INFO     | core.risk_manager | Position value $330356.69 exceeds max $28906.07, capping to max
+2026-04-07 17:55:18 | WARNING  | __main__ | BTC/USD trade rejected: Portfolio exposure 69.9% exceeds max 60.0%
+2026-04-07 17:55:21 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:55:21 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:55:21 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:55:21 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:55:21 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:55:21 | INFO     | __main__ | Loop #74 complete in 8.9s. Trades: 1. Next run: 17:55:36
+2026-04-07 17:55:36 | INFO     | __main__ | --- Loop #75 started ---
+2026-04-07 17:55:37 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-31.50
+2026-04-07 17:55:37 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-31.50 (-0.1%) | LOSS
+2026-04-07 17:55:41 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:55:41 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:55:41 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:55:43 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:55:43 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:55:43 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:55:43 | INFO     | core.risk_manager | Position value $286618.98 exceeds max $28877.11, capping to max
+2026-04-07 17:55:44 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.852908 order_id=c2523e2f-78e8-41b0-87a6-8d2f693ad9d0 status=OrderStatus.PENDING_NEW
+2026-04-07 17:55:44 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:55:44 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.818275692","balance":"13.818275692","code":40310000,"message":"insufficient balance for ETH (requested: 13.852907962, available: 13.818275692)","symbol":"USD"}
+2026-04-07 17:55:44 | INFO     | core.trade_results | Trade entry recorded: BUY 13.852908 ETH/USD @ $2084.55
+2026-04-07 17:55:44 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:55:44 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.852908
+2026-04-07 17:55:44 | INFO     | __main__ | Loop #75 complete in 7.6s. Trades: 1. Next run: 17:55:59
+2026-04-07 17:55:59 | INFO     | __main__ | --- Loop #76 started ---
+2026-04-07 17:56:04 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:56:04 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:56:04 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:56:09 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:56:09 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:56:09 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:56:10 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:56:10 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:56:10 | INFO     | __main__ | Loop #76 complete in 10.7s. Trades: 1. Next run: 17:56:25
+2026-04-07 17:56:25 | INFO     | __main__ | --- Loop #77 started ---
+2026-04-07 17:56:25 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-23.55
+2026-04-07 17:56:25 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-23.55 (-0.1%) | LOSS
+2026-04-07 17:56:29 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:56:29 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:56:29 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:56:32 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:56:32 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:56:32 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:56:32 | INFO     | core.risk_manager | Position value $279375.94 exceeds max $28818.10, capping to max
+2026-04-07 17:56:32 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.824603 order_id=4714efcb-04b5-4578-9695-ff56f6390ee4 status=OrderStatus.PENDING_NEW
+2026-04-07 17:56:32 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:56:33 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.790041572","balance":"13.790041572","code":40310000,"message":"insufficient balance for ETH (requested: 13.82460308, available: 13.790041572)","symbol":"USD"}
+2026-04-07 17:56:33 | INFO     | core.trade_results | Trade entry recorded: BUY 13.824603 ETH/USD @ $2084.55
+2026-04-07 17:56:33 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:56:33 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.824603
+2026-04-07 17:56:33 | INFO     | __main__ | Loop #77 complete in 7.9s. Trades: 1. Next run: 17:56:48
+2026-04-07 17:56:48 | INFO     | __main__ | --- Loop #78 started ---
+2026-04-07 17:56:52 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:56:52 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:56:52 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:56:57 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:56:57 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:56:57 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:56:57 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:56:57 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:56:57 | INFO     | __main__ | Loop #78 complete in 9.6s. Trades: 1. Next run: 17:57:12
+2026-04-07 17:57:12 | INFO     | __main__ | --- Loop #79 started ---
+2026-04-07 17:57:13 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-34.45
+2026-04-07 17:57:13 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-34.45 (-0.1%) | LOSS
+2026-04-07 17:57:17 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:57:17 | INFO     | core.signal_engine | Signal for BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:57:17 | INFO     | __main__ | BTC/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:57:17 | INFO     | core.risk_manager | Position value $384570.64 exceeds max $28747.60, capping to max
+2026-04-07 17:57:17 | INFO     | core.order_executor | BUY order submitted: BTC/USD qty=0.420250 order_id=399e1821-05b4-4225-96ab-6edd48931fe1 status=OrderStatus.PENDING_NEW
+2026-04-07 17:57:18 | ERROR    | core.order_executor | Error placing stop loss for BTC/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:57:18 | ERROR    | core.order_executor | Error placing take profit for BTC/USD: {"available":"0.419199331","balance":"0.419199331","code":40310000,"message":"insufficient balance for BTC (requested: 0.420249957, available: 0.419199331)","symbol":"USD"}
+2026-04-07 17:57:18 | INFO     | core.trade_results | Trade entry recorded: BUY 0.420250 BTC/USD @ $68405.95
+2026-04-07 17:57:18 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:57:18 | INFO     | __main__ | Order executed: BUY BTC/USD qty=0.420250
+2026-04-07 17:57:21 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:57:21 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:57:21 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:57:21 | INFO     | core.risk_manager | Position value $278663.39 exceeds max $28747.60, capping to max
+2026-04-07 17:57:21 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.792215 order_id=32bba13e-344b-4611-96d0-da2ab6b41bf3 status=OrderStatus.PENDING_NEW
+2026-04-07 17:57:22 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:57:22 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.757734484","balance":"13.757734484","code":40310000,"message":"insufficient balance for ETH (requested: 13.792215023, available: 13.757734484)","symbol":"USD"}
+2026-04-07 17:57:22 | INFO     | core.trade_results | Trade entry recorded: BUY 13.792215 ETH/USD @ $2084.34
+2026-04-07 17:57:22 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:57:22 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.792215
+2026-04-07 17:57:22 | INFO     | __main__ | Loop #79 complete in 9.8s. Trades: 2. Next run: 17:57:37
+2026-04-07 17:57:37 | INFO     | __main__ | --- Loop #80 started ---
+2026-04-07 17:57:38 | INFO     | __main__ | 🎯 SCALP EXIT BTC/USD: Min profit: $5.61 >= $3.0
+2026-04-07 17:57:38 | INFO     | core.order_executor | Position closed: BTC/USD
+2026-04-07 17:57:38 | INFO     | __main__ | ✅ Quick profit taken: BTC/USD P&L=$5.61
+2026-04-07 17:57:38 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 17:57:39 | INFO     | core.portfolio_tracker | Position closed: BTC/USD P&L: $5.61
+2026-04-07 17:57:39 | INFO     | core.portfolio_tracker | Trade recorded: LONG BTC/USD | P&L: $+5.61 (+0.0%) | WIN
+2026-04-07 17:57:46 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:57:46 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:57:46 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:57:50 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:57:50 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:57:50 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:57:50 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:57:50 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:57:50 | INFO     | __main__ | Loop #80 complete in 13.2s. Trades: 2. Next run: 17:58:05
+2026-04-07 17:58:05 | INFO     | __main__ | --- Loop #81 started ---
+2026-04-07 17:58:06 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-32.74
+2026-04-07 17:58:06 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-32.74 (-0.1%) | LOSS
+2026-04-07 17:58:09 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:58:09 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:58:09 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:58:12 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:58:12 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:58:12 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:58:12 | INFO     | core.risk_manager | Position value $277471.60 exceeds max $28624.65, capping to max
+2026-04-07 17:58:12 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.733228 order_id=8b8fcf26-90f0-448d-974f-02b38b61f541 status=OrderStatus.PENDING_NEW
+2026-04-07 17:58:13 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:58:13 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.698895271","balance":"13.698895271","code":40310000,"message":"insufficient balance for ETH (requested: 13.733228343, available: 13.698895271)","symbol":"USD"}
+2026-04-07 17:58:13 | INFO     | core.trade_results | Trade entry recorded: BUY 13.733228 ETH/USD @ $2084.34
+2026-04-07 17:58:13 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:58:13 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.733228
+2026-04-07 17:58:13 | INFO     | __main__ | Loop #81 complete in 7.7s. Trades: 1. Next run: 17:58:28
+2026-04-07 17:58:28 | INFO     | __main__ | --- Loop #82 started ---
+2026-04-07 17:58:33 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:58:33 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:58:33 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:58:38 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:58:38 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:58:38 | INFO     | __main__ | ETH/USD: CLOSE (conf: 75%) - Confirmed: True
+2026-04-07 17:58:38 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:58:38 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:58:38 | INFO     | __main__ | Loop #82 complete in 10.1s. Trades: 1. Next run: 17:58:53
+2026-04-07 17:58:53 | INFO     | __main__ | --- Loop #83 started ---
+2026-04-07 17:58:54 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-32.38
+2026-04-07 17:58:54 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-32.38 (-0.1%) | LOSS
+2026-04-07 17:58:57 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:58:57 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:58:57 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:59:00 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:59:00 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:59:00 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 17:59:00 | INFO     | core.risk_manager | Position value $292733.36 exceeds max $28562.73, capping to max
+2026-04-07 17:59:00 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.703520 order_id=4afd7635-126f-45fe-b516-63518e3d1c85 status=OrderStatus.PENDING_NEW
+2026-04-07 17:59:00 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:59:01 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.669261266","balance":"13.669261266","code":40310000,"message":"insufficient balance for ETH (requested: 13.703520067, available: 13.669261266)","symbol":"USD"}
+2026-04-07 17:59:01 | INFO     | core.trade_results | Trade entry recorded: BUY 13.703520 ETH/USD @ $2084.34
+2026-04-07 17:59:01 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:59:01 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.703520
+2026-04-07 17:59:01 | INFO     | __main__ | Loop #83 complete in 7.6s. Trades: 1. Next run: 17:59:16
+2026-04-07 17:59:16 | INFO     | __main__ | --- Loop #84 started ---
+2026-04-07 17:59:20 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:59:20 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:59:20 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 17:59:25 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:59:25 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:59:25 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 17:59:25 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 17:59:25 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 17:59:25 | INFO     | __main__ | Loop #84 complete in 9.5s. Trades: 1. Next run: 17:59:40
+2026-04-07 17:59:40 | INFO     | __main__ | --- Loop #85 started ---
+2026-04-07 17:59:41 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-24.06
+2026-04-07 17:59:41 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-24.06 (-0.1%) | LOSS
+2026-04-07 17:59:45 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:59:45 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:59:45 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 17:59:50 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 17:59:50 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:59:50 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 17:59:50 | INFO     | core.risk_manager | Position value $291970.09 exceeds max $28497.69, capping to max
+2026-04-07 17:59:50 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.676843 order_id=fbea332d-70a6-4e36-8c9e-2f0efde8083d status=OrderStatus.PENDING_NEW
+2026-04-07 17:59:50 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 17:59:51 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.642651115","balance":"13.642651115","code":40310000,"message":"insufficient balance for ETH (requested: 13.676843224, available: 13.642651115)","symbol":"USD"}
+2026-04-07 17:59:51 | INFO     | core.trade_results | Trade entry recorded: BUY 13.676843 ETH/USD @ $2083.64
+2026-04-07 17:59:51 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 17:59:51 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.676843
+2026-04-07 17:59:51 | INFO     | __main__ | Loop #85 complete in 10.4s. Trades: 1. Next run: 18:00:06
+2026-04-07 18:00:06 | INFO     | __main__ | --- Loop #86 started ---
+2026-04-07 18:00:09 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:00:09 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 18:00:09 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 18:00:12 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:00:12 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 18:00:12 | INFO     | __main__ | ETH/USD: CLOSE (conf: 70%) - Confirmed: True
+2026-04-07 18:00:13 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 18:00:13 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 18:00:13 | INFO     | __main__ | Loop #86 complete in 7.0s. Trades: 1. Next run: 18:00:28
+2026-04-07 18:00:28 | INFO     | __main__ | --- Loop #87 started ---
+2026-04-07 18:00:28 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-23.47
+2026-04-07 18:00:28 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-23.47 (-0.1%) | LOSS
+2026-04-07 18:00:32 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:00:32 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:00:32 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:00:35 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:00:35 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 18:00:35 | INFO     | __main__ | ETH/USD: BUY (conf: 55%) - Confirmed: True
+2026-04-07 18:00:35 | INFO     | core.risk_manager | Position value $291385.48 exceeds max $28438.03, capping to max
+2026-04-07 18:00:35 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.646969 order_id=7226f848-b8f2-4053-b75e-8672dcfb0727 status=OrderStatus.PENDING_NEW
+2026-04-07 18:00:36 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 18:00:36 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.612851746","balance":"13.612851746","code":40310000,"message":"insufficient balance for ETH (requested: 13.646969169, available: 13.612851746)","symbol":"USD"}
+2026-04-07 18:00:36 | INFO     | core.trade_results | Trade entry recorded: BUY 13.646969 ETH/USD @ $2083.84
+2026-04-07 18:00:36 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 18:00:36 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.646969
+2026-04-07 18:00:36 | INFO     | __main__ | Loop #87 complete in 8.4s. Trades: 1. Next run: 18:00:51
+2026-04-07 18:00:51 | INFO     | __main__ | --- Loop #88 started ---
+2026-04-07 18:00:52 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $3.56 >= $3.0
+2026-04-07 18:00:52 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 18:00:52 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$3.56
+2026-04-07 18:00:52 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 18:00:53 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $3.56
+2026-04-07 18:00:53 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+3.56 (+0.0%) | WIN
+2026-04-07 18:00:56 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:00:56 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 18:00:56 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 18:01:00 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:01:00 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:01:00 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:01:00 | INFO     | core.risk_manager | Position value $286613.83 exceeds max $28381.71, capping to max
+2026-04-07 18:01:00 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.609187 order_id=632be364-1ac9-4a72-8737-7f06eb093d6a status=OrderStatus.PENDING_NEW
+2026-04-07 18:01:01 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 18:01:01 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.575163542","balance":"13.575163542","code":40310000,"message":"insufficient balance for ETH (requested: 13.609186509, available: 13.575163542)","symbol":"USD"}
+2026-04-07 18:01:01 | INFO     | core.trade_results | Trade entry recorded: BUY 13.609187 ETH/USD @ $2085.48
+2026-04-07 18:01:01 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 18:01:01 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.609187
+2026-04-07 18:01:01 | INFO     | __main__ | Loop #88 complete in 9.9s. Trades: 2. Next run: 18:01:16
+2026-04-07 18:01:16 | INFO     | __main__ | --- Loop #89 started ---
+2026-04-07 18:01:17 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $6.95 >= $3.0
+2026-04-07 18:01:17 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 18:01:17 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$6.95
+2026-04-07 18:01:17 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 18:01:18 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $6.95
+2026-04-07 18:01:18 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+6.95 (+0.0%) | WIN
+2026-04-07 18:01:22 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:01:22 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:01:22 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:01:26 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:01:26 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:01:26 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:01:26 | INFO     | core.risk_manager | Position value $286126.53 exceeds max $28322.35, capping to max
+2026-04-07 18:01:26 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.575397 order_id=6fde157e-978e-4e05-9009-793f8b4b088a status=OrderStatus.PENDING_NEW
+2026-04-07 18:01:26 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 18:01:27 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.541458143","balance":"13.541458143","code":40310000,"message":"insufficient balance for ETH (requested: 13.575396635, available: 13.541458143)","symbol":"USD"}
+2026-04-07 18:01:27 | INFO     | core.trade_results | Trade entry recorded: BUY 13.575397 ETH/USD @ $2086.30
+2026-04-07 18:01:27 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 18:01:27 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.575397
+2026-04-07 18:01:27 | INFO     | __main__ | Loop #89 complete in 10.8s. Trades: 2. Next run: 18:01:42
+2026-04-07 18:01:42 | INFO     | __main__ | --- Loop #90 started ---
+2026-04-07 18:01:45 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:01:45 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 18:01:45 | INFO     | __main__ | BTC/USD: HOLD (conf: 30%) - Confirmed: True
+2026-04-07 18:01:48 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:01:48 | INFO     | core.signal_engine | Signal for ETH/USD: CLOSE (conf: 65%) - Confirmed: True
+2026-04-07 18:01:48 | INFO     | __main__ | ETH/USD: CLOSE (conf: 65%) - Confirmed: True
+2026-04-07 18:01:48 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 18:01:48 | INFO     | __main__ | Position closed: ETH/USD
+2026-04-07 18:01:48 | INFO     | __main__ | Loop #90 complete in 6.7s. Trades: 1. Next run: 18:02:03
+2026-04-07 18:02:03 | INFO     | __main__ | --- Loop #91 started ---
+2026-04-07 18:02:04 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $-9.48
+2026-04-07 18:02:04 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $-9.48 (-0.0%) | LOSS
+2026-04-07 18:02:08 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:02:08 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:02:08 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:02:12 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:02:12 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:02:12 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:02:12 | INFO     | core.risk_manager | Position value $324968.03 exceeds max $28253.59, capping to max
+2026-04-07 18:02:13 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.560965 order_id=2b87d948-a59a-406c-b34f-1f3c6ce05b05 status=OrderStatus.PENDING_NEW
+2026-04-07 18:02:13 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 18:02:13 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.527062572","balance":"13.527062572","code":40310000,"message":"insufficient balance for ETH (requested: 13.560964985, available: 13.527062572)","symbol":"USD"}
+2026-04-07 18:02:13 | INFO     | core.trade_results | Trade entry recorded: BUY 13.560965 ETH/USD @ $2083.45
+2026-04-07 18:02:13 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 18:02:13 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.560965
+2026-04-07 18:02:13 | INFO     | __main__ | Loop #91 complete in 9.8s. Trades: 1. Next run: 18:02:28
+2026-04-07 18:02:28 | INFO     | __main__ | --- Loop #92 started ---
+2026-04-07 18:02:29 | INFO     | __main__ | 🎯 SCALP EXIT ETH/USD: Min profit: $34.71 >= $3.0
+2026-04-07 18:02:30 | INFO     | core.order_executor | Position closed: ETH/USD
+2026-04-07 18:02:30 | INFO     | __main__ | ✅ Quick profit taken: ETH/USD P&L=$34.71
+2026-04-07 18:02:30 | INFO     | __main__ | 🎯 Quick profit exits: 1 positions closed
+2026-04-07 18:02:30 | INFO     | core.portfolio_tracker | Position closed: ETH/USD P&L: $34.71
+2026-04-07 18:02:30 | INFO     | core.portfolio_tracker | Trade recorded: LONG ETH/USD | P&L: $+34.71 (+0.1%) | WIN
+2026-04-07 18:02:42 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:02:42 | INFO     | core.signal_engine | Signal for BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:02:42 | INFO     | __main__ | BTC/USD: HOLD (conf: 40%) - Confirmed: True
+2026-04-07 18:02:54 | INFO     | httpx | HTTP Request: POST https://ollama.com/api/chat "HTTP/1.1 200 OK"
+2026-04-07 18:02:54 | INFO     | core.signal_engine | Signal for ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:02:54 | INFO     | __main__ | ETH/USD: BUY (conf: 60%) - Confirmed: True
+2026-04-07 18:02:54 | INFO     | core.risk_manager | Position value $324117.70 exceeds max $28193.67, capping to max
+2026-04-07 18:02:54 | INFO     | core.order_executor | BUY order submitted: ETH/USD qty=13.538929 order_id=8f1b2278-80ec-4bf7-ad3e-60442d264eb4 status=OrderStatus.PENDING_NEW
+2026-04-07 18:02:54 | ERROR    | core.order_executor | Error placing stop loss for ETH/USD: {"code":40010001,"message":"invalid order type for crypto order"}
+2026-04-07 18:02:54 | ERROR    | core.order_executor | Error placing take profit for ETH/USD: {"available":"13.505081756","balance":"13.505081756","code":40310000,"message":"insufficient balance for ETH (requested: 13.538929079, available: 13.505081756)","symbol":"USD"}
+2026-04-07 18:02:54 | INFO     | core.trade_results | Trade entry recorded: BUY 13.538929 ETH/USD @ $2082.41
+2026-04-07 18:02:54 | INFO     | core.order_executor | Trade entry recorded in results tracker
+2026-04-07 18:02:54 | INFO     | __main__ | Order executed: BUY ETH/USD qty=13.538929
+2026-04-07 18:02:54 | INFO     | __main__ | Loop #92 complete in 26.3s. Trades: 2. Next run: 18:03:09

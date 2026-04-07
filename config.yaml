@@ -143,3 +143,69 @@ signals:
   # Trading Mode
   scalping_mode: true              # true = aggressive quick trades
                                    # false = swing trading (hold longer)
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# TRAILING STOP STRATEGY - Complete configuration
+# ─────────────────────────────────────────────────────────────────────────────────
+trailing_stop:
+  enabled: true                    # Master switch for trailing stop
+
+  # ── INITIAL FLOOR ──────────────────────────────────────────────────────────────
+  initial_stop_loss_pct: 0.5       # Floor set at entry: entry × (1 - 0.5%)
+                                   # Example: Buy $100 → floor = $99.50
+
+  # ── TRAILING MECHANISM ─────────────────────────────────────────────────────────
+  trail_pct: 0.25                  # Trail floor this % below the PEAK price
+                                   # Floor = peak_price × (1 - 0.25%)
+                                   # Example: Peak $110 → floor = $109.725
+  trail_activation_pct: 0.15       # Only start trailing after price rises X%
+                                   # Prevents premature trailing on small moves
+
+  # ── PROFIT PROTECTION TIERS ────────────────────────────────────────────────────
+  # When profit reaches each tier, tighten the trail automatically
+  profit_tiers:
+    - profit_pct: 0.3              # Tier 1: at 0.3% profit
+      tighten_trail_to_pct: 0.20   # → trail tightens to 0.20%
+    - profit_pct: 0.6              # Tier 2: at 0.6% profit
+      tighten_trail_to_pct: 0.15   # → trail tightens to 0.15%
+    - profit_pct: 1.0              # Tier 3: at 1.0% profit
+      tighten_trail_to_pct: 0.10   # → trail tightens to 0.10%
+    - profit_pct: 2.0              # Tier 4: at 2.0% profit
+      tighten_trail_to_pct: 0.08   # → trail tightens to 0.08%
+
+  # ── QUICK EXIT RULES ───────────────────────────────────────────────────────────
+  min_profit_to_exit_usd: 3.0      # Exit if unrealized profit >= $3.00
+  quick_profit_pct: 0.3            # Exit immediately at this % gain
+                                   # Don't wait for trail — just take it
+  max_hold_minutes: 30             # Force-exit if trade open > 30 minutes
+                                   # Prevents bag holding in scalping
+
+  # ── LOSS PROTECTION ────────────────────────────────────────────────────────────
+  hard_stop_pct: 1.5               # Absolute hard floor (overrides trail)
+                                   # NEVER let a trade lose more than this
+                                   # Example: Buy $100 → hard floor = $98.50
+                                   # Protects against gap-down scenarios
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# LADDER-IN / DCA (Dollar Cost Averaging) STRATEGY
+# ─────────────────────────────────────────────────────────────────────────────────
+ladder_in:
+  enabled: true                    # Enable DCA on dips
+  dip_threshold_pct: 20.0          # Buy more if price drops X% from entry
+                                   # Example: Entry $100, drops to $80 → buy more
+  additional_size_pct: 50.0        # Add this % of original position size
+                                   # If first buy = $1000, dip buy = $500
+  max_ladder_count: 2              # Maximum number of DCA additions
+                                   # Prevents infinite averaging down
+  min_time_between_dips_minutes: 5 # Wait at least X minutes between dip-buys
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# POSITION MONITORING SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+position_monitor:
+  check_interval_seconds: 10       # How often to check open positions
+                                   # Separate from main loop — runs faster
+  price_update_method: "alpaca"    # alpaca | websocket
+  trail_update_on_every_tick: true # Update trail on every price check
+  log_trail_updates: true          # Log when floor moves up
+  alert_on_floor_hit: true         # Log prominently when stop is triggered
