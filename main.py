@@ -115,6 +115,80 @@ class AITrader:
         
         return all_ok
     
+    def _check_quick_profit_exits(self, portfolio_state: PortfolioState) -> int:
+        """
+        Check all open positions for quick profit opportunities.
+        Exits positions that meet profit thresholds from config.
+        
+        Returns:
+            Number of positions closed for quick profit
+        """
+        exits_made = 0
+        positions = self.portfolio_tracker.get_positions()
+        
+        if not positions:
+            return 0
+        
+        # Get scalping settings from config
+        quick_profit_pct = self.config.risk.quick_profit_threshold
+        min_profit_dollars = self.config.risk.min_profit_to_exit
+        max_hold_minutes = self.config.risk.max_hold_minutes
+        scalping_mode = self.config.signals.scalping_mode
+        
+        if not scalping_mode:
+            return 0
+        
+        from datetime import datetime, timedelta
+        
+        for pos in positions:
+            symbol = pos.symbol
+            entry_price = float(pos.entry_price)
+            current_price = float(pos.current_price)
+            qty = float(pos.qty)
+            unrealized_pnl = float(pos.unrealized_pnl)
+            
+            # Calculate profit percentage
+            profit_pct = ((current_price - entry_price) / entry_price) * 100
+            
+            should_exit = False
+            exit_reason = ""
+            
+            # Check 1: Quick profit threshold reached
+            if profit_pct >= quick_profit_pct:
+                should_exit = True
+                exit_reason = f"Quick profit: +{profit_pct:.2f}% >= {quick_profit_pct}%"
+            
+            # Check 2: Minimum dollar profit reached
+            elif unrealized_pnl >= min_profit_dollars:
+                should_exit = True
+                exit_reason = f"Min profit: ${unrealized_pnl:.2f} >= ${min_profit_dollars}"
+            
+            # Check 3: Max hold time exceeded (exit regardless of profit/loss)
+            # Note: We'd need entry time tracking for this - skip for now if not available
+            
+            if should_exit:
+                logger.info(f"🎯 SCALP EXIT {symbol}: {exit_reason}")
+                self.ui.add_log("INFO", f"🎯 Quick exit: {symbol} - {exit_reason}")
+                
+                result = self.order_executor.close_position(symbol)
+                
+                if result.success:
+                    exits_made += 1
+                    logger.info(f"✅ Quick profit taken: {symbol} P&L=${unrealized_pnl:.2f}")
+                    self.ui.add_log("SUCCESS", f"Closed {symbol} for ${unrealized_pnl:.2f} profit")
+                    
+                    # Record in results
+                    if result.filled_price:
+                        self.results_tracker.record_exit(
+                            symbol=symbol,
+                            exit_price=result.filled_price,
+                            reason="QUICK_PROFIT",
+                        )
+                else:
+                    logger.warning(f"Failed to close {symbol}: {result.error_message}")
+        
+        return exits_made
+
     def _process_symbol(
         self,
         symbol: str,
@@ -407,9 +481,18 @@ class AITrader:
                     positions_summary = self.portfolio_tracker.get_portfolio_summary()
                     self.ui.update_positions(positions_summary.get("positions", []))
                     
+                    # ═══════════════════════════════════════════════════════════════
+                    # SCALPING: Check for quick profit exits FIRST (before new trades)
+                    # ═══════════════════════════════════════════════════════════════
+                    quick_exits = self._check_quick_profit_exits(portfolio_state)
+                    if quick_exits > 0:
+                        logger.info(f"🎯 Quick profit exits: {quick_exits} positions closed")
+                        # Refresh portfolio after exits
+                        portfolio_state = self.portfolio_tracker.update()
+                    
                     # Process each trading pair
                     indicators_map: Dict[str, SymbolIndicators] = {}
-                    trades_executed = 0
+                    trades_executed = quick_exits  # Count quick exits as trades
                     
                     for symbol in self.trading_pairs:
                         if not self._running:

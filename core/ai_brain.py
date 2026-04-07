@@ -301,24 +301,87 @@ Analyze the following market data for {symbol} and provide a trading decision.
 - Open Positions: {open_positions} / {max_positions} max
 """
 
-        prompt += f"""
-=== TRADING RULES ===
+        # Get scalping settings from config
+        scalping_mode = self.config.signals.scalping_mode
+        quick_profit_pct = self.config.risk.quick_profit_threshold
+        min_profit = self.config.risk.min_profit_to_exit
+        stop_loss_pct = self.config.risk.stop_loss_pct
+        take_profit_mult = self.config.risk.take_profit_multiplier
+        min_confidence = self.config.risk.min_signal_confidence
+        
+        if scalping_mode:
+            # Aggressive scalping mode prompt
+            prompt += f"""
+=== SCALPING MODE (AGGRESSIVE TRADING) ===
+You are in SCALPING MODE. Trade frequently for small, quick profits.
+Risk-Reward Ratio: {take_profit_mult}:1 (Stop Loss: {stop_loss_pct}%, Take Profit: {stop_loss_pct * take_profit_mult}%)
+Quick Profit Target: {quick_profit_pct}% (or ${min_profit} minimum)
+
+=== TRADING RULES (SCALPING) ===
+1. BUY SIGNALS - Be aggressive! Enter when:
+   - Any bullish momentum on 5-min (MACD crossing up, RSI rising)
+   - Price bouncing from lower Bollinger Band
+   - RSI is below {self.config.indicators.rsi_overbought} (not overbought)
+   - Confidence >= {min_confidence * 100:.0f}%
+
+2. CLOSE POSITIONS - Take profits quickly!
+   - IMMEDIATELY recommend CLOSE when position shows {quick_profit_pct}%+ profit
+   - Close if profit >= ${min_profit} even if less than {quick_profit_pct}%
+   - Close if momentum is fading (MACD histogram shrinking)
+   - Close if RSI reaches extreme levels
+
+3. SELL/SHORT - Only in clear downtrends:
+   - Strong bearish momentum confirmed
+   - Price rejected from upper Bollinger Band
+
+4. HOLD - Minimize holding time:
+   - Only HOLD if entry just happened and need more data
+   - Never hold for long periods - trade actively!
+
+=== CRITICAL: PROFIT TAKING ===
+When we have an open position:
+- If profit >= {quick_profit_pct}% → CLOSE (lock in gains!)
+- If momentum reversing → CLOSE (don't give back profits)
+- If trend weakening → CLOSE (capital preservation)
+- NEVER let a winning trade become a loser
+
+=== YOUR TASK ===
+Make a quick decision. In scalping:
+1. Favor action over waiting
+2. Small profits accumulate - take them!
+3. Cut losses fast at {stop_loss_pct}%
+4. Trade momentum, not conviction
+
+Respond ONLY with a valid JSON object:
+{{
+    "action": "BUY" | "SELL" | "HOLD" | "CLOSE",
+    "confidence": 0.0 to 1.0,
+    "reasoning": "Brief explanation of your decision",
+    "trend": "BULLISH" | "BEARISH" | "SIDEWAYS",
+    "entry_quality": "STRONG" | "MODERATE" | "WEAK"
+}}
+
+Respond with ONLY the JSON, no additional text."""
+        else:
+            # Standard swing trading prompt
+            prompt += f"""
+=== TRADING RULES (SWING TRADING) ===
 1. Only recommend BUY if:
    - 10-min trend is BULLISH or SIDEWAYS with bullish momentum
    - 5-min entry shows good timing (RSI not overbought, MACD positive)
    - No current long position exists
-   - Confidence is 65% or higher
+   - Confidence is {min_confidence * 100:.0f}% or higher
 
 2. Only recommend SELL/SHORT if:
    - 10-min trend is BEARISH or SIDEWAYS with bearish momentum
    - 5-min entry shows good timing (RSI not oversold, MACD negative)
-   - Confidence is 65% or higher
+   - Confidence is {min_confidence * 100:.0f}% or higher
 
 3. Recommend CLOSE if:
    - We have an open position AND
    - Trend is reversing against us OR
-   - Take profit level is near OR
-   - Stop loss is about to be hit
+   - Take profit level ({stop_loss_pct * take_profit_mult}%) is near OR
+   - Stop loss ({stop_loss_pct}%) is about to be hit
 
 4. Recommend HOLD if:
    - Conditions are unclear

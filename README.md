@@ -236,39 +236,140 @@ Before any trade:
 
 ## Configuration Reference
 
+All trading parameters are configured in **config.yaml**. Edit this single file to customize the bot's behavior.
+
 ### Bot Settings
 ```yaml
 bot:
-  name: "AI Crypto Trader"
-  mode: "paper"              # Never change to "live"
+  name: "AI Crypto Scalper"
+  mode: "paper"              # NEVER change to "live" - paper trading only!
   base_currency: "USD"
-  loop_interval_seconds: 30  # Main loop frequency
-  log_level: "INFO"
+  loop_interval_seconds: 15  # How often to check markets (15s = aggressive)
+  log_level: "INFO"          # DEBUG | INFO | WARNING | ERROR
 ```
 
 ### AI Model Settings
 ```yaml
 ai:
   provider: "ollama_cloud"
-  model: "minimax-m2.7"      # Cloud model with thinking capability
-  base_url: "https://api.ollama.com/v1"
-  temperature: 0.3           # Low = more deterministic
-  max_tokens: 1000           # Allow detailed reasoning
-  timeout_seconds: 120       # Thinking models need more time
+  model: "gpt-oss:120b"      # Cloud model to use
+  base_url: "https://ollama.com"
+  temperature: 0.2           # 0.1-0.3 = decisive, 0.5+ = creative
+  max_tokens: 800
+  timeout_seconds: 60
+  fallback_models:           # Backup models if primary fails
+    - "deepseek-v3.1:671b"
+    - "mistral-large-3:675b"
 ```
 
-### Risk Settings
+### Trading Pairs
+```yaml
+markets:
+  crypto:
+    enabled: true
+    pairs:                   # Add/remove crypto pairs
+      - "BTC/USD"            # Bitcoin
+      - "ETH/USD"            # Ethereum
+      # - "SOL/USD"          # Uncomment to enable
+      # - "DOGE/USD"
+    exchange: "alpaca"
+  forex:
+    enabled: false           # Requires paid Alpaca SIP subscription
+    pairs:
+      - "EUR/USD"
+      - "GBP/USD"
+```
+
+### Timeframes
+```yaml
+timeframes:
+  trend:
+    interval: "5Min"         # Trend analysis (1Min, 5Min, 15Min, 1Hour)
+    lookback_bars: 30
+  entry:
+    interval: "1Min"         # Entry timing (smaller = faster scalping)
+    lookback_bars: 20
+```
+
+### Technical Indicators
+```yaml
+indicators:
+  rsi:
+    period: 7                # 7 = fast, 14 = standard
+    oversold: 35             # Buy signal threshold
+    overbought: 65           # Sell signal threshold
+  macd:
+    fast: 8
+    slow: 17
+    signal: 9
+  ema:
+    short: 5
+    long: 13
+  bollinger_bands:
+    period: 14
+    std_dev: 1.8
+  atr:
+    period: 10
+```
+
+### Risk Management
 ```yaml
 risk:
-  max_positions: 3           # Max concurrent trades
-  risk_per_trade_pct: 1.5    # % of portfolio per trade
-  stop_loss_pct: 2.0         # % below entry
-  take_profit_multiplier: 3.0 # 3x the stop loss
-  max_daily_loss_pct: 5.0    # Halt if exceeded
-  min_signal_confidence: 0.65 # AI must be ≥65% confident
-  max_portfolio_exposure_pct: 60.0 # Max total open exposure
-  max_symbol_exposure_pct: 25.0 # Max exposure per symbol
+  # Position Management
+  max_positions: 2           # Max concurrent open trades
+  max_portfolio_exposure_pct: 40.0  # Max % of portfolio in trades
+  max_symbol_exposure_pct: 25.0     # Max % per single symbol
+  
+  # Risk Per Trade
+  risk_per_trade_pct: 1.0    # % of portfolio risked per trade
+  
+  # Risk-Reward Ratio
+  stop_loss_pct: 0.5         # Stop loss % below entry (0.5% = tight)
+  take_profit_multiplier: 2.0 # Risk-Reward (2.0 = 2:1 ratio)
+                             # If stop_loss = 0.5%, take_profit = 1.0%
+  
+  # Daily Limits
+  max_daily_loss_pct: 3.0    # Stop trading if exceeded
+  
+  # AI Confidence
+  min_signal_confidence: 0.50 # Min AI confidence to trade (50%)
+  
+  # Scalping Settings
+  quick_profit_threshold: 0.3 # Take profit at this % gain
+  trailing_stop_pct: 0.25    # Trail stop below peak
+  max_hold_minutes: 30       # Force exit after N minutes
+  min_profit_to_exit: 3.0    # Exit if profit >= $3
 ```
+
+### Signal Settings
+```yaml
+signals:
+  require_trend_confirmation: false  # false = trade against trend (scalping)
+  require_volume_confirmation: false
+  min_rsi_for_buy: 45        # Only buy when RSI <= this
+  max_rsi_for_sell: 55       # Only sell when RSI >= this
+  scalping_mode: true        # true = aggressive quick trades
+```
+
+### Understanding Risk-Reward Ratio
+
+| Setting | Example 1 | Example 2 | Example 3 |
+|---------|-----------|-----------|-----------|
+| `stop_loss_pct` | 0.5% | 1.0% | 2.0% |
+| `take_profit_multiplier` | 2.0 | 2.0 | 3.0 |
+| **Take Profit %** | 1.0% | 2.0% | 6.0% |
+| **Risk:Reward** | 2:1 | 2:1 | 3:1 |
+
+### Scalping Mode vs Swing Trading
+
+| Setting | Scalping | Swing Trading |
+|---------|----------|---------------|
+| `scalping_mode` | `true` | `false` |
+| `loop_interval_seconds` | 15 | 60 |
+| `entry.interval` | "1Min" | "5Min" |
+| `stop_loss_pct` | 0.5% | 2.0% |
+| `max_hold_minutes` | 30 | 180 |
+| `quick_profit_threshold` | 0.3% | 1.0% |
 
 ## Changing AI Models
 

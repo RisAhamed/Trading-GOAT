@@ -391,7 +391,8 @@ class OrderExecutor:
             OrderResult with close order details
         """
         timestamp = datetime.now().isoformat()
-        alpaca_symbol = self._convert_symbol(symbol)
+        # For close_position, Alpaca requires symbol WITHOUT slash
+        alpaca_symbol = symbol.replace("/", "")
         
         result = OrderResult(
             success=False,

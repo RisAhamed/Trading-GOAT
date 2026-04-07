@@ -93,6 +93,11 @@ class RiskConfig:
     min_signal_confidence: float = 0.65
     max_portfolio_exposure_pct: float = 60.0
     max_symbol_exposure_pct: float = 25.0
+    # Scalping settings
+    quick_profit_threshold: float = 0.3  # Take profit at 0.3% gain
+    trailing_stop_pct: float = 0.25      # Trail stop at 0.25%
+    max_hold_minutes: int = 30           # Max hold time
+    min_profit_to_exit: float = 3.0      # Exit if profit >= $3
 
 
 @dataclass
@@ -102,6 +107,7 @@ class SignalConfig:
     require_volume_confirmation: bool = False
     min_rsi_for_buy: int = 35
     max_rsi_for_sell: int = 65
+    scalping_mode: bool = False  # Enable aggressive scalping
 
 
 @dataclass
@@ -250,6 +256,11 @@ class ConfigLoader:
             min_signal_confidence=risk_cfg.get("min_signal_confidence", 0.65),
             max_portfolio_exposure_pct=risk_cfg.get("max_portfolio_exposure_pct", 60.0),
             max_symbol_exposure_pct=risk_cfg.get("max_symbol_exposure_pct", 25.0),
+            # Scalping settings
+            quick_profit_threshold=risk_cfg.get("quick_profit_threshold", 0.3),
+            trailing_stop_pct=risk_cfg.get("trailing_stop_pct", 0.25),
+            max_hold_minutes=risk_cfg.get("max_hold_minutes", 30),
+            min_profit_to_exit=risk_cfg.get("min_profit_to_exit", 3.0),
         )
         
         # Signals config
@@ -259,6 +270,7 @@ class ConfigLoader:
             require_volume_confirmation=sig_cfg.get("require_volume_confirmation", False),
             min_rsi_for_buy=sig_cfg.get("min_rsi_for_buy", 35),
             max_rsi_for_sell=sig_cfg.get("max_rsi_for_sell", 65),
+            scalping_mode=sig_cfg.get("scalping_mode", False),
         )
     
     def _setup_logging(self) -> None:

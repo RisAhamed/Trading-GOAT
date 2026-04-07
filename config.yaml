@@ -1,86 +1,145 @@
-# config.yaml
-# AI Crypto & Forex Paper Trading Bot Configuration
-# This is the single source of truth for all configurable parameters
+# ═══════════════════════════════════════════════════════════════════════════════
+# AI CRYPTO TRADER - MASTER CONFIGURATION FILE
+# ═══════════════════════════════════════════════════════════════════════════════
+# All trading parameters are configured here. Edit this file to customize:
+# - Trading pairs (crypto/forex)
+# - Risk management (stop loss, take profit, risk-reward ratio)
+# - AI model settings
+# - Scalping/trading strategy
+# ═══════════════════════════════════════════════════════════════════════════════
 
+# ─────────────────────────────────────────────────────────────────────────────────
+# BOT SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
 bot:
-  name: "AI Crypto Trader"
-  mode: "paper"  # paper | live (NEVER change to live)
-  base_currency: "USD"
-  loop_interval_seconds: 30  # how often the main loop runs
-  log_level: "INFO"
+  name: "AI Crypto Scalper"
+  mode: "paper"                    # paper | live (NEVER change to live!)
+  base_currency: "USD"             # Base currency for all calculations
+  loop_interval_seconds: 15        # How often to check markets (15 = aggressive)
+  log_level: "INFO"                # DEBUG | INFO | WARNING | ERROR
   log_file: "logs/trading.log"
 
+# ─────────────────────────────────────────────────────────────────────────────────
+# AI MODEL SETTINGS (Ollama Cloud)
+# ─────────────────────────────────────────────────────────────────────────────────
 ai:
-  provider: "ollama_cloud"  # Ollama Cloud API — no local models
-  # Ollama Cloud models with strong thinking/reasoning capabilities for trading
-  # Available: "gpt-oss:120b", "deepseek-v3.1:671b", "mistral-large-3:675b", "cogito-2.1:671b"
-  model: "gpt-oss:120b"  # GPT OSS 120B - Large model for trading analysis
-  base_url: "https://ollama.com"  # Ollama Cloud API endpoint (native format)
-  temperature: 0.3  # low = more deterministic decisions
-  max_tokens: 1000  # More tokens for chain-of-thought reasoning
+  provider: "ollama_cloud"
+  # Available models: "gpt-oss:120b", "deepseek-v3.1:671b", "mistral-large-3:675b"
+  model: "gpt-oss:120b"
+  base_url: "https://ollama.com"
+  temperature: 0.2                 # 0.1-0.3 = decisive, 0.5+ = creative
+  max_tokens: 800
   reasoning_prompt_style: "chain_of_thought"
-  timeout_seconds: 120  # Longer timeout for thinking models
-  # Fallback models in order of preference (all Ollama Cloud models with thinking capability)
+  timeout_seconds: 60
   fallback_models:
-    - "deepseek-v3.1:671b"   # DeepSeek V3.1 - Excellent for analysis
-    - "mistral-large-3:675b" # Mistral Large 3 - Large model
-    - "cogito-2.1:671b"      # Cogito 2.1 - Deep reasoning
+    - "deepseek-v3.1:671b"
+    - "mistral-large-3:675b"
 
+# ─────────────────────────────────────────────────────────────────────────────────
+# TRADING PAIRS - Add/remove pairs here
+# ─────────────────────────────────────────────────────────────────────────────────
 markets:
   crypto:
-    enabled: true
-    pairs:
-      - "BTC/USD"
-      - "ETH/USD"
-      # Note: SOL and AVAX available but may have lower liquidity
-      # - "SOL/USD"
-      # - "AVAX/USD"
+    enabled: true                  # true/false to enable crypto trading
+    pairs:                         # Add or remove crypto pairs
+      - "BTC/USD"                  # Bitcoin
+      - "ETH/USD"                  # Ethereum
+      # - "SOL/USD"                # Solana (uncomment to enable)
+      # - "AVAX/USD"               # Avalanche
+      # - "DOGE/USD"               # Dogecoin
+      # - "LTC/USD"                # Litecoin
     exchange: "alpaca"
+  
   forex:
-    enabled: false  # Requires paid Alpaca subscription for SIP data
+    enabled: false                 # Requires paid Alpaca SIP subscription
     pairs:
       - "EUR/USD"
       - "GBP/USD"
+      # - "USD/JPY"
+      # - "AUD/USD"
     exchange: "alpaca"
 
+# ─────────────────────────────────────────────────────────────────────────────────
+# TIMEFRAMES FOR ANALYSIS
+# ─────────────────────────────────────────────────────────────────────────────────
 timeframes:
   trend:
-    interval: "10Min"  # 10-minute bars for trend direction
-    lookback_bars: 50  # how many bars to analyze
+    interval: "5Min"               # Trend analysis timeframe (1Min, 5Min, 15Min, 1Hour)
+    lookback_bars: 30              # How many bars to analyze for trend
   entry:
-    interval: "5Min"  # 5-minute bars for entry timing
-    lookback_bars: 30
+    interval: "1Min"               # Entry timing timeframe (use smaller for scalping)
+    lookback_bars: 20
 
+# ─────────────────────────────────────────────────────────────────────────────────
+# TECHNICAL INDICATORS - Tune these for your strategy
+# ─────────────────────────────────────────────────────────────────────────────────
 indicators:
   rsi:
-    period: 14
-    oversold: 30
-    overbought: 70
+    period: 7                      # RSI period (7 = fast, 14 = standard)
+    oversold: 35                   # Buy signal when RSI below this
+    overbought: 65                 # Sell signal when RSI above this
+  
   macd:
-    fast: 12
-    slow: 26
-    signal: 9
+    fast: 8                        # Fast EMA period
+    slow: 17                       # Slow EMA period
+    signal: 9                      # Signal line period
+  
   ema:
-    short: 9
-    long: 21
+    short: 5                       # Short-term EMA
+    long: 13                       # Long-term EMA
+  
   bollinger_bands:
-    period: 20
-    std_dev: 2.0
+    period: 14
+    std_dev: 1.8                   # Standard deviations (1.5-2.0 typical)
+  
   atr:
-    period: 14  # for dynamic stop loss sizing
+    period: 10                     # ATR period for volatility
 
+# ─────────────────────────────────────────────────────────────────────────────────
+# RISK MANAGEMENT - CRITICAL SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
 risk:
-  max_positions: 3  # max concurrent open trades
-  risk_per_trade_pct: 1.5  # % of portfolio risked per trade
-  stop_loss_pct: 2.0  # % below entry for stop loss
-  take_profit_multiplier: 3.0  # take profit = stop_loss × 3 (6%)
-  max_daily_loss_pct: 5.0  # halt trading if daily loss exceeds this
-  min_signal_confidence: 0.65  # AI must be ≥65% confident to trade
-  max_portfolio_exposure_pct: 60.0  # cap total open exposure across all positions
-  max_symbol_exposure_pct: 25.0  # cap exposure per symbol
+  # Position Management
+  max_positions: 2                 # Maximum concurrent open trades
+  max_portfolio_exposure_pct: 60.0 # Max % of portfolio in trades (60% allows 2 positions)
+  max_symbol_exposure_pct: 35.0    # Max % per single symbol
+  
+  # Risk Per Trade
+  risk_per_trade_pct: 1.0          # % of portfolio risked per trade
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # RISK-REWARD RATIO SETTINGS
+  # ═══════════════════════════════════════════════════════════════════════════
+  stop_loss_pct: 0.5               # Stop loss % below entry (0.5% = tight)
+  take_profit_multiplier: 2.0      # Risk-Reward Ratio (2.0 = 2:1 ratio)
+                                   # If stop_loss = 0.5%, take_profit = 1.0%
+  
+  # Daily Limits
+  max_daily_loss_pct: 3.0          # Stop trading if daily loss exceeds this
+  
+  # AI Confidence Threshold
+  min_signal_confidence: 0.50      # Min AI confidence to place trade (0.5 = 50%)
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SCALPING / QUICK PROFIT SETTINGS
+  # ═══════════════════════════════════════════════════════════════════════════
+  quick_profit_threshold: 0.3      # Take profit at this % gain (0.3% = $30 on $10K)
+  trailing_stop_pct: 0.25          # Trail stop this % below peak price
+  max_hold_minutes: 30             # Force exit after this many minutes
+  min_profit_to_exit: 3.0          # Exit if profit >= this $ amount
 
+# ─────────────────────────────────────────────────────────────────────────────────
+# SIGNAL GENERATION SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
 signals:
-  require_trend_confirmation: true  # Require 10-min trend confirmation
+  # Confirmation Requirements
+  require_trend_confirmation: false # false = trade against trend (scalping)
   require_volume_confirmation: false
-  min_rsi_for_buy: 35  # BUYs are favored when RSI is <= this; high RSI is already blocked (>70)
-  max_rsi_for_sell: 65  # SELLs are favored when RSI is >= this; low RSI is already blocked (<30)
+  
+  # RSI Entry Thresholds
+  min_rsi_for_buy: 45              # Only buy when RSI <= this
+  max_rsi_for_sell: 55             # Only sell when RSI >= this
+  
+  # Trading Mode
+  scalping_mode: true              # true = aggressive quick trades
+                                   # false = swing trading (hold longer)

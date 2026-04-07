@@ -204,16 +204,15 @@ class RiskManager:
             # Calculate risk/reward ratio
             risk_reward_ratio = self.take_profit_multiplier  # By definition
             
-            # Cap position value to Alpaca's max notional per order ($200,000)
-            # Use $50,000 as a safe limit for paper trading
-            MAX_NOTIONAL = 50000.0
+            # Cap position value to max symbol exposure
+            MAX_PER_TRADE = portfolio_value * (self.max_symbol_exposure_pct / 100)
             
-            if position_value > MAX_NOTIONAL:
+            if position_value > MAX_PER_TRADE:
                 logger.info(
-                    f"Position value ${position_value:.2f} exceeds max ${MAX_NOTIONAL:.2f}, "
+                    f"Position value ${position_value:.2f} exceeds max ${MAX_PER_TRADE:.2f}, "
                     f"capping to max"
                 )
-                position_value = MAX_NOTIONAL
+                position_value = MAX_PER_TRADE
                 qty = position_value / entry_price
                 max_loss_usd = qty * stop_loss_distance
             
