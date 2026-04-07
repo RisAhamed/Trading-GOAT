@@ -446,7 +446,7 @@ class IndicatorCalculator:
                 last_volume = volume.iloc[-1]
                 prev_volume = volume.iloc[-2]
                 if not pd.isna(last_volume) and not pd.isna(prev_volume):
-                    result.volume_increasing = last_volume > prev_volume
+                    result.volume_increasing = last_volume > prev_volume and last_volume > 0 and prev_volume > 0
                      
         except Exception as e:
             logger.debug(f"Volume calculation error: {e}")

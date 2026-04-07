@@ -469,7 +469,7 @@ class AITrader:
         self,
         symbol: str,
         signal_action: str,
-        symbol_indicators,
+        symbol_indicators: SymbolIndicators,
     ) -> tuple[bool, str]:
         """
         Confluence-scored pre-entry gate.
