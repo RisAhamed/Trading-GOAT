@@ -494,3 +494,11 @@ class PortfolioTracker:
                 self._positions[symbol].stop_price = stop_price
             if take_profit_price is not None:
                 self._positions[symbol].take_profit_price = take_profit_price
+
+    def get_position_stop(self, symbol: str) -> Optional[float]:
+        """Return current stop price for a symbol, or None if not tracked."""
+        try:
+            pos = self._positions.get(symbol)
+            return pos.stop_price if pos else None
+        except Exception:
+            return None

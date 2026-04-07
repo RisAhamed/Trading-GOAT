@@ -37,23 +37,36 @@ class BearishScalpStrategy:
 
     def should_enter_bearish_scalp(self, rsi: float, adx: float) -> bool:
         """Return True only when RSI < rsi_entry_max and ADX < adx_entry_max."""
-        allowed = self.enabled and rsi < self.rsi_entry_max and adx < self.adx_entry_max
-        logger.info(
-            "Bearish scalp check: enabled=%s rsi=%.2f<%.2f adx=%.2f<%.2f => %s",
-            self.enabled,
-            rsi,
-            self.rsi_entry_max,
-            adx,
-            self.adx_entry_max,
-            allowed,
-        )
-        return allowed
+        try:
+            allowed = self.enabled and rsi < self.rsi_entry_max and adx < self.adx_entry_max
+            logger.info(
+                "Bearish scalp check: enabled=%s rsi=%.2f<%.2f adx=%.2f<%.2f => %s",
+                self.enabled,
+                rsi,
+                self.rsi_entry_max,
+                adx,
+                self.adx_entry_max,
+                allowed,
+            )
+            return allowed
+        except Exception as e:
+            logger.error(f"Bearish scalp check error: {e}")
+            return False
 
     def get_bearish_scalp_params(self) -> dict:
         """Get bearish scalp execution parameters."""
-        return {
-            "profit_target_pct": self.profit_target_pct,
-            "stop_loss_pct": self.stop_loss_pct,
-            "max_hold_seconds": self.max_hold_seconds,
-            "position_size_multiplier": self.position_size_multiplier,
-        }
+        try:
+            return {
+                "profit_target_pct": self.profit_target_pct,
+                "stop_loss_pct": self.stop_loss_pct,
+                "max_hold_seconds": self.max_hold_seconds,
+                "position_size_multiplier": self.position_size_multiplier,
+            }
+        except Exception as e:
+            logger.error(f"Get bearish scalp params error: {e}")
+            return {
+                "profit_target_pct": 0.8,
+                "stop_loss_pct": 0.4,
+                "max_hold_seconds": 300,
+                "position_size_multiplier": 0.5,
+            }

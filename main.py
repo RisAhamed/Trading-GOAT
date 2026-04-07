@@ -75,8 +75,8 @@ class AITrader:
         # Market regime detector
         self.regime_detector = MarketRegimeDetector(self.market_data, self.config)
         self.bearish_scalp = BearishScalpStrategy(self.config)
-        self._market_regime = "UNKNOWN"
-        self._regime_summary = {}
+        self._market_regime: str = "UNKNOWN"
+        self._regime_summary: dict = {}
 
         # Initialize position monitor (will be started in run())
         self.position_monitor = PositionMonitor(
@@ -94,6 +94,7 @@ class AITrader:
         # Loop control
         self._running = False
         self._loop_count = 0
+        self._loss_cooldowns: Dict[str, datetime] = {}
         self._position_entry_times: Dict[str, datetime] = {}
         
         # ═══ WEB UI THREAD ═══════════════════════════════════════════════════
@@ -280,39 +281,303 @@ class AITrader:
         return exits_made
 
     def _update_market_regime(self) -> str:
-        """Detect current market regime and update internal state."""
         try:
             self._market_regime = self.regime_detector.get_regime()
             self._regime_summary = self.regime_detector.get_regime_summary()
-            regime_emoji = {"BULLISH": "🟢", "BEARISH": "🔴", "SIDEWAYS": "🟡"}.get(self._market_regime, "⚪")
-            self.ui.add_log("INFO", f"Market Regime: {regime_emoji} {self._market_regime} | ADX={self._regime_summary.get('adx', 0):.1f}")
-            logger.info(f"Market regime: {self._market_regime} | {self._regime_summary}")
+            emoji = {"BULLISH": "🟢", "BEARISH": "🔴", "SIDEWAYS": "🟡"}.get(
+                self._market_regime, "⚪"
+            )
+            self.ui.add_log(
+                "INFO",
+                f"Regime: {emoji} {self._market_regime} | "
+                f"ADX={self._regime_summary.get('adx', 0):.1f} | "
+                f"Session={self._regime_summary.get('session', 'UNKNOWN')}"
+            )
         except Exception as e:
             logger.error(f"Regime detection error: {e}")
             self._market_regime = "UNKNOWN"
         return self._market_regime
 
-    def _check_max_hold_exits(self) -> int:
-        """Force-exit positions held beyond max hold time (bearish protection)."""
+    def _check_regime_change_exits(self) -> int:
+        """
+        On BEARISH regime: exit losing longs immediately.
+        Leave profitable longs alone — let trailing stop handle them.
+        """
         exits = 0
-        max_hold_seconds = getattr(self.config.risk, "max_hold_seconds", 600)
-        now = datetime.now()
-        open_symbols = {pos.symbol for pos in self.portfolio_tracker.get_positions()}
+        try:
+            if self._market_regime != "BEARISH":
+                return 0
 
-        for symbol in list(self._position_entry_times.keys()):
-            if symbol not in open_symbols:
-                del self._position_entry_times[symbol]
+            positions = self.portfolio_tracker.get_positions()
+            for pos in positions:
+                symbol = pos.symbol
+                try:
+                    side = getattr(pos, 'side', 'long')
+                    unrealized_pnl = float(pos.unrealized_pnl)
 
-        for symbol, entry_time in list(self._position_entry_times.items()):
-            held_seconds = (now - entry_time).total_seconds()
-            if held_seconds > max_hold_seconds:
-                logger.warning(f"[MAX HOLD] {symbol} held {held_seconds:.0f}s > {max_hold_seconds}s — force closing")
-                self.ui.add_log("WARN", f"⏱️ Force exit: {symbol} max hold exceeded ({held_seconds:.0f}s)")
-                result = self.order_executor.close_position(symbol)
-                if result.success:
-                    exits += 1
-                    del self._position_entry_times[symbol]
+                    if side != 'long':
+                        continue
+
+                    if unrealized_pnl >= 0:
+                        logger.info(
+                            f"[REGIME EXIT] {symbol}: Profitable long (+${unrealized_pnl:.2f}) "
+                            f"— letting trailing stop protect it"
+                        )
+                        self.ui.add_log(
+                            "INFO",
+                            f"🔒 {symbol} profitable in bearish market — trailing stop protecting"
+                        )
+                        continue
+
+                    logger.warning(
+                        f"[REGIME EXIT] {symbol}: BEARISH regime, losing long "
+                        f"(P&L=${unrealized_pnl:.2f}) — force closing"
+                    )
+                    self.ui.add_log(
+                        "WARN",
+                        f"🔴 Regime exit: {symbol} (P&L=${unrealized_pnl:.2f})"
+                    )
+
+                    result = self.order_executor.close_position(symbol)
+                    if result.success:
+                        exits += 1
+                        if result.filled_price:
+                            self.results_tracker.record_exit(
+                                symbol=symbol,
+                                exit_price=result.filled_price,
+                                reason="REGIME_CHANGE_BEARISH",
+                            )
+                        cooldown_minutes = getattr(self.config.risk, 'loss_cooldown_minutes', 10)
+                        self._loss_cooldowns[symbol] = datetime.now() + timedelta(minutes=cooldown_minutes)
+                        logger.info(f"[COOLDOWN] {symbol}: {cooldown_minutes}min after regime loss exit")
+                        self.ui.add_log("WARN", f"⏳ {symbol} cooldown: {cooldown_minutes}min")
+                        self._position_entry_times.pop(symbol, None)
+
+                except Exception as e:
+                    logger.error(f"[REGIME EXIT] Error processing {symbol}: {e}")
+                    continue
+
+        except Exception as e:
+            logger.error(f"[REGIME EXIT] Fatal error: {e}")
         return exits
+
+    def _check_max_hold_exits(self) -> int:
+        exits = 0
+        try:
+            max_hold_seconds = getattr(self.config.risk, 'max_hold_seconds', 600)
+            now = datetime.now()
+            for symbol, entry_time in list(self._position_entry_times.items()):
+                try:
+                    held_seconds = (now - entry_time).total_seconds()
+                    if held_seconds <= max_hold_seconds:
+                        continue
+
+                    pos = self.portfolio_tracker.get_position_dict(symbol)
+                    unrealized_pnl = float(pos.get('unrealized_pnl', 0)) if pos else 0
+
+                    logger.warning(
+                        f"[MAX HOLD] {symbol}: held {held_seconds:.0f}s > {max_hold_seconds}s "
+                        f"(P&L=${unrealized_pnl:.2f}) — force closing"
+                    )
+                    self.ui.add_log(
+                        "WARN",
+                        f"⏱️ Max hold exit: {symbol} ({held_seconds:.0f}s, P&L=${unrealized_pnl:.2f})"
+                    )
+
+                    result = self.order_executor.close_position(symbol)
+                    if result.success:
+                        exits += 1
+                        self._position_entry_times.pop(symbol, None)
+
+                        if unrealized_pnl < 0:
+                            cooldown_minutes = getattr(self.config.risk, 'loss_cooldown_minutes', 10)
+                            self._loss_cooldowns[symbol] = datetime.now() + timedelta(minutes=cooldown_minutes)
+                            logger.info(f"[COOLDOWN] {symbol}: {cooldown_minutes}min after max-hold loss")
+                            self.ui.add_log("WARN", f"⏳ {symbol} cooldown: {cooldown_minutes}min")
+
+                except Exception as e:
+                    logger.error(f"[MAX HOLD] Error for {symbol}: {e}")
+        except Exception as e:
+            logger.error(f"[MAX HOLD] Fatal error: {e}")
+        return exits
+
+    def _check_profit_lock_stops(self) -> int:
+        """
+        Profit-lock stop: once profit >= profit_lock_trigger_pct,
+        move stop to entry + (current_gain * profit_lock_ratio).
+        Stop only moves UP, NEVER down.
+        """
+        updates = 0
+        try:
+            profit_lock_trigger_pct = getattr(self.config.risk, 'profit_lock_trigger_pct', 1.5)
+            profit_lock_ratio = getattr(self.config.risk, 'profit_lock_ratio', 0.5)
+            min_profit_lock_pct = getattr(self.config.risk, 'min_profit_lock_pct', 0.3)
+
+            positions = self.portfolio_tracker.get_positions()
+            for pos in positions:
+                try:
+                    symbol = pos.symbol
+                    entry_price = float(pos.entry_price)
+                    current_price = float(pos.current_price)
+
+                    if entry_price <= 0 or current_price <= entry_price:
+                        continue
+
+                    current_gain = current_price - entry_price
+                    profit_pct = (current_gain / entry_price) * 100
+
+                    if profit_pct < profit_lock_trigger_pct:
+                        continue
+
+                    locked_gain = current_gain * profit_lock_ratio
+                    min_gain = entry_price * (min_profit_lock_pct / 100)
+                    new_stop = entry_price + max(locked_gain, min_gain)
+
+                    current_stop = None
+                    try:
+                        current_stop = self.portfolio_tracker.get_position_stop(symbol)
+                    except AttributeError:
+                        pass
+
+                    if current_stop is not None and current_stop >= new_stop:
+                        continue
+
+                    self.portfolio_tracker.set_position_stops(symbol, new_stop, None)
+
+                    if hasattr(self.trailing_manager, 'update_floor_price'):
+                        self.trailing_manager.update_floor_price(symbol, new_stop)
+
+                    updates += 1
+                    locked_dollars = new_stop - entry_price
+                    logger.info(
+                        f"[PROFIT-LOCK] {symbol}: Entry=${entry_price:,.4f} | "
+                        f"Price=${current_price:,.4f} (+{profit_pct:.2f}%) | "
+                        f"Stop→${new_stop:,.4f} | Min profit≥${locked_dollars:,.4f}"
+                    )
+                    self.ui.add_log(
+                        "INFO",
+                        f"🔒 Profit lock {symbol}: stop=${new_stop:,.2f} (+${locked_dollars:.2f} guaranteed)"
+                    )
+
+                except Exception as e:
+                    logger.error(f"[PROFIT-LOCK] Error for {symbol}: {e}")
+        except Exception as e:
+            logger.error(f"[PROFIT-LOCK] Fatal error: {e}")
+        return updates
+
+    def _pre_entry_analysis(
+        self,
+        symbol: str,
+        signal_action: str,
+        symbol_indicators: SymbolIndicators,
+    ) -> tuple[bool, str]:
+        """
+        Confluence-scored pre-entry gate.
+        Each check contributes a weighted score (max 100).
+        Trade only approved if score >= confluence_min_score (default 70).
+        """
+        try:
+            score = 0
+            max_score = 100
+            details = []
+            hard_failures = []
+
+            cooldown_until = self._loss_cooldowns.get(symbol)
+            if cooldown_until and datetime.now() < cooldown_until:
+                remaining = int((cooldown_until - datetime.now()).total_seconds())
+                hard_failures.append(f"⏳ {symbol} in loss cooldown — {remaining}s remaining")
+
+            session = self._regime_summary.get("session", "UNKNOWN")
+            off_peak_mode = getattr(self.config, 'session_filter', None)
+            prefer_sessions = True
+            if off_peak_mode:
+                prefer_sessions = getattr(off_peak_mode, 'prefer_high_volume_sessions', True)
+            if prefer_sessions and session == "OFF_PEAK" and signal_action == "BUY":
+                hard_failures.append(f"🌙 Off-peak session — no new entries (session={session})")
+
+            if hard_failures:
+                summary = " | ".join(hard_failures)
+                logger.info(f"[PRE-ENTRY] {symbol} HARD BLOCKED: {summary}")
+                self.ui.add_log("WARN", f"Pre-entry {symbol}: HARD BLOCKED")
+                return False, summary
+
+            regime = self._market_regime
+            if signal_action == "BUY":
+                if regime == "BULLISH":
+                    score += 30
+                    details.append("✅ Regime BULLISH (+30)")
+                elif regime == "SIDEWAYS":
+                    score += 15
+                    details.append("⚠️ Regime SIDEWAYS (+15)")
+                elif regime == "BEARISH":
+                    rsi_val = symbol_indicators.entry_tf.rsi
+                    if rsi_val < 25:
+                        score += 10
+                        details.append(f"⚡ Bearish scalp RSI={rsi_val:.1f} (+10)")
+                    else:
+                        details.append(f"🔴 Regime BEARISH RSI={rsi_val:.1f} (+0)")
+
+            adx = getattr(symbol_indicators.entry_tf, 'adx', 25.0)
+            if adx >= 25:
+                score += 20
+                details.append(f"✅ ADX={adx:.1f} strong trend (+20)")
+            elif adx >= 20:
+                score += 12
+                details.append(f"✅ ADX={adx:.1f} trending (+12)")
+            else:
+                details.append(f"🟡 ADX={adx:.1f} choppy (+0)")
+
+            rsi = symbol_indicators.entry_tf.rsi
+            if signal_action == "BUY":
+                if 35 <= rsi <= 55:
+                    score += 15
+                    details.append(f"✅ RSI={rsi:.1f} ideal zone (+15)")
+                elif rsi < 35:
+                    score += 10
+                    details.append(f"✅ RSI={rsi:.1f} oversold (+10)")
+                elif rsi <= 65:
+                    score += 8
+                    details.append(f"⚠️ RSI={rsi:.1f} neutral (+8)")
+                else:
+                    details.append(f"🔴 RSI={rsi:.1f} overbought (+0)")
+
+            ema_trend = symbol_indicators.entry_tf.ema_trend
+            if signal_action == "BUY":
+                if ema_trend == "BULLISH":
+                    score += 20
+                    details.append("✅ EMA BULLISH (+20)")
+                elif ema_trend == "SIDEWAYS":
+                    score += 10
+                    details.append("⚠️ EMA SIDEWAYS (+10)")
+                else:
+                    details.append("🔴 EMA BEARISH (+0)")
+
+            volume_increasing = getattr(symbol_indicators.entry_tf, 'volume_increasing', True)
+            volume_ratio = getattr(symbol_indicators.entry_tf, 'volume_ratio', 1.0)
+            if volume_increasing and volume_ratio >= 1.2:
+                score += 15
+                details.append("✅ Volume spike confirmed (+15)")
+            elif volume_increasing:
+                score += 8
+                details.append("✅ Volume increasing (+8)")
+            else:
+                details.append("⚠️ Volume declining (+0)")
+
+            confluence_min = getattr(self.config.risk, 'confluence_min_score', 70)
+            is_approved = score >= confluence_min
+            status = f"{'APPROVED ✅' if is_approved else 'REJECTED ❌'} Score={score}/{max_score}"
+            summary = f"{status} | " + " | ".join(details)
+
+            logger.info(f"[PRE-ENTRY] {symbol} {signal_action} → {summary}")
+            self.ui.add_log(
+                "INFO" if is_approved else "WARN",
+                f"Pre-entry {symbol}: Score={score}/{max_score} {'✅' if is_approved else '❌'}"
+            )
+            return is_approved, summary
+
+        except Exception as e:
+            logger.error(f"[PRE-ENTRY] Error for {symbol}: {e}")
+            return False, f"Pre-entry analysis error: {e}"
 
     def _process_symbol(
         self,
@@ -477,6 +742,10 @@ class AITrader:
                 
                 # 8. Execute order
                 if signal.action == "BUY":
+                    approved, reason = self._pre_entry_analysis(symbol, signal.action, symbol_indicators)
+                    if not approved:
+                        logger.info(f"[PRE-ENTRY BLOCKED] {symbol}: {reason}")
+                        return None, symbol_indicators
                     result = self.order_executor.execute_buy(symbol, risk_params)
                 else:
                     result = self.order_executor.execute_sell(symbol, risk_params)
@@ -540,8 +809,14 @@ class AITrader:
                 
                 if result.success:
                     logger.info(f"Position closed: {symbol}")
-                    if symbol in self._position_entry_times:
-                        del self._position_entry_times[symbol]
+                    if current_position:
+                        unrealized_pnl = current_position.get('unrealized_pnl', 0)
+                        if float(unrealized_pnl) < 0:
+                            cooldown_minutes = getattr(self.config.risk, 'loss_cooldown_minutes', 10)
+                            self._loss_cooldowns[symbol] = datetime.now() + timedelta(minutes=cooldown_minutes)
+                            logger.info(f"[COOLDOWN] {symbol}: {cooldown_minutes}min cooldown after loss close")
+                            self.ui.add_log("WARN", f"⏳ {symbol} cooldown: {cooldown_minutes}min after loss")
+                    self._position_entry_times.pop(symbol, None)
                     if current_position:
                         self.ui.add_trade(
                             action="CLOSE",
@@ -665,8 +940,30 @@ class AITrader:
                         self.ui.set_bot_status("HALTED")
                     else:
                         self.ui.set_bot_status("RUNNING")
-                    
-                    # Update portfolio display
+
+                    # 4) Update market regime + session
+                    self._update_market_regime()
+
+                    # 5) Exit losing longs on BEARISH regime
+                    regime_exits = self._check_regime_change_exits()
+                    if regime_exits > 0:
+                        portfolio_state = self.portfolio_tracker.update()
+
+                    # 7) Force-exit stale positions
+                    stale_exits = self._check_max_hold_exits()
+                    if stale_exits > 0:
+                        portfolio_state = self.portfolio_tracker.update()
+
+                    # 9) Profit-lock stop updates
+                    self._check_profit_lock_stops()
+
+                    # 10) Existing quick-profit exits
+                    quick_exits = self._check_quick_profit_exits(portfolio_state)
+                    if quick_exits > 0:
+                        logger.info(f"🎯 Quick profit exits: {quick_exits} positions closed")
+                        portfolio_state = self.portfolio_tracker.update()
+
+                    # 12) Update UI displays after portfolio/actions are finalized
                     self.ui.update_portfolio({
                         "total_value": portfolio_state.total_value,
                         "cash": portfolio_state.cash,
@@ -676,35 +973,12 @@ class AITrader:
                         "today_trades": portfolio_state.today_trades,
                         "win_rate": portfolio_state.win_rate,
                     })
-                    
-                    # Update positions display
+
                     positions_summary = self.portfolio_tracker.get_portfolio_summary()
                     self.ui.update_positions(positions_summary.get("positions", []))
 
-                    # ═══ UPDATE TRAILING STOP DISPLAY ═══════════════════════════
-                    # Update trailing stop panel with current positions
                     trailing_summary = self.trailing_manager.get_position_summary()
                     self.ui.update_trailing_stops(trailing_summary)
-                    # ═══ END UPDATE TRAILING STOP DISPLAY ═══════════════════════
-                    
-                    # ═══════════════════════════════════════════════════════════════
-                    # Update market regime at start of each loop
-                    self._update_market_regime()
-
-                    # ═══════════════════════════════════════════════════════════════
-                    # Force-exit stale positions
-                    stale_exits = self._check_max_hold_exits()
-                    if stale_exits > 0:
-                        portfolio_state = self.portfolio_tracker.update()
-
-                    # ═══════════════════════════════════════════════════════════════
-                    # SCALPING: Check for quick profit exits FIRST (before new trades)
-                    # ═══════════════════════════════════════════════════════════════
-                    quick_exits = self._check_quick_profit_exits(portfolio_state)
-                    if quick_exits > 0:
-                        logger.info(f"🎯 Quick profit exits: {quick_exits} positions closed")
-                        # Refresh portfolio after exits
-                        portfolio_state = self.portfolio_tracker.update()
                     
                     # Process each trading pair
                     indicators_map: Dict[str, SymbolIndicators] = {}

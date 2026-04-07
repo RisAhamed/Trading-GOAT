@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import pandas as pd
 from ta.momentum import RSIIndicator
-from ta.trend import MACD, EMAIndicator, SMAIndicator
+from ta.trend import ADXIndicator, MACD, EMAIndicator, SMAIndicator
 from ta.volatility import BollingerBands, AverageTrueRange
 
 from .config_loader import get_config, ConfigLoader
@@ -65,6 +65,10 @@ class IndicatorValues:
     volume: float = 0.0
     volume_sma: float = 0.0
     volume_ratio: float = 1.0  # current volume / avg volume
+    volume_increasing: bool = False  # True if last candle volume > prior candle volume
+    
+    # Trend strength
+    adx: float = 0.0  # 14-period ADX
     
     # Price action summary
     high_5bars: float = 0.0
@@ -166,6 +170,9 @@ class IndicatorCalculator:
             
             # Calculate ATR
             self._calculate_atr(df, result)
+
+            # Calculate ADX
+            self._calculate_adx(df, result)
             
             # Calculate volume metrics
             self._calculate_volume(df, result)
@@ -394,6 +401,24 @@ class IndicatorCalculator:
         except Exception as e:
             logger.debug(f"ATR calculation error: {e}")
     
+    def _calculate_adx(self, df: pd.DataFrame, result: IndicatorValues) -> None:
+        """Calculate ADX indicator using ta library."""
+        try:
+            adx_indicator = ADXIndicator(
+                high=df['high'],
+                low=df['low'],
+                close=df['close'],
+                window=14,
+                fillna=False,
+            )
+            adx_series = adx_indicator.adx()
+            if adx_series is not None and not adx_series.empty:
+                adx_value = adx_series.iloc[-1]
+                if not pd.isna(adx_value):
+                    result.adx = float(adx_value)
+        except Exception as e:
+            logger.debug(f"ADX calculation error: {e}")
+    
     def _calculate_volume(self, df: pd.DataFrame, result: IndicatorValues) -> None:
         """Calculate volume metrics."""
         try:
@@ -416,7 +441,13 @@ class IndicatorCalculator:
                 if not pd.isna(val) and val > 0:
                     result.volume_sma = float(val)
                     result.volume_ratio = result.volume / result.volume_sma
-                    
+
+            if len(volume) >= 2:
+                last_volume = volume.iloc[-1]
+                prev_volume = volume.iloc[-2]
+                if not pd.isna(last_volume) and not pd.isna(prev_volume):
+                    result.volume_increasing = last_volume > prev_volume and last_volume > 0 and prev_volume > 0
+                     
         except Exception as e:
             logger.debug(f"Volume calculation error: {e}")
     
