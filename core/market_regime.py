@@ -278,6 +278,14 @@ class MarketRegime:
 
     def __init__(self, config: Optional[ConfigLoader] = None) -> None:
         self.config = config or get_config()
+        regime_cfg = getattr(self.config, "regime_detection", None)
+        raw_cfg = getattr(self.config, "_raw_config", {}).get("regime_detection", {})
+        self.lookback = int(getattr(regime_cfg, "lookback_bars", 20))
+        self.crash_threshold_pct = float(raw_cfg.get("crash_threshold_pct", -8.0))
+        self.extreme_fear_threshold_pct = float(raw_cfg.get("extreme_fear_threshold_pct", -5.0))
+        self.high_volatility_threshold_pct = float(raw_cfg.get("high_volatility_threshold_pct", 2.0))
+        self.bearish_threshold_pct = float(raw_cfg.get("bearish_threshold_pct", -2.0))
+        self.bullish_threshold_pct = float(raw_cfg.get("bullish_threshold_pct", 2.0))
 
     def detect_regime(self, btc_bars: Optional[pd.DataFrame]) -> str:
         """Classify current regime using recent BTC bars."""
@@ -289,7 +297,7 @@ class MarketRegime:
             if close.empty:
                 return "NORMAL"
 
-            lookback = min(len(close), 20)
+            lookback = min(len(close), self.lookback)
             window = close.iloc[-lookback:]
             start = float(window.iloc[0])
             end = float(window.iloc[-1])
@@ -300,15 +308,15 @@ class MarketRegime:
             returns = window.pct_change().dropna()
             vol_pct = float(returns.std() * 100) if not returns.empty else 0.0
 
-            if change_pct <= -8.0:
+            if change_pct <= self.crash_threshold_pct:
                 return "CRASH"
-            if change_pct <= -5.0:
+            if change_pct <= self.extreme_fear_threshold_pct:
                 return "EXTREME_FEAR"
-            if vol_pct >= 2.0:
+            if vol_pct >= self.high_volatility_threshold_pct:
                 return "HIGH_VOLATILITY"
-            if change_pct <= -2.0:
+            if change_pct <= self.bearish_threshold_pct:
                 return "BEARISH"
-            if change_pct >= 2.0:
+            if change_pct >= self.bullish_threshold_pct:
                 return "BULLISH"
             return "NORMAL"
         except Exception as e:

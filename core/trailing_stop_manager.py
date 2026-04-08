@@ -594,8 +594,8 @@ class TrailingStopManager:
 
         tier1_pct = getattr(self.config.risk, "partial_exit_tier1_pct", 1.0)
         tier2_pct = getattr(self.config.risk, "partial_exit_tier2_pct", 2.5)
-        tier1_qty_fraction = 0.33
-        tier2_qty_fraction = 0.33
+        tier1_qty_fraction = getattr(self.config.risk, "partial_exit_tier1_fraction", 0.33)
+        tier2_qty_fraction = getattr(self.config.risk, "partial_exit_tier2_fraction", 0.33)
 
         if profit_pct >= tier1_pct and not pos.tier1_taken:
             exit_orders.append({"qty_fraction": tier1_qty_fraction, "reason": f"Tier1 +{profit_pct:.2f}%"})

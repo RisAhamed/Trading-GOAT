@@ -449,8 +449,8 @@ class SignalEngine:
             reasons.append(f"Low volume: {vol_ratio:.2f}x (need 1.2x)")
 
         all_passed = trend_ok and momentum_ok and volume_ok
-        fail_reason = " | ".join(reasons) if reasons else f"All confirmations passed for {symbol}"
-        return all_passed, fail_reason
+        status_message = " | ".join(reasons) if reasons else f"All confirmations passed for {symbol}"
+        return all_passed, status_message
     
     def quick_signal(
         self,

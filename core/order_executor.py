@@ -26,10 +26,6 @@ from .trade_results import get_results_tracker
 
 
 logger = logging.getLogger(__name__)
-STRONG_INTEL_THRESHOLD = 20
-WEAK_INTEL_THRESHOLD = -10
-STRONG_INTEL_SIZE_MULTIPLIER = 1.25
-WEAK_INTEL_SIZE_MULTIPLIER = 0.5
 
 
 @dataclass
@@ -93,21 +89,25 @@ class OrderExecutor:
         base_risk_pct = getattr(self.config.risk, "base_risk_pct", 0.02)
         max_position_pct = getattr(self.config.risk, "max_position_pct", 0.10)
         atr_mult = getattr(self.config.risk, "atr_stop_multiplier", 1.5)
+        strong_intel_threshold = getattr(self.config.risk, "intel_positive_threshold", 20)
+        weak_intel_threshold = getattr(self.config.risk, "intel_negative_threshold", -10)
+        strong_intel_size_multiplier = getattr(self.config.risk, "intel_positive_size_multiplier", 1.25)
+        weak_intel_size_multiplier = getattr(self.config.risk, "intel_negative_size_multiplier", 0.5)
 
         dollar_risk = portfolio_cash * base_risk_pct
 
         atr_pct_value = float(atr_pct or 0.0)
-        # Scanner/meta values are usually "percent points" (e.g., 0.8 for 0.8%);
-        # some callers may pass fractional form (e.g., 0.008). Normalize both.
-        atr_pct_frac = atr_pct_value / 100.0 if atr_pct_value > 1 else atr_pct_value
+        # Scanner/meta values are usually "percent points" (e.g., 0.8 for 0.8%).
+        # Normalize values >=1.0 as percent points, otherwise treat as fraction.
+        atr_pct_frac = atr_pct_value / 100.0 if atr_pct_value >= 1 else atr_pct_value
         stop_distance_pct = max(atr_pct_frac * atr_mult, 0.005)
 
         raw_size = dollar_risk / (current_price * stop_distance_pct)
 
-        if intel_modifier >= STRONG_INTEL_THRESHOLD:
-            raw_size *= STRONG_INTEL_SIZE_MULTIPLIER
-        elif intel_modifier <= WEAK_INTEL_THRESHOLD:
-            raw_size *= WEAK_INTEL_SIZE_MULTIPLIER
+        if intel_modifier >= strong_intel_threshold:
+            raw_size *= strong_intel_size_multiplier
+        elif intel_modifier <= weak_intel_threshold:
+            raw_size *= weak_intel_size_multiplier
 
         max_size = (portfolio_cash * max_position_pct) / current_price
         final_size = min(raw_size, max_size)

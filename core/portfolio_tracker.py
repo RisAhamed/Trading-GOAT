@@ -513,9 +513,8 @@ class PortfolioTracker:
     def is_in_cooldown(self, symbol: str) -> bool:
         """Returns True if symbol is in post-stop-loss cooldown."""
         exit_time = self._stop_loss_exits.get(symbol, 0)
-        cooldown_seconds = getattr(
-            getattr(self.config, "risk", None), "re_entry_cooldown_seconds", 1800
-        )
+        risk_cfg = getattr(self.config, "risk", None)
+        cooldown_seconds = getattr(risk_cfg, "re_entry_cooldown_seconds", 1800)
         in_cooldown = (time.time() - exit_time) < cooldown_seconds
         if in_cooldown:
             remaining = cooldown_seconds - (time.time() - exit_time)

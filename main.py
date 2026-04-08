@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 # Regex pattern for valid crypto symbols (BASE/QUOTE format)
 CRYPTO_SYMBOL_PATTERN = re.compile(r"^[A-Z]+/[A-Z]+$")
 REGIME_BLOCKED_BUY = ("CRASH", "EXTREME_FEAR", "HIGH_VOLATILITY")
+BEARISH_CONFIDENCE_BONUS = 0.20
 
 
 def _is_valid_crypto_symbol(symbol: str) -> bool:
@@ -92,6 +93,7 @@ class AITrader:
         from core.symbol_scanner import SymbolScanner
         self.symbol_scanner = SymbolScanner(self.market_data, self.config)
         self.bearish_scalp = BearishScalpStrategy(self.config)
+        self.market_regime_gate = MarketRegime(self.config)
         self._market_regime: str = "UNKNOWN"
         self._regime_summary: dict = {}
 
@@ -854,8 +856,7 @@ class AITrader:
             # Regime gate before AI decision
             try:
                 btc_bars = self.market_data.fetch_bars("BTC/USD", trend_interval, trend_lookback)
-                regime = MarketRegime(self.config)
-                current_regime = regime.detect_regime(btc_bars)
+                current_regime = self.market_regime_gate.detect_regime(btc_bars)
                 if current_regime in REGIME_BLOCKED_BUY and not current_position:
                     logger.warning(
                         f"[REGIME GATE] {symbol}: Blocking new BUY — regime={current_regime}"
@@ -863,7 +864,7 @@ class AITrader:
                     return None, symbol_indicators
                 if current_regime == "BEARISH":
                     effective_min_confidence = (
-                        getattr(self.config.risk, "min_signal_confidence", 0.65) + 0.20
+                        getattr(self.config.risk, "min_signal_confidence", 0.65) + BEARISH_CONFIDENCE_BONUS
                     )
                     symbol_meta["regime"] = current_regime
                     symbol_meta["min_confidence_override"] = effective_min_confidence
@@ -958,7 +959,8 @@ class AITrader:
                 )
 
                 # Dynamic ATR-normalized quantity sizing override
-                atr_pct = symbol_meta.get("atr_pct", getattr(symbol_indicators.entry_tf, "atr_percent", 0.0))
+                atr_pct_meta = symbol_meta.get("atr_pct")
+                atr_pct = atr_pct_meta if atr_pct_meta is not None else getattr(symbol_indicators.entry_tf, "atr_percent", 0.0)
                 intel_modifier = int(symbol_meta.get("intel_modifier", 0) or 0)
                 dynamic_qty = self.order_executor.calculate_dynamic_position_size(
                     symbol=symbol,
