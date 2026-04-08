@@ -93,7 +93,7 @@ class AITrader:
         from core.symbol_scanner import SymbolScanner
         self.symbol_scanner = SymbolScanner(self.market_data, self.config)
         self.bearish_scalp = BearishScalpStrategy(self.config)
-        self.market_regime_gate = MarketRegime(self.config)
+        self.market_regime = MarketRegime(self.config)
         self._market_regime: str = "UNKNOWN"
         self._regime_summary: dict = {}
 
@@ -856,7 +856,7 @@ class AITrader:
             # Regime gate before AI decision
             try:
                 btc_bars = self.market_data.fetch_bars("BTC/USD", trend_interval, trend_lookback)
-                current_regime = self.market_regime_gate.detect_regime(btc_bars)
+                current_regime = self.market_regime.detect_regime(btc_bars)
                 if current_regime in REGIME_BLOCKED_BUY and not current_position:
                     logger.warning(
                         f"[REGIME GATE] {symbol}: Blocking new BUY — regime={current_regime}"
@@ -960,7 +960,11 @@ class AITrader:
 
                 # Dynamic ATR-normalized quantity sizing override
                 atr_pct_from_meta = symbol_meta.get("atr_pct")
-                atr_pct = atr_pct_from_meta if atr_pct_from_meta is not None else getattr(symbol_indicators.entry_tf, "atr_percent", 0.0)
+                atr_pct = (
+                    atr_pct_from_meta
+                    if atr_pct_from_meta is not None
+                    else getattr(symbol_indicators.entry_tf, "atr_percent", 0.0)
+                )
                 intel_modifier = int(symbol_meta.get("intel_modifier", 0) or 0)
                 dynamic_qty = self.order_executor.calculate_dynamic_position_size(
                     symbol=symbol,

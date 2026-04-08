@@ -97,7 +97,8 @@ class OrderExecutor:
         dollar_risk = portfolio_cash * base_risk_pct
 
         atr_pct_value = float(atr_pct or 0.0)
-        # Standardized input: atr_pct must be percent points (e.g., 0.8 for 0.8%).
+        # Standardized input: atr_pct is percent points (e.g., 0.8 means 0.8%).
+        # Convert percent points to fraction for math (0.8 -> 0.008).
         atr_pct_frac = max(0.0, atr_pct_value / 100.0)
         stop_distance_pct = max(atr_pct_frac * atr_mult, 0.005)
 
