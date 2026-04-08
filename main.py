@@ -29,7 +29,7 @@ from core.portfolio_tracker import PortfolioTracker, PortfolioState
 from core.trade_results import get_results_tracker, TradeResultsTracker
 from core.trailing_stop_manager import TrailingStopManager
 from core.position_monitor import PositionMonitor
-from core.market_regime import MarketRegimeDetector
+from core.market_regime import MarketRegimeDetector, MarketRegime
 from core.bearish_scalp_strategy import BearishScalpStrategy
 from core.trade_exit_engine import TradeExitEngine
 from dashboard.terminal_ui import TerminalUI
@@ -77,6 +77,7 @@ class AITrader:
         self.risk_manager = RiskManager(self.config)
         self.order_executor = OrderExecutor(self.config)
         self.portfolio_tracker = PortfolioTracker(self.config)
+        self.order_executor.portfolio_tracker = self.portfolio_tracker
         self.exit_engine = TradeExitEngine(self.config)
         self.results_tracker = get_results_tracker()  # Trade results tracking
         self.ui = TerminalUI(self.config)
@@ -790,6 +791,17 @@ class AITrader:
             Tuple of (OrderResult if executed, SymbolIndicators for scan display)
         """
         try:
+            # Global daily drawdown kill switch
+            self.risk_manager.update_daily_equity(portfolio_state.total_value)
+            if self.risk_manager.is_kill_switch_active():
+                self.ui.add_log("ERROR", "🛑 Daily kill switch active — no new trades")
+                return None, None
+
+            # Re-entry cooldown after stop-loss exits
+            if self.portfolio_tracker.is_in_cooldown(symbol):
+                logger.info(f"[COOLDOWN] {symbol}: Post-stop-loss cooldown active — skipping")
+                return None, None
+
             # 1. Fetch market data for both timeframes
             self.ui.set_data_fetch_status(symbol, "Fetching...")
             
@@ -837,6 +849,38 @@ class AITrader:
                         symbol_meta = dict(r)
                         symbol_meta['pool_size'] = len(rankings)
                         break
+
+            # Regime gate before AI decision
+            try:
+                btc_bars = self.market_data.fetch_bars("BTC/USD", trend_interval, trend_lookback)
+                regime = MarketRegime(self.config)
+                current_regime = regime.detect_regime(btc_bars)
+                blocked_regimes = ["CRASH", "EXTREME_FEAR", "HIGH_VOLATILITY"]
+                if current_regime in blocked_regimes and not current_position:
+                    logger.warning(
+                        f"[REGIME GATE] {symbol}: Blocking new BUY — regime={current_regime}"
+                    )
+                    return None, symbol_indicators
+                if current_regime == "BEARISH":
+                    effective_min_confidence = (
+                        getattr(self.config.risk, "min_signal_confidence", 0.65) + 0.20
+                    )
+                    symbol_meta["regime"] = current_regime
+                    symbol_meta["min_confidence_override"] = effective_min_confidence
+                elif current_regime:
+                    symbol_meta["regime"] = current_regime
+            except Exception as e:
+                logger.error(f"[REGIME GATE] Error checking regime: {e}")
+
+            # Triple confirmation pre-filter before AI (BUY hints only)
+            action_hint = self.signal_engine.quick_signal(symbol_indicators)
+            if action_hint == "BUY":
+                confirmed, reason = self.signal_engine._triple_confirmation_check(
+                    symbol, symbol_indicators, symbol_meta
+                )
+                if not confirmed:
+                    logger.info(f"[FILTER] {symbol}: BUY blocked — {reason}")
+                    return None, symbol_indicators
             
             ai_decision = self.ai_brain.get_decision(
                 symbol,
@@ -912,6 +956,21 @@ class AITrader:
                     side="long" if signal.action == "BUY" else "short",
                     atr=symbol_indicators.entry_tf.atr,
                 )
+
+                # Dynamic ATR-normalized quantity sizing override
+                atr_pct = symbol_meta.get("atr_pct", getattr(symbol_indicators.entry_tf, "atr_percent", 0.0))
+                intel_modifier = int(symbol_meta.get("intel_modifier", 0) or 0)
+                dynamic_qty = self.order_executor.calculate_dynamic_position_size(
+                    symbol=symbol,
+                    current_price=entry_price,
+                    atr_pct=float(atr_pct or 0.0),
+                    portfolio_cash=portfolio_state.cash,
+                    intel_modifier=intel_modifier,
+                )
+                if dynamic_qty > 0:
+                    risk_params.qty = dynamic_qty
+                    risk_params.position_value = dynamic_qty * entry_price
+                    risk_params.max_loss_usd = risk_params.stop_loss_distance * dynamic_qty
                 
                 # Apply optional position-size override (used for bearish scalp entries)
                 risk_params.position_size_override = position_size_override

@@ -271,3 +271,46 @@ class MarketRegimeDetector:
         except Exception as e:
             logger.error(f"Session detection error: {e}")
             return "OFF_PEAK"
+
+
+class MarketRegime:
+    """Lightweight regime classifier for BTC bars used by entry gating."""
+
+    def __init__(self, config: Optional[ConfigLoader] = None) -> None:
+        self.config = config or get_config()
+
+    def detect_regime(self, btc_bars: Optional[pd.DataFrame]) -> str:
+        """Classify current regime using recent BTC bars."""
+        try:
+            if btc_bars is None or btc_bars.empty or "close" not in btc_bars.columns:
+                return "NORMAL"
+
+            close = pd.to_numeric(btc_bars["close"], errors="coerce").dropna()
+            if close.empty:
+                return "NORMAL"
+
+            lookback = min(len(close), 20)
+            window = close.iloc[-lookback:]
+            start = float(window.iloc[0])
+            end = float(window.iloc[-1])
+            if start <= EPSILON:
+                return "NORMAL"
+
+            change_pct = ((end - start) / start) * 100
+            returns = window.pct_change().dropna()
+            vol_pct = float(returns.std() * 100) if not returns.empty else 0.0
+
+            if change_pct <= -8.0:
+                return "CRASH"
+            if change_pct <= -5.0:
+                return "EXTREME_FEAR"
+            if vol_pct >= 2.0:
+                return "HIGH_VOLATILITY"
+            if change_pct <= -2.0:
+                return "BEARISH"
+            if change_pct >= 2.0:
+                return "BULLISH"
+            return "NORMAL"
+        except Exception as e:
+            logger.error(f"MarketRegime.detect_regime error: {e}")
+            return "NORMAL"

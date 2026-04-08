@@ -409,6 +409,49 @@ class SignalEngine:
             return True, f"Closing existing {side.upper()} position (P&L: {unrealized_pnl_pct:+.2f}%)"
         
         return True, "Position context is valid"
+
+    def _triple_confirmation_check(
+        self, symbol: str, indicators: SymbolIndicators, symbol_meta: Dict[str, Any]
+    ) -> tuple[bool, str]:
+        """
+        Returns (passed: bool, reason: str).
+        All 3 confirmations must pass for a BUY to proceed.
+        """
+        del symbol
+        trend = indicators.trend_tf
+        entry = indicators.entry_tf
+        reasons: List[str] = []
+
+        # CONFIRMATION 1: Trend Alignment
+        trend_ok = (
+            trend.overall_trend == "BULLISH"
+            and entry.overall_trend in ["BULLISH", "SIDEWAYS"]
+        )
+        if not trend_ok:
+            reasons.append(
+                f"Trend conflict: 10m={trend.overall_trend}, 5m={entry.overall_trend}"
+            )
+
+        # CONFIRMATION 2: Momentum
+        momentum_ok = (
+            entry.rsi < 70 and
+            entry.rsi > 30 and
+            entry.macd_trend == "BULLISH"
+        )
+        if not momentum_ok:
+            reasons.append(
+                f"Momentum weak: RSI={entry.rsi:.1f}, MACD={entry.macd_trend}"
+            )
+
+        # CONFIRMATION 3: Volume
+        vol_ratio = symbol_meta.get("vol_ratio", 1.0)
+        volume_ok = vol_ratio >= 1.2
+        if not volume_ok:
+            reasons.append(f"Low volume: {vol_ratio:.2f}x (need 1.2x)")
+
+        all_passed = trend_ok and momentum_ok and volume_ok
+        fail_reason = " | ".join(reasons) if reasons else "All confirmations passed"
+        return all_passed, fail_reason
     
     def quick_signal(
         self,
