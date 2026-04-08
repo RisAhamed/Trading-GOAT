@@ -346,6 +346,7 @@ class MarketIntelligence:
         bo_mod = int(bo.get("score_modifier", 0))
 
         total = fg_mod + whale_mod + rs_mod + bo_mod
+        # Keep intelligence additive but bounded so it cannot dominate base scanner scoring.
         total = max(-30, min(+30, total))
 
         fg_class = fg.get("classification", "Neutral")
