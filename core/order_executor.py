@@ -26,6 +26,10 @@ from .trade_results import get_results_tracker
 
 
 logger = logging.getLogger(__name__)
+STRONG_INTEL_THRESHOLD = 20
+WEAK_INTEL_THRESHOLD = -10
+STRONG_INTEL_SIZE_MULTIPLIER = 1.25
+WEAK_INTEL_SIZE_MULTIPLIER = 0.5
 
 
 @dataclass
@@ -93,15 +97,17 @@ class OrderExecutor:
         dollar_risk = portfolio_cash * base_risk_pct
 
         atr_pct_value = float(atr_pct or 0.0)
+        # Scanner/meta values are usually "percent points" (e.g., 0.8 for 0.8%);
+        # some callers may pass fractional form (e.g., 0.008). Normalize both.
         atr_pct_frac = atr_pct_value / 100.0 if atr_pct_value > 1 else atr_pct_value
         stop_distance_pct = max(atr_pct_frac * atr_mult, 0.005)
 
         raw_size = dollar_risk / (current_price * stop_distance_pct)
 
-        if intel_modifier >= 20:
-            raw_size *= 1.25
-        elif intel_modifier <= -10:
-            raw_size *= 0.5
+        if intel_modifier >= STRONG_INTEL_THRESHOLD:
+            raw_size *= STRONG_INTEL_SIZE_MULTIPLIER
+        elif intel_modifier <= WEAK_INTEL_THRESHOLD:
+            raw_size *= WEAK_INTEL_SIZE_MULTIPLIER
 
         max_size = (portfolio_cash * max_position_pct) / current_price
         final_size = min(raw_size, max_size)

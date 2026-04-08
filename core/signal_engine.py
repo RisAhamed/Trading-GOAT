@@ -417,7 +417,6 @@ class SignalEngine:
         Returns (passed: bool, reason: str).
         All 3 confirmations must pass for a BUY to proceed.
         """
-        del symbol
         trend = indicators.trend_tf
         entry = indicators.entry_tf
         reasons: List[str] = []
@@ -450,7 +449,7 @@ class SignalEngine:
             reasons.append(f"Low volume: {vol_ratio:.2f}x (need 1.2x)")
 
         all_passed = trend_ok and momentum_ok and volume_ok
-        fail_reason = " | ".join(reasons) if reasons else "All confirmations passed"
+        fail_reason = " | ".join(reasons) if reasons else f"All confirmations passed for {symbol}"
         return all_passed, fail_reason
     
     def quick_signal(

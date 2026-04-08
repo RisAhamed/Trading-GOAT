@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 # Regex pattern for valid crypto symbols (BASE/QUOTE format)
 CRYPTO_SYMBOL_PATTERN = re.compile(r"^[A-Z]+/[A-Z]+$")
+REGIME_BLOCKED_BUY = ("CRASH", "EXTREME_FEAR", "HIGH_VOLATILITY")
 
 
 def _is_valid_crypto_symbol(symbol: str) -> bool:
@@ -855,8 +856,7 @@ class AITrader:
                 btc_bars = self.market_data.fetch_bars("BTC/USD", trend_interval, trend_lookback)
                 regime = MarketRegime(self.config)
                 current_regime = regime.detect_regime(btc_bars)
-                blocked_regimes = ["CRASH", "EXTREME_FEAR", "HIGH_VOLATILITY"]
-                if current_regime in blocked_regimes and not current_position:
+                if current_regime in REGIME_BLOCKED_BUY and not current_position:
                     logger.warning(
                         f"[REGIME GATE] {symbol}: Blocking new BUY — regime={current_regime}"
                     )

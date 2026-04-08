@@ -351,11 +351,15 @@ Use this momentum and volume data in your analysis.
         regime = symbol_meta.get("regime", "NORMAL")
         min_conf_override = symbol_meta.get("min_confidence_override", None)
         if regime and regime != "NORMAL":
+            regime_warning = (
+                "Do NOT open new positions — crash conditions detected"
+                if regime in ["CRASH", "EXTREME_FEAR"]
+                else "Heightened caution — raise your confidence bar"
+            )
             prompt += f"""
 === MARKET REGIME WARNING ===
 Current Market Regime: {regime}
-  → {"Do NOT open new positions — crash conditions detected" if regime in ["CRASH","EXTREME_FEAR"]
-     else "Heightened caution — raise your confidence bar"}
+  → {regime_warning}
 Minimum confidence required this regime: {min_conf_override or "standard"}
 """
 
