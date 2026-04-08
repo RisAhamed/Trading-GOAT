@@ -69,6 +69,7 @@ markets:
 # ─────────────────────────────────────────────────────────────────────────────────
 symbol_scanner:
   enabled: true
+  crypto_only: true                   # Only allow BASE/QUOTE formatted symbols (e.g., BTC/USD)
   scan_interval_seconds: 120        # Re-rank coins every 2 minutes
   min_score_to_trade: 40            # Symbol needs 40/100 to be tradeable
   max_symbols_to_trade: 3           # Never open more than 3 symbols simultaneously

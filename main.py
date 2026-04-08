@@ -9,6 +9,7 @@ PAPER TRADING ONLY - Never uses real money.
 """
 
 import logging
+import re
 import signal
 import sys
 import time
@@ -37,6 +38,16 @@ from dashboard.web_ui import app as web_app
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+# Regex pattern for valid crypto symbols (BASE/QUOTE format)
+CRYPTO_SYMBOL_PATTERN = re.compile(r"^[A-Z]+/[A-Z]+$")
+
+
+def _is_valid_crypto_symbol(symbol: str) -> bool:
+    """Check if symbol matches valid crypto format (BASE/QUOTE like BTC/USD)."""
+    if not isinstance(symbol, str):
+        return False
+    return bool(CRYPTO_SYMBOL_PATTERN.match(symbol.strip()))
 
 
 class AITrader:
@@ -379,15 +390,29 @@ class AITrader:
             if not getattr(scanner_cfg, 'enabled', False):
                 return
 
+            crypto_only = getattr(scanner_cfg, 'crypto_only', True)
             tradeable = self.symbol_scanner.get_tradeable_symbols()
             max_symbols = getattr(scanner_cfg, 'max_symbols_to_trade', 3)
-            self._active_trading_pairs = tradeable[:max_symbols]
+            
+            # Filter and validate tradeable symbols
+            validated_tradeable: List[str] = []
+            for sym in tradeable[:max_symbols]:
+                if _is_valid_crypto_symbol(sym):
+                    validated_tradeable.append(sym)
+                else:
+                    logger.warning(f"[MAIN] Removed non-crypto symbol from active pairs: {sym}")
+            
+            self._active_trading_pairs = validated_tradeable
 
             # Always include symbols with open positions (don't abandon open trades)
+            # But only if they are valid crypto symbols (or crypto_only is disabled)
             open_symbols = {pos.symbol for pos in self.portfolio_tracker.get_positions()}
             for sym in open_symbols:
                 if sym not in self._active_trading_pairs:
-                    self._active_trading_pairs.append(sym)
+                    if not crypto_only or _is_valid_crypto_symbol(sym):
+                        self._active_trading_pairs.append(sym)
+                    else:
+                        logger.warning(f"[MAIN] Skipping non-crypto open position symbol: {sym}")
 
             rankings = self.symbol_scanner.get_ranking_summary()
             top3 = rankings[:3]

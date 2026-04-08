@@ -5,6 +5,7 @@ Fetches OHLCV data for both crypto and forex pairs with caching and retry logic.
 """
 
 import logging
+import re
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
@@ -19,6 +20,9 @@ from .config_loader import get_config, ConfigLoader
 
 
 logger = logging.getLogger(__name__)
+
+# Regex pattern for valid crypto/forex symbols (BASE/QUOTE format)
+VALID_SYMBOL_PATTERN = re.compile(r"^[A-Z]+/[A-Z]+$")
 
 
 @dataclass
@@ -83,6 +87,12 @@ class MarketDataFetcher:
         """Check if a symbol is a forex pair."""
         return symbol in self.FOREX_SYMBOLS
     
+    def _is_valid_symbol_format(self, symbol: str) -> bool:
+        """Check if symbol matches valid BASE/QUOTE format (e.g., BTC/USD)."""
+        if not isinstance(symbol, str):
+            return False
+        return bool(VALID_SYMBOL_PATTERN.match(symbol.strip()))
+    
     def _convert_symbol_for_crypto(self, symbol: str) -> str:
         """Convert symbol format for Alpaca Crypto API (keeps slash)."""
         # Alpaca crypto API requires BTC/USD format (WITH slash)
@@ -141,6 +151,11 @@ class MarketDataFetcher:
             DataFrame with columns: open, high, low, close, volume, vwap
             Index is datetime
         """
+        # Validate symbol format before making any API request
+        if not self._is_valid_symbol_format(symbol):
+            logger.warning(f"[MARKET_DATA] Rejecting invalid crypto symbol: {symbol}")
+            return None
+        
         cache_key = (symbol, interval)
         
         # Check cache
@@ -294,6 +309,11 @@ class MarketDataFetcher:
         Returns:
             QuoteData with bid, ask, and mid prices
         """
+        # Validate symbol format before making any API request
+        if not self._is_valid_symbol_format(symbol):
+            logger.warning(f"[MARKET_DATA] Rejecting invalid symbol for quote: {symbol}")
+            return None
+        
         # Check cache
         if symbol in self._quotes_cache:
             cached_quote, cache_time = self._quotes_cache[symbol]

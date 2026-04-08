@@ -3,6 +3,7 @@ Dynamic symbol scanner and ranker.
 """
 
 import logging
+import re
 import time
 from typing import List, Optional
 
@@ -16,6 +17,9 @@ from .political_signal_scanner import PoliticalSignalScanner
 logger = logging.getLogger(__name__)
 EPSILON = 1e-9
 
+# Regex pattern for valid crypto symbols (BASE/QUOTE format)
+CRYPTO_SYMBOL_PATTERN = re.compile(r"^[A-Z]+/[A-Z]+$")
+
 
 class SymbolScanner:
     """Scores and ranks candidate symbols for dynamic trade selection."""
@@ -26,10 +30,19 @@ class SymbolScanner:
             self.config = config
 
             scanner_cfg = getattr(self.config, "symbol_scanner", None)
+            self._crypto_only = bool(getattr(scanner_cfg, "crypto_only", True))
+            
             default_pool = list(getattr(self.config.markets, "crypto_pairs", ["BTC/USD", "ETH/USD"]))
-            self._candidate_pool: List[str] = list(
-                getattr(scanner_cfg, "candidate_pool", default_pool)
-            )
+            raw_pool = list(getattr(scanner_cfg, "candidate_pool", default_pool))
+            
+            # Filter out invalid symbols from candidate pool
+            self._candidate_pool: List[str] = []
+            for sym in raw_pool:
+                if self._is_valid_crypto_symbol(sym):
+                    self._candidate_pool.append(sym)
+                else:
+                    logger.warning(f"[SCANNER] Skipping invalid crypto symbol from pool: {sym}")
+            
             self._ranked_symbols: List[dict] = []
             self._last_scan_time: float = 0.0
             self._scan_interval: int = int(
@@ -51,6 +64,7 @@ class SymbolScanner:
             logger.error(f"[SCANNER] init error: {e}")
             self.market_data = market_data
             self.config = config
+            self._crypto_only = True
             self._candidate_pool = ["BTC/USD", "ETH/USD"]
             self._ranked_symbols = []
             self._last_scan_time = 0.0
@@ -62,6 +76,12 @@ class SymbolScanner:
             self._btc_bars_cache = None
             self._btc_bars_time = 0.0
             self._political_enabled = False
+
+    def _is_valid_crypto_symbol(self, symbol: str) -> bool:
+        """Check if symbol matches valid crypto format (BASE/QUOTE like BTC/USD)."""
+        if not isinstance(symbol, str):
+            return False
+        return bool(CRYPTO_SYMBOL_PATTERN.match(symbol.strip()))
 
     def _get_btc_change_pct(self) -> float:
         """Return short-term BTC change percent with scan-interval cache."""
@@ -113,6 +133,10 @@ class SymbolScanner:
             results: List[dict] = []
 
             for symbol in self._candidate_pool:
+                # Validate symbol format before processing
+                if not self._is_valid_crypto_symbol(symbol):
+                    logger.warning(f"[SCANNER] Skipping invalid crypto symbol: {symbol}")
+                    continue
                 try:
                     bars = self.market_data.fetch_bars(symbol, "5Min", 50)
                     if bars is None or bars.empty or len(bars) < 20:
@@ -294,20 +318,32 @@ class SymbolScanner:
             tradeable = [
                 row.get("symbol")
                 for row in self._ranked_symbols
-                if bool(row.get("tradeable", False))
+                if bool(row.get("tradeable", False)) and self._is_valid_crypto_symbol(row.get("symbol", ""))
             ]
 
+            # Filter fallback symbols as well
             if not tradeable and self._ranked_symbols:
-                return [str(self._ranked_symbols[0].get("symbol"))]
+                first_sym = str(self._ranked_symbols[0].get("symbol", ""))
+                if self._is_valid_crypto_symbol(first_sym):
+                    return [first_sym]
             if not tradeable and self._candidate_pool:
-                return [str(self._candidate_pool[0])]
-            return [str(sym) for sym in tradeable if sym]
+                first_pool = str(self._candidate_pool[0])
+                if self._is_valid_crypto_symbol(first_pool):
+                    return [first_pool]
+                return []
+            return [str(sym) for sym in tradeable if sym and self._is_valid_crypto_symbol(str(sym))]
 
         except Exception as e:
             logger.error(f"[SCANNER] get_tradeable_symbols error: {e}")
             if self._ranked_symbols:
-                return [str(self._ranked_symbols[0].get("symbol"))]
-            return list(self._candidate_pool[:1])
+                first_sym = str(self._ranked_symbols[0].get("symbol", ""))
+                if self._is_valid_crypto_symbol(first_sym):
+                    return [first_sym]
+            if self._candidate_pool:
+                first_pool = str(self._candidate_pool[0])
+                if self._is_valid_crypto_symbol(first_pool):
+                    return [first_pool]
+            return []
 
     def get_best_symbol(self) -> Optional[str]:
         """Return best currently tradeable symbol."""
