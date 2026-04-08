@@ -189,6 +189,19 @@ class MarketIntelligenceConfig:
 
 
 @dataclass
+class ExitEngineConfig:
+    """Trade exit engine configuration."""
+    enabled: bool = True
+    max_trade_hours: float = 8
+    partial_exit_r: float = 1.5
+    breakeven_r: float = 1.0
+    signal_reversal_exit: bool = True
+    dynamic_sizing: bool = True
+    min_risk_pct: float = 0.25
+    max_risk_pct: float = 2.5
+
+
+@dataclass
 class WebUIConfig:
     """Web dashboard settings."""
     enabled: bool = True
@@ -434,6 +447,19 @@ class ConfigLoader:
             relative_strength_lookback=intel_cfg.get("relative_strength_lookback", 10),
             breakout_detection_enabled=intel_cfg.get("breakout_detection_enabled", True),
             breakout_lookback_bars=intel_cfg.get("breakout_lookback_bars", 10),
+        )
+
+        # Exit engine config
+        exit_cfg = self._raw_config.get("exit_engine", {})
+        self.exit_engine = ExitEngineConfig(
+            enabled=exit_cfg.get("enabled", True),
+            max_trade_hours=exit_cfg.get("max_trade_hours", 8),
+            partial_exit_r=exit_cfg.get("partial_exit_r", 1.5),
+            breakeven_r=exit_cfg.get("breakeven_r", 1.0),
+            signal_reversal_exit=exit_cfg.get("signal_reversal_exit", True),
+            dynamic_sizing=exit_cfg.get("dynamic_sizing", True),
+            min_risk_pct=exit_cfg.get("min_risk_pct", 0.25),
+            max_risk_pct=exit_cfg.get("max_risk_pct", 2.5),
         )
         
         # Web UI config
