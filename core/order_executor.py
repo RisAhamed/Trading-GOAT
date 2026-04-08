@@ -67,8 +67,57 @@ class OrderExecutor:
         # Order history
         self._recent_orders: List[OrderResult] = []
         self._max_history = 50
+        self.portfolio_tracker = None
         
         logger.info("OrderExecutor initialized (PAPER TRADING)")
+
+    def calculate_dynamic_position_size(
+        self,
+        symbol: str,
+        current_price: float,
+        atr_pct: float,
+        portfolio_cash: float,
+        intel_modifier: int = 0,
+    ) -> float:
+        """
+        ATR-normalized position sizing.
+        Higher volatility = smaller position = same dollar risk per trade.
+        """
+        if current_price <= 0 or portfolio_cash <= 0:
+            return 0.0
+
+        base_risk_pct = getattr(self.config.risk, "base_risk_pct", 0.02)
+        max_position_pct = getattr(self.config.risk, "max_position_pct", 0.10)
+        atr_mult = getattr(self.config.risk, "atr_stop_multiplier", 1.5)
+        strong_intel_threshold = getattr(self.config.risk, "intel_positive_threshold", 20)
+        weak_intel_threshold = getattr(self.config.risk, "intel_negative_threshold", -10)
+        strong_intel_size_multiplier = getattr(self.config.risk, "intel_positive_size_multiplier", 1.25)
+        weak_intel_size_multiplier = getattr(self.config.risk, "intel_negative_size_multiplier", 0.5)
+
+        dollar_risk = portfolio_cash * base_risk_pct
+
+        atr_pct_value = float(atr_pct or 0.0)
+        # Standardized input: atr_pct is numeric percent points from indicators/scanner
+        # (example: 0.8 means 0.8%, and is converted to 0.008 for calculations).
+        atr_pct_frac = max(0.0, atr_pct_value / 100.0)
+        stop_distance_pct = max(atr_pct_frac * atr_mult, 0.005)
+
+        raw_size = dollar_risk / (current_price * stop_distance_pct)
+
+        if intel_modifier >= strong_intel_threshold:
+            raw_size *= strong_intel_size_multiplier
+        elif intel_modifier <= weak_intel_threshold:
+            raw_size *= weak_intel_size_multiplier
+
+        max_size = (portfolio_cash * max_position_pct) / current_price
+        final_size = min(raw_size, max_size)
+
+        logger.info(
+            f"[SIZING] {symbol}: ATR={atr_pct_frac*100:.2f}%, "
+            f"StopDist={stop_distance_pct*100:.2f}%, "
+            f"Size={final_size:.4f} (risk=${dollar_risk:.0f})"
+        )
+        return round(max(final_size, 0.0), 4)
     
     def _convert_symbol(self, symbol: str) -> str:
         """Convert symbol format for Alpaca API."""
@@ -421,6 +470,12 @@ class OrderExecutor:
                 result.filled_price = float(order.filled_avg_price)
             
             result.success = True
+
+            if "STOP" in str(reason).upper() and self.portfolio_tracker:
+                try:
+                    self.portfolio_tracker.record_stop_loss_exit(symbol)
+                except Exception as e:
+                    logger.warning(f"[COOLDOWN] Failed to record stop-loss exit for {symbol}: {e}")
             
             # Record trade exit in results tracker
             try:

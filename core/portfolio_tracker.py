@@ -5,6 +5,7 @@ Fetches positions from Alpaca and calculates metrics.
 """
 
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, date, timezone
 from typing import Any, Dict, List, Optional
@@ -123,6 +124,9 @@ class PortfolioTracker:
         self._today_trades = 0
         self._today_wins = 0
         self._today_losses = 0
+        self._stop_loss_exits: Dict[str, float] = {}  # {symbol: exit_timestamp}
+        risk_cfg = getattr(self.config, "risk", None)
+        self._re_entry_cooldown_seconds = getattr(risk_cfg, "re_entry_cooldown_seconds", 1800)
         
         logger.info("PortfolioTracker initialized")
     
@@ -502,3 +506,21 @@ class PortfolioTracker:
             return pos.stop_price if pos else None
         except Exception:
             return None
+
+    def record_stop_loss_exit(self, symbol: str) -> None:
+        """Called whenever a stop-loss triggered exit occurs."""
+        self._stop_loss_exits[symbol] = time.time()
+        cooldown_minutes = int(self._re_entry_cooldown_seconds // 60)
+        logger.warning(
+            f"[COOLDOWN] {symbol}: Stop-loss recorded, {cooldown_minutes:.0f}-min cooldown starts"
+        )
+
+    def is_in_cooldown(self, symbol: str) -> bool:
+        """Returns True if symbol is in post-stop-loss cooldown."""
+        exit_time = self._stop_loss_exits.get(symbol, 0)
+        cooldown_seconds = self._re_entry_cooldown_seconds
+        in_cooldown = (time.time() - exit_time) < cooldown_seconds
+        if in_cooldown:
+            remaining = cooldown_seconds - (time.time() - exit_time)
+            logger.info(f"[COOLDOWN] {symbol}: {remaining/60:.0f}min remaining")
+        return in_cooldown

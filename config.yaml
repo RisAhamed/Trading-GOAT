@@ -171,6 +171,9 @@ risk:
   
   # Risk Per Trade
   risk_per_trade_pct: 1.0          # % of portfolio risked per trade
+  base_risk_pct: 0.02              # Risk 2% of portfolio per trade
+  max_position_pct: 0.10           # Never more than 10% in one position
+  atr_stop_multiplier: 1.5         # Stop = 1.5x ATR below entry
   
   # ═══════════════════════════════════════════════════════════════════════════
   # RISK-REWARD RATIO SETTINGS
@@ -181,6 +184,8 @@ risk:
   
   # Daily Limits
   max_daily_loss_pct: 3.0          # Stop trading if daily loss exceeds this
+  max_weekly_loss_pct: 7.0         # Optional weekly limit
+  re_entry_cooldown_seconds: 1800  # 30-minute cooldown after stop-loss
   
   # AI Confidence Threshold
   min_signal_confidence: 0.50      # Min AI confidence to place trade (0.5 = 50%)
@@ -199,6 +204,11 @@ risk:
   min_profit_lock_pct: 0.3
   confluence_min_score: 70
   atr_volatility_max_multiplier: 2.5
+  partial_exit_tier1_pct: 1.0      # Take 33% profit at +1.0%
+  partial_exit_tier2_pct: 2.5      # Take 33% profit at +2.5%
+  partial_exit_tier1_fraction: 0.33
+  partial_exit_tier2_fraction: 0.33
+  partial_exit_enabled: true
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # SIGNAL GENERATION SETTINGS

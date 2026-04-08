@@ -105,6 +105,16 @@ class RiskConfig:
     min_profit_lock_pct: float = 0.3
     confluence_min_score: int = 70
     atr_volatility_max_multiplier: float = 2.5
+    base_risk_pct: float = 0.02
+    max_position_pct: float = 0.10
+    atr_stop_multiplier: float = 1.5
+    re_entry_cooldown_seconds: int = 1800
+    partial_exit_tier1_pct: float = 1.0
+    partial_exit_tier2_pct: float = 2.5
+    partial_exit_tier1_fraction: float = 0.33
+    partial_exit_tier2_fraction: float = 0.33
+    partial_exit_enabled: bool = True
+    max_weekly_loss_pct: float = 7.0
 
 
 @dataclass
@@ -368,6 +378,16 @@ class ConfigLoader:
             min_profit_lock_pct=risk_cfg.get("min_profit_lock_pct", 0.3),
             confluence_min_score=risk_cfg.get("confluence_min_score", 70),
             atr_volatility_max_multiplier=risk_cfg.get("atr_volatility_max_multiplier", 2.5),
+            base_risk_pct=risk_cfg.get("base_risk_pct", 0.02),
+            max_position_pct=risk_cfg.get("max_position_pct", 0.10),
+            atr_stop_multiplier=risk_cfg.get("atr_stop_multiplier", 1.5),
+            re_entry_cooldown_seconds=risk_cfg.get("re_entry_cooldown_seconds", 1800),
+            partial_exit_tier1_pct=risk_cfg.get("partial_exit_tier1_pct", 1.0),
+            partial_exit_tier2_pct=risk_cfg.get("partial_exit_tier2_pct", 2.5),
+            partial_exit_tier1_fraction=risk_cfg.get("partial_exit_tier1_fraction", 0.33),
+            partial_exit_tier2_fraction=risk_cfg.get("partial_exit_tier2_fraction", 0.33),
+            partial_exit_enabled=risk_cfg.get("partial_exit_enabled", True),
+            max_weekly_loss_pct=risk_cfg.get("max_weekly_loss_pct", 7.0),
         )
         
         # Signals config

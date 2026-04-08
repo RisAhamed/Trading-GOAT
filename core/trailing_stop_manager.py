@@ -39,6 +39,8 @@ class TrailingPosition:
     status: str                    # INIT | TRAILING | PROFIT_LOCK | WATCH | HARD | EXITING
     original_qty: float = 0.0      # Original quantity before DCA
     original_entry: float = 0.0    # Original entry before DCA
+    tier1_taken: bool = False
+    tier2_taken: bool = False
 
 
 @dataclass
@@ -568,6 +570,50 @@ class TrailingStopManager:
         except Exception as e:
             logger.error(f"Error recording DCA fill for {symbol}: {e}")
             return False
+
+    def check_partial_exits(
+        self, symbol: str, current_price: float, position_qty: float
+    ) -> List[Dict[str, Any]]:
+        """
+        Returns list of partial exit orders to execute.
+        Each dict: {"qty_fraction": float, "reason": str}
+
+        Ladder:
+          Tier 1: Exit 33% at +1.0% profit
+          Tier 2: Exit 33% at +2.5% profit
+          Tier 3: Remaining position handled by trailing stop.
+        """
+        if position_qty <= 0:
+            return []
+        if not getattr(self.config.risk, "partial_exit_enabled", True):
+            return []
+        pos = self.get_position(symbol)
+        if not pos or pos.entry_price <= 0:
+            return []
+
+        exit_orders: List[Dict[str, Any]] = []
+        profit_pct = (current_price - pos.entry_price) / pos.entry_price * 100
+
+        tier1_pct = getattr(self.config.risk, "partial_exit_tier1_pct", 1.0)
+        tier2_pct = getattr(self.config.risk, "partial_exit_tier2_pct", 2.5)
+        tier1_qty_fraction = getattr(self.config.risk, "partial_exit_tier1_fraction", 0.33)
+        tier2_qty_fraction = getattr(self.config.risk, "partial_exit_tier2_fraction", 0.33)
+
+        with self._lock:
+            tracked_pos = self._positions.get(symbol)
+            if tracked_pos and profit_pct >= tier1_pct and not tracked_pos.tier1_taken:
+                tracked_pos.tier1_taken = True
+                exit_orders.append(
+                    {"qty_fraction": tier1_qty_fraction, "reason": f"Tier1 +{profit_pct:.2f}%"}
+                )
+
+            if tracked_pos and profit_pct >= tier2_pct and not tracked_pos.tier2_taken:
+                tracked_pos.tier2_taken = True
+                exit_orders.append(
+                    {"qty_fraction": tier2_qty_fraction, "reason": f"Tier2 +{profit_pct:.2f}%"}
+                )
+
+        return exit_orders
     
     def remove_position(self, symbol: str) -> Optional[Dict[str, Any]]:
         """
@@ -639,6 +685,8 @@ class TrailingStopManager:
                     status=pos.status,
                     original_qty=pos.original_qty,
                     original_entry=pos.original_entry,
+                    tier1_taken=pos.tier1_taken,
+                    tier2_taken=pos.tier2_taken,
                 )
             return None
     
@@ -666,6 +714,8 @@ class TrailingStopManager:
                     status=pos.status,
                     original_qty=pos.original_qty,
                     original_entry=pos.original_entry,
+                    tier1_taken=pos.tier1_taken,
+                    tier2_taken=pos.tier2_taken,
                 ))
         return result
     

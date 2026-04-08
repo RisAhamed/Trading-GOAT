@@ -109,8 +109,38 @@ class RiskManager:
             wins=0,
             losses=0,
         )
+        self._daily_start_equity: float = 0.0
+        self._daily_start_date: str = ""
+        self._kill_switch_active: bool = False
         
         logger.info("RiskManager initialized")
+
+    def update_daily_equity(self, current_equity: float) -> None:
+        """Call at start of each trading cycle."""
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        # Reset at start of new day
+        if self._daily_start_date != today:
+            self._daily_start_date = today
+            self._daily_start_equity = current_equity
+            self._kill_switch_active = False
+            logger.info(f"[KILL SWITCH] Daily reset — starting equity: ${current_equity:,.2f}")
+
+        # Check drawdown
+        if self._daily_start_equity > 0:
+            daily_loss_pct = (
+                (self._daily_start_equity - current_equity) / self._daily_start_equity * 100
+            )
+            max_daily_loss = getattr(self.config.risk, "max_daily_loss_pct", 3.0)
+            if daily_loss_pct >= max_daily_loss and not self._kill_switch_active:
+                self._kill_switch_active = True
+                logger.critical(
+                    f"[KILL SWITCH] ACTIVATED — daily loss {daily_loss_pct:.2f}% "
+                    f"exceeds {max_daily_loss}% limit. No new trades today."
+                )
+
+    def is_kill_switch_active(self) -> bool:
+        return self._kill_switch_active
     
     def calculate_position_size(
         self,
