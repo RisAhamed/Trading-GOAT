@@ -16,6 +16,34 @@ class TradeExitEngine:
         self._position_entry_prices: dict = {}  # symbol → entry price
         self._partial_exits_done: set = set()  # symbols where 50% already taken
 
+    def register_position_entry(
+        self,
+        symbol: str,
+        entry_timestamp: float,
+        entry_price: float = 0.0,
+    ) -> None:
+        try:
+            if symbol:
+                self._position_entry_times[symbol] = float(entry_timestamp)
+                if float(entry_price) > 0:
+                    self._position_entry_prices[symbol] = float(entry_price)
+        except Exception:
+            pass
+
+    def cleanup_position(self, symbol: str) -> None:
+        try:
+            self._position_entry_times.pop(symbol, None)
+            self._position_entry_prices.pop(symbol, None)
+            self._partial_exits_done.discard(symbol)
+        except Exception:
+            pass
+
+    def get_entry_timestamp(self, symbol: str) -> float:
+        try:
+            return float(self._position_entry_times.get(symbol, 0.0))
+        except Exception:
+            return 0.0
+
     def evaluate_position_exit(
         self,
         position: dict,
@@ -138,8 +166,6 @@ class TradeExitEngine:
                 return float(base_risk_pct)
 
             wins = [t for t in last5 if float(t.get("pnl", 0)) > 0]
-            losses = [t for t in last5 if float(t.get("pnl", 0)) < 0]
-            _ = losses
             win_rate = len(wins) / len(last5)
 
             consecutive_losses = 0

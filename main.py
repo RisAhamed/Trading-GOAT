@@ -521,9 +521,7 @@ class AITrader:
 
     def _cleanup_exit_engine_state(self, symbol: str) -> None:
         try:
-            self.exit_engine._position_entry_times.pop(symbol, None)
-            self.exit_engine._position_entry_prices.pop(symbol, None)
-            self.exit_engine._partial_exits_done.discard(symbol)
+            self.exit_engine.cleanup_position(symbol)
         except Exception:
             pass
 
@@ -551,9 +549,11 @@ class AITrader:
                     entry_dt = self._position_entry_times.get(symbol, datetime.now())
                     entry_ts = entry_dt.timestamp()
 
-                    self.exit_engine._position_entry_times[symbol] = entry_ts
-                    if entry_price > 0:
-                        self.exit_engine._position_entry_prices[symbol] = entry_price
+                    self.exit_engine.register_position_entry(
+                        symbol=symbol,
+                        entry_timestamp=entry_ts,
+                        entry_price=entry_price,
+                    )
 
                     trend_bars = self.market_data.fetch_bars(
                         symbol,
@@ -967,10 +967,11 @@ class AITrader:
 
                         # Track entry time for max-hold enforcement
                         self._position_entry_times[symbol] = datetime.now()
-                        self.exit_engine._position_entry_times[symbol] = self._position_entry_times[
-                            symbol
-                        ].timestamp()
-                        self.exit_engine._position_entry_prices[symbol] = fill_price
+                        self.exit_engine.register_position_entry(
+                            symbol=symbol,
+                            entry_timestamp=self._position_entry_times[symbol].timestamp(),
+                            entry_price=fill_price,
+                        )
                     # ═══ END REGISTER WITH TRAILING STOP MANAGER ═══════════════
 
                     # Update position stops in tracker
