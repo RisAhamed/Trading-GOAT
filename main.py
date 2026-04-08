@@ -959,6 +959,8 @@ class AITrader:
                 )
 
                 # Dynamic ATR-normalized quantity sizing override
+                # Prefer scanner ATR% when available (same bars used for ranking);
+                # fallback to live entry timeframe ATR%.
                 atr_pct_from_meta = symbol_meta.get("atr_pct")
                 atr_pct = (
                     atr_pct_from_meta

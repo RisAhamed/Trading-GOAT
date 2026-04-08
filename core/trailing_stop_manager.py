@@ -599,17 +599,19 @@ class TrailingStopManager:
         tier1_qty_fraction = getattr(self.config.risk, "partial_exit_tier1_fraction", 0.33)
         tier2_qty_fraction = getattr(self.config.risk, "partial_exit_tier2_fraction", 0.33)
 
-        if profit_pct >= tier1_pct and not pos.tier1_taken:
-            exit_orders.append({"qty_fraction": tier1_qty_fraction, "reason": f"Tier1 +{profit_pct:.2f}%"})
-            with self._lock:
-                if symbol in self._positions:
-                    self._positions[symbol].tier1_taken = True
+        with self._lock:
+            tracked_pos = self._positions.get(symbol)
+            if tracked_pos and profit_pct >= tier1_pct and not tracked_pos.tier1_taken:
+                tracked_pos.tier1_taken = True
+                exit_orders.append(
+                    {"qty_fraction": tier1_qty_fraction, "reason": f"Tier1 +{profit_pct:.2f}%"}
+                )
 
-        if profit_pct >= tier2_pct and not pos.tier2_taken:
-            exit_orders.append({"qty_fraction": tier2_qty_fraction, "reason": f"Tier2 +{profit_pct:.2f}%"})
-            with self._lock:
-                if symbol in self._positions:
-                    self._positions[symbol].tier2_taken = True
+            if tracked_pos and profit_pct >= tier2_pct and not tracked_pos.tier2_taken:
+                tracked_pos.tier2_taken = True
+                exit_orders.append(
+                    {"qty_fraction": tier2_qty_fraction, "reason": f"Tier2 +{profit_pct:.2f}%"}
+                )
 
         return exit_orders
     

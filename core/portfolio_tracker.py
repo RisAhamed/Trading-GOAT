@@ -510,7 +510,7 @@ class PortfolioTracker:
     def record_stop_loss_exit(self, symbol: str) -> None:
         """Called whenever a stop-loss triggered exit occurs."""
         self._stop_loss_exits[symbol] = time.time()
-        cooldown_minutes = self._re_entry_cooldown_seconds / 60
+        cooldown_minutes = int(self._re_entry_cooldown_seconds // 60)
         logger.warning(
             f"[COOLDOWN] {symbol}: Stop-loss recorded, {cooldown_minutes:.0f}-min cooldown starts"
         )
