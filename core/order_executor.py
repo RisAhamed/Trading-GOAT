@@ -459,6 +459,137 @@ class OrderExecutor:
             self._recent_orders.pop(0)
         
         return result
+
+    def close_position_partial(
+        self,
+        symbol: str,
+        exit_pct: float,
+        reason: str = "PARTIAL_EXIT",
+    ) -> OrderResult:
+        """
+        Close a fraction of an open position with a market order.
+        """
+        timestamp = datetime.now().isoformat()
+        result = OrderResult(
+            success=False,
+            order_id=None,
+            symbol=symbol,
+            side="close_partial",
+            qty=0.0,
+            filled_price=None,
+            status="pending",
+            error_message="",
+            timestamp=timestamp,
+        )
+        try:
+            if exit_pct <= 0:
+                result.error_message = "exit_pct must be > 0"
+                result.status = "rejected"
+                return result
+
+            pct = min(1.0, max(0.0, float(exit_pct)))
+            alpaca_symbol = symbol.replace("/", "")
+            open_pos = self.client.get_open_position(alpaca_symbol)
+
+            pos_qty_signed = float(getattr(open_pos, "qty", 0) or 0)
+            pos_side = str(getattr(open_pos, "side", "long")).lower()
+            pos_qty = abs(pos_qty_signed)
+            if pos_qty <= 0:
+                result.error_message = "No position quantity available"
+                result.status = "no_position"
+                return result
+
+            close_qty = max(0.0, pos_qty * pct)
+            if close_qty <= 0:
+                result.error_message = "Computed close quantity is zero"
+                result.status = "rejected"
+                return result
+
+            order_side = OrderSide.SELL if pos_side == "long" else OrderSide.BUY
+            order_request = MarketOrderRequest(
+                symbol=alpaca_symbol,
+                qty=close_qty,
+                side=order_side,
+                time_in_force=TimeInForce.GTC,
+            )
+            order = self.client.submit_order(order_request)
+
+            result.order_id = str(order.id) if hasattr(order, "id") else None
+            result.status = str(order.status) if hasattr(order, "status") else "submitted"
+            result.qty = float(close_qty)
+            if hasattr(order, "filled_avg_price") and order.filled_avg_price:
+                result.filled_price = float(order.filled_avg_price)
+            result.success = True
+
+            logger.info(
+                f"Partial close submitted: {symbol} qty={close_qty:.6f} "
+                f"({pct*100:.1f}%) reason={reason}"
+            )
+        except APIError as e:
+            result.error_message = self._handle_api_error(e)
+            result.status = "error"
+            logger.error(f"Error partially closing {symbol}: {result.error_message}")
+        except Exception as e:
+            result.error_message = str(e)
+            result.status = "error"
+            logger.error(f"Error partially closing {symbol}: {e}")
+
+        self._recent_orders.append(result)
+        if len(self._recent_orders) > self._max_history:
+            self._recent_orders.pop(0)
+        return result
+
+    def move_stop_to_breakeven(self, symbol: str, breakeven_price: float) -> bool:
+        """
+        Best-effort stop update: cancel open stop orders and place a new stop at breakeven.
+        """
+        try:
+            if breakeven_price <= 0:
+                return False
+
+            alpaca_symbol = symbol.replace("/", "")
+            open_pos = self.client.get_open_position(alpaca_symbol)
+            pos_qty_signed = float(getattr(open_pos, "qty", 0) or 0)
+            pos_side = str(getattr(open_pos, "side", "long")).lower()
+            pos_qty = abs(pos_qty_signed)
+            if pos_qty <= 0:
+                return False
+
+            try:
+                orders = self.client.get_orders()
+                for o in orders:
+                    o_symbol = str(getattr(o, "symbol", ""))
+                    o_type = str(getattr(o, "type", "")).lower()
+                    o_status = str(getattr(o, "status", "")).lower()
+                    if (
+                        o_symbol.replace("/", "") == alpaca_symbol
+                        and o_type == "stop"
+                        and o_status in {"new", "accepted", "pending_new", "partially_filled"}
+                    ):
+                        try:
+                            self.client.cancel_order_by_id(str(o.id))
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+            stop_side = "sell" if pos_side == "long" else "buy"
+            new_stop_id = self._place_stop_loss(
+                symbol=alpaca_symbol,
+                qty=pos_qty,
+                stop_price=breakeven_price,
+                side=stop_side,
+            )
+            if new_stop_id:
+                logger.info(
+                    f"Breakeven stop updated for {symbol}: stop=${breakeven_price:.4f} "
+                    f"(order={new_stop_id})"
+                )
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error moving stop to breakeven for {symbol}: {e}")
+            return False
     
     def _place_stop_loss(
         self,

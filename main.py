@@ -30,6 +30,7 @@ from core.trailing_stop_manager import TrailingStopManager
 from core.position_monitor import PositionMonitor
 from core.market_regime import MarketRegimeDetector
 from core.bearish_scalp_strategy import BearishScalpStrategy
+from core.trade_exit_engine import TradeExitEngine
 from dashboard.terminal_ui import TerminalUI
 from dashboard.web_ui import app as web_app
 
@@ -65,6 +66,7 @@ class AITrader:
         self.risk_manager = RiskManager(self.config)
         self.order_executor = OrderExecutor(self.config)
         self.portfolio_tracker = PortfolioTracker(self.config)
+        self.exit_engine = TradeExitEngine(self.config)
         self.results_tracker = get_results_tracker()  # Trade results tracking
         self.ui = TerminalUI(self.config)
 
@@ -268,6 +270,7 @@ class AITrader:
                     exits_made += 1
                     if symbol in self._position_entry_times:
                         del self._position_entry_times[symbol]
+                    self._cleanup_exit_engine_state(symbol)
                     logger.info(f"✅ Quick profit taken: {symbol} P&L=${unrealized_pnl:.2f}")
                     self.ui.add_log("SUCCESS", f"Closed {symbol} for ${unrealized_pnl:.2f} profit")
                     
@@ -355,6 +358,7 @@ class AITrader:
                         logger.info(f"[COOLDOWN] {symbol}: {cooldown_minutes}min after regime loss exit")
                         self.ui.add_log("WARN", f"⏳ {symbol} cooldown: {cooldown_minutes}min")
                         self._position_entry_times.pop(symbol, None)
+                        self._cleanup_exit_engine_state(symbol)
 
                 except Exception as e:
                     logger.error(f"[REGIME EXIT] Error processing {symbol}: {e}")
@@ -437,6 +441,7 @@ class AITrader:
                     if result.success:
                         exits += 1
                         self._position_entry_times.pop(symbol, None)
+                        self._cleanup_exit_engine_state(symbol)
 
                         if unrealized_pnl < 0:
                             cooldown_minutes = getattr(self.config.risk, 'loss_cooldown_minutes', 10)
@@ -513,6 +518,122 @@ class AITrader:
         except Exception as e:
             logger.error(f"[PROFIT-LOCK] Fatal error: {e}")
         return updates
+
+    def _cleanup_exit_engine_state(self, symbol: str) -> None:
+        try:
+            self.exit_engine.cleanup_position(symbol)
+        except Exception:
+            pass
+
+    def _evaluate_open_position_exits(self) -> int:
+        """
+        Re-evaluate open positions each loop and execute exit-engine actions.
+        """
+        actions_taken = 0
+        try:
+            exit_cfg = getattr(self.config, "exit_engine", None)
+            if not bool(getattr(exit_cfg, "enabled", True)):
+                return 0
+
+            positions = self.portfolio_tracker.get_positions()
+            for pos in positions:
+                try:
+                    symbol = pos.symbol
+                    side = getattr(pos, "side", "long")
+                    entry_price = float(getattr(pos, "entry_price", 0) or 0)
+                    stop_price = float(getattr(pos, "stop_price", 0) or 0)
+                    unrealized_pnl_pct = float(getattr(pos, "unrealized_pnl_pct", 0) or 0)
+
+                    if symbol not in self._position_entry_times:
+                        self._position_entry_times[symbol] = datetime.now()
+                    entry_dt = self._position_entry_times.get(symbol, datetime.now())
+                    entry_ts = entry_dt.timestamp()
+
+                    self.exit_engine.register_position_entry(
+                        symbol=symbol,
+                        entry_timestamp=entry_ts,
+                        entry_price=entry_price,
+                    )
+
+                    trend_bars = self.market_data.fetch_bars(
+                        symbol,
+                        self.config.timeframes.trend_interval,
+                        self.config.timeframes.trend_lookback_bars,
+                    )
+                    entry_bars = self.market_data.fetch_bars(
+                        symbol,
+                        self.config.timeframes.entry_interval,
+                        self.config.timeframes.entry_lookback_bars,
+                    )
+                    if trend_bars is None or entry_bars is None or entry_bars.empty:
+                        continue
+
+                    indicators = self.indicators.calculate_for_symbol(
+                        symbol=symbol,
+                        trend_bars=trend_bars,
+                        entry_bars=entry_bars,
+                    )
+                    current_signal = self.signal_engine.quick_signal(indicators)
+                    position_payload = {
+                        "symbol": symbol,
+                        "side": side,
+                        "avg_entry_price": entry_price,
+                        "stop_price": stop_price,
+                        "unrealized_plpc": unrealized_pnl_pct / 100.0,
+                    }
+                    decision = self.exit_engine.evaluate_position_exit(
+                        position=position_payload,
+                        current_bars=entry_bars,
+                        current_signal=current_signal,
+                        entry_time=entry_ts,
+                    )
+
+                    action = str(decision.get("action", "HOLD"))
+                    reason = str(decision.get("reason", "EXIT_ENGINE"))
+                    exit_pct = float(decision.get("exit_pct", 0.0) or 0.0)
+
+                    if action == "EXIT_FULL":
+                        result = self.order_executor.close_position(symbol, reason=reason)
+                        if result.success:
+                            actions_taken += 1
+                            self._position_entry_times.pop(symbol, None)
+                            self._cleanup_exit_engine_state(symbol)
+                            logger.info(f"[EXIT ENGINE] Full exit {symbol}: {reason}")
+                            self.ui.add_log("WARN", f"🚪 Exit full {symbol}: {reason}")
+
+                    elif action == "EXIT_PARTIAL":
+                        result = self.order_executor.close_position_partial(
+                            symbol=symbol,
+                            exit_pct=exit_pct if exit_pct > 0 else 0.5,
+                            reason=reason,
+                        )
+                        if result.success:
+                            actions_taken += 1
+                            if entry_price > 0:
+                                moved = self.order_executor.move_stop_to_breakeven(symbol, entry_price)
+                                if moved:
+                                    self.portfolio_tracker.set_position_stops(symbol, entry_price, None)
+                                    if hasattr(self.trailing_manager, "update_floor_price"):
+                                        self.trailing_manager.update_floor_price(symbol, entry_price)
+                            logger.info(f"[EXIT ENGINE] Partial exit {symbol}: {reason}")
+                            self.ui.add_log("INFO", f"✂️ Exit partial {symbol}: {reason}")
+
+                    elif action == "MOVE_STOP_BREAKEVEN":
+                        if entry_price > 0:
+                            moved = self.order_executor.move_stop_to_breakeven(symbol, entry_price)
+                            if moved:
+                                actions_taken += 1
+                                self.portfolio_tracker.set_position_stops(symbol, entry_price, None)
+                                if hasattr(self.trailing_manager, "update_floor_price"):
+                                    self.trailing_manager.update_floor_price(symbol, entry_price)
+                                logger.info(f"[EXIT ENGINE] Breakeven stop moved {symbol}: {reason}")
+                                self.ui.add_log("INFO", f"🛡️ Stop→breakeven {symbol}: {reason}")
+                except Exception as e:
+                    logger.error(f"[EXIT ENGINE] Error evaluating {getattr(pos, 'symbol', '?')}: {e}")
+                    continue
+        except Exception as e:
+            logger.error(f"[EXIT ENGINE] Fatal cycle error: {e}")
+        return actions_taken
 
     def _pre_entry_analysis(
         self,
@@ -846,6 +967,11 @@ class AITrader:
 
                         # Track entry time for max-hold enforcement
                         self._position_entry_times[symbol] = datetime.now()
+                        self.exit_engine.register_position_entry(
+                            symbol=symbol,
+                            entry_timestamp=self._position_entry_times[symbol].timestamp(),
+                            entry_price=fill_price,
+                        )
                     # ═══ END REGISTER WITH TRAILING STOP MANAGER ═══════════════
 
                     # Update position stops in tracker
@@ -876,6 +1002,7 @@ class AITrader:
                             logger.info(f"[COOLDOWN] {symbol}: {cooldown_minutes}min cooldown after loss close")
                             self.ui.add_log("WARN", f"⏳ {symbol} cooldown: {cooldown_minutes}min after loss")
                     self._position_entry_times.pop(symbol, None)
+                    self._cleanup_exit_engine_state(symbol)
                     if current_position:
                         self.ui.add_trade(
                             action="CLOSE",
@@ -1009,6 +1136,11 @@ class AITrader:
                     # 5) Exit losing longs on BEARISH regime
                     regime_exits = self._check_regime_change_exits()
                     if regime_exits > 0:
+                        portfolio_state = self.portfolio_tracker.update()
+
+                    # 6) Exit engine re-evaluation (full/partial/breakeven)
+                    exit_actions = self._evaluate_open_position_exits()
+                    if exit_actions > 0:
                         portfolio_state = self.portfolio_tracker.update()
 
                     # 7) Force-exit stale positions

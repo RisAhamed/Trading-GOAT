@@ -78,11 +78,39 @@ symbol_scanner:
     - "SOL/USD"
     - "AVAX/USD"
     - "DOGE/USD"
-    - "LNK/USD"
     - "LTC/USD"
-    - "MATIC/USD"
   btc_correlation_guard: true       # Apply BTC penalty to altcoins when BTC drops
   log_rankings: true                # Log full ranking table each scan
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# MARKET INTELLIGENCE — External signals layer (all free, no API keys required)
+# ─────────────────────────────────────────────────────────────────────────────────
+market_intelligence:
+  enabled: true
+  # Fear & Greed: alternative.me — completely free, no key
+  fear_greed_enabled: true
+  # Large-trade pressure: Kraken public REST API — no key, no account, no wallet
+  whale_tracking_enabled: true
+  min_whale_usd: 500000            # Only trades >= $500,000 USD count as "whale"
+  # Relative Strength vs BTC: uses existing bar data — zero API cost
+  relative_strength_enabled: true
+  relative_strength_lookback: 10   # Number of bars for RS calculation
+  # Breakout Detection: uses existing bar data — zero API cost
+  breakout_detection_enabled: true
+  breakout_lookback_bars: 10       # Bars to define consolidation range
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# TRADE EXIT ENGINE — Post-entry profit-protection layer
+# ─────────────────────────────────────────────────────────────────────────────────
+exit_engine:
+  enabled: true
+  max_trade_hours: 8         # Exit dead trades after 8 hours with <0.3% move
+  partial_exit_r: 1.5        # Take 50% profit at 1.5× risk distance
+  breakeven_r: 1.0           # Move stop to breakeven at 1× risk distance
+  signal_reversal_exit: true # Exit immediately when entry signal flips
+  dynamic_sizing: true       # Scale position size with win/loss streaks
+  min_risk_pct: 0.25         # Minimum risk per trade (safety floor)
+  max_risk_pct: 2.5          # Maximum risk per trade (greed cap)
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # POLITICAL DISCLOSURE SIGNALS

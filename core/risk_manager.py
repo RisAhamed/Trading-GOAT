@@ -11,6 +11,8 @@ from datetime import datetime, date
 from typing import Any, Dict, List, Optional
 
 from .config_loader import get_config, ConfigLoader
+from .trade_results import get_results_tracker
+from .trade_exit_engine import TradeExitEngine
 
 
 logger = logging.getLogger(__name__)
@@ -90,6 +92,7 @@ class RiskManager:
         self.max_daily_loss_pct = self.config.risk.max_daily_loss_pct
         self.max_portfolio_exposure_pct = self.config.risk.max_portfolio_exposure_pct
         self.max_symbol_exposure_pct = self.config.risk.max_symbol_exposure_pct
+        self.exit_engine = TradeExitEngine(self.config)
         
         # Trading state
         self._is_halted = False
@@ -159,14 +162,36 @@ class RiskManager:
             return result
         
         try:
+            exit_cfg = getattr(self.config, "exit_engine", None)
+            dynamic_sizing_enabled = bool(getattr(exit_cfg, "dynamic_sizing", True))
+
+            dynamic_risk_pct = float(self.risk_per_trade_pct)
+            if dynamic_sizing_enabled:
+                try:
+                    tracker = get_results_tracker()
+                    recent_trades = [
+                        {"pnl": float(t.realized_pnl or 0.0)}
+                        for t in list(getattr(tracker, "trades", []))
+                        if getattr(t, "status", "") == "CLOSED"
+                    ]
+                    dynamic_risk_pct = float(
+                        self.exit_engine.calculate_dynamic_position_size(
+                            self.risk_per_trade_pct,
+                            recent_trades,
+                        )
+                    )
+                except Exception as e:
+                    logger.debug(f"Dynamic risk sizing unavailable, using base risk: {e}")
+                    dynamic_risk_pct = float(self.risk_per_trade_pct)
+
             # ═══ TRAILING STOP INTEGRATION ═══════════════════════════════════════
             # Check if trailing stop is enabled - use those settings for stop loss
             trailing_config = self.config._raw_config.get("trailing_stop", {})
             trailing_enabled = trailing_config.get("enabled", False)
 
             # Calculate risk amount in USD
-            # risk_per_trade_pct is the % of portfolio we're willing to lose on this trade
-            risk_amount_usd = portfolio_value * (self.risk_per_trade_pct / 100)
+            # dynamic_risk_pct is the % of portfolio we're willing to lose on this trade
+            risk_amount_usd = portfolio_value * (dynamic_risk_pct / 100)
 
             # Calculate stop loss distance
             if trailing_enabled:
