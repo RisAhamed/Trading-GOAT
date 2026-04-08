@@ -206,6 +206,8 @@ risk:
   atr_volatility_max_multiplier: 2.5
   partial_exit_tier1_pct: 1.0      # Take 33% profit at +1.0%
   partial_exit_tier2_pct: 2.5      # Take 33% profit at +2.5%
+  partial_exit_tier1_fraction: 0.33
+  partial_exit_tier2_fraction: 0.33
   partial_exit_enabled: true
 
 # ─────────────────────────────────────────────────────────────────────────────────

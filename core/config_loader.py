@@ -111,6 +111,8 @@ class RiskConfig:
     re_entry_cooldown_seconds: int = 1800
     partial_exit_tier1_pct: float = 1.0
     partial_exit_tier2_pct: float = 2.5
+    partial_exit_tier1_fraction: float = 0.33
+    partial_exit_tier2_fraction: float = 0.33
     partial_exit_enabled: bool = True
     max_weekly_loss_pct: float = 7.0
 
@@ -382,6 +384,8 @@ class ConfigLoader:
             re_entry_cooldown_seconds=risk_cfg.get("re_entry_cooldown_seconds", 1800),
             partial_exit_tier1_pct=risk_cfg.get("partial_exit_tier1_pct", 1.0),
             partial_exit_tier2_pct=risk_cfg.get("partial_exit_tier2_pct", 2.5),
+            partial_exit_tier1_fraction=risk_cfg.get("partial_exit_tier1_fraction", 0.33),
+            partial_exit_tier2_fraction=risk_cfg.get("partial_exit_tier2_fraction", 0.33),
             partial_exit_enabled=risk_cfg.get("partial_exit_enabled", True),
             max_weekly_loss_pct=risk_cfg.get("max_weekly_loss_pct", 7.0),
         )

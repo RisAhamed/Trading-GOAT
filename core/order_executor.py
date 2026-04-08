@@ -97,9 +97,8 @@ class OrderExecutor:
         dollar_risk = portfolio_cash * base_risk_pct
 
         atr_pct_value = float(atr_pct or 0.0)
-        # Scanner/meta values are usually "percent points" (e.g., 0.8 for 0.8%).
-        # Normalize values >=1.0 as percent points, otherwise treat as fraction.
-        atr_pct_frac = atr_pct_value / 100.0 if atr_pct_value >= 1 else atr_pct_value
+        # Standardized input: atr_pct must be percent points (e.g., 0.8 for 0.8%).
+        atr_pct_frac = max(0.0, atr_pct_value / 100.0)
         stop_distance_pct = max(atr_pct_frac * atr_mult, 0.005)
 
         raw_size = dollar_risk / (current_price * stop_distance_pct)

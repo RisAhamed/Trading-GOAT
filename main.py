@@ -864,7 +864,7 @@ class AITrader:
                     return None, symbol_indicators
                 if current_regime == "BEARISH":
                     effective_min_confidence = (
-                        getattr(self.config.risk, "min_signal_confidence", 0.65) + BEARISH_CONFIDENCE_BONUS
+                        getattr(self.config.risk, "min_signal_confidence", 0.50) + BEARISH_CONFIDENCE_BONUS
                     )
                     symbol_meta["regime"] = current_regime
                     symbol_meta["min_confidence_override"] = effective_min_confidence
@@ -959,8 +959,8 @@ class AITrader:
                 )
 
                 # Dynamic ATR-normalized quantity sizing override
-                atr_pct_meta = symbol_meta.get("atr_pct")
-                atr_pct = atr_pct_meta if atr_pct_meta is not None else getattr(symbol_indicators.entry_tf, "atr_percent", 0.0)
+                atr_pct_from_meta = symbol_meta.get("atr_pct")
+                atr_pct = atr_pct_from_meta if atr_pct_from_meta is not None else getattr(symbol_indicators.entry_tf, "atr_percent", 0.0)
                 intel_modifier = int(symbol_meta.get("intel_modifier", 0) or 0)
                 dynamic_qty = self.order_executor.calculate_dynamic_position_size(
                     symbol=symbol,

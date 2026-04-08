@@ -125,6 +125,8 @@ class PortfolioTracker:
         self._today_wins = 0
         self._today_losses = 0
         self._stop_loss_exits: Dict[str, float] = {}  # {symbol: exit_timestamp}
+        risk_cfg = getattr(self.config, "risk", None)
+        self._re_entry_cooldown_seconds = getattr(risk_cfg, "re_entry_cooldown_seconds", 1800)
         
         logger.info("PortfolioTracker initialized")
     
@@ -513,8 +515,7 @@ class PortfolioTracker:
     def is_in_cooldown(self, symbol: str) -> bool:
         """Returns True if symbol is in post-stop-loss cooldown."""
         exit_time = self._stop_loss_exits.get(symbol, 0)
-        risk_cfg = getattr(self.config, "risk", None)
-        cooldown_seconds = getattr(risk_cfg, "re_entry_cooldown_seconds", 1800)
+        cooldown_seconds = self._re_entry_cooldown_seconds
         in_cooldown = (time.time() - exit_time) < cooldown_seconds
         if in_cooldown:
             remaining = cooldown_seconds - (time.time() - exit_time)

@@ -444,9 +444,10 @@ class SignalEngine:
 
         # CONFIRMATION 3: Volume
         vol_ratio = symbol_meta.get("vol_ratio", 1.0)
-        volume_ok = vol_ratio >= 1.2
+        min_vol_ratio = getattr(self.config.signals, "triple_confirmation_min_vol_ratio", 1.2)
+        volume_ok = vol_ratio >= min_vol_ratio
         if not volume_ok:
-            reasons.append(f"Low volume: {vol_ratio:.2f}x (need 1.2x)")
+            reasons.append(f"Low volume: {vol_ratio:.2f}x (need {min_vol_ratio:.1f}x)")
 
         all_passed = trend_ok and momentum_ok and volume_ok
         status_message = " | ".join(reasons) if reasons else f"All confirmations passed for {symbol}"

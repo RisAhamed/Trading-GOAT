@@ -585,6 +585,8 @@ class TrailingStopManager:
         """
         if position_qty <= 0:
             return []
+        if not getattr(self.config.risk, "partial_exit_enabled", True):
+            return []
         pos = self.get_position(symbol)
         if not pos or pos.entry_price <= 0:
             return []
