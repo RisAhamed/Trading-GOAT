@@ -78,11 +78,26 @@ symbol_scanner:
     - "SOL/USD"
     - "AVAX/USD"
     - "DOGE/USD"
-    - "LNK/USD"
     - "LTC/USD"
-    - "MATIC/USD"
   btc_correlation_guard: true       # Apply BTC penalty to altcoins when BTC drops
   log_rankings: true                # Log full ranking table each scan
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# MARKET INTELLIGENCE — External signals layer (all free, no API keys required)
+# ─────────────────────────────────────────────────────────────────────────────────
+market_intelligence:
+  enabled: true
+  # Fear & Greed: alternative.me — completely free, no key
+  fear_greed_enabled: true
+  # Large-trade pressure: Kraken public REST API — no key, no account, no wallet
+  whale_tracking_enabled: true
+  min_whale_usd: 500000            # Only trades >= $500,000 USD count as "whale"
+  # Relative Strength vs BTC: uses existing bar data — zero API cost
+  relative_strength_enabled: true
+  relative_strength_lookback: 10   # Number of bars for RS calculation
+  # Breakout Detection: uses existing bar data — zero API cost
+  breakout_detection_enabled: true
+  breakout_lookback_bars: 10       # Bars to define consolidation range
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # POLITICAL DISCLOSURE SIGNALS

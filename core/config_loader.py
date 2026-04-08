@@ -176,6 +176,19 @@ class PoliticalSignalConfig:
 
 
 @dataclass
+class MarketIntelligenceConfig:
+    """Market intelligence external signal layer configuration."""
+    enabled: bool = True
+    fear_greed_enabled: bool = True
+    whale_tracking_enabled: bool = True
+    min_whale_usd: float = 500000.0
+    relative_strength_enabled: bool = True
+    relative_strength_lookback: int = 10
+    breakout_detection_enabled: bool = True
+    breakout_lookback_bars: int = 10
+
+
+@dataclass
 class WebUIConfig:
     """Web dashboard settings."""
     enabled: bool = True
@@ -408,6 +421,19 @@ class ConfigLoader:
             min_trade_size=pol_cfg.get("min_trade_size", 1000),
             apply_to_crypto=pol_cfg.get("apply_to_crypto", True),
             log_signals=pol_cfg.get("log_signals", True),
+        )
+
+        # Market intelligence config
+        intel_cfg = self._raw_config.get("market_intelligence", {})
+        self.market_intelligence = MarketIntelligenceConfig(
+            enabled=intel_cfg.get("enabled", True),
+            fear_greed_enabled=intel_cfg.get("fear_greed_enabled", True),
+            whale_tracking_enabled=intel_cfg.get("whale_tracking_enabled", True),
+            min_whale_usd=intel_cfg.get("min_whale_usd", 500000),
+            relative_strength_enabled=intel_cfg.get("relative_strength_enabled", True),
+            relative_strength_lookback=intel_cfg.get("relative_strength_lookback", 10),
+            breakout_detection_enabled=intel_cfg.get("breakout_detection_enabled", True),
+            breakout_lookback_bars=intel_cfg.get("breakout_lookback_bars", 10),
         )
         
         # Web UI config

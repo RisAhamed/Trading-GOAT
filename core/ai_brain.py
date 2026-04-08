@@ -360,6 +360,37 @@ Note: Congress members often receive sector briefings before public news.
 Factor this as a secondary confirmation signal, not a primary one.
 """
 
+        # ── Market Intelligence Context Block ─────────────────────────────
+        fear_greed = symbol_meta.get("fear_greed", 50)
+        whale_flow = symbol_meta.get("whale_flow", "NEUTRAL")
+        rs = symbol_meta.get("relative_strength", 0.0)
+        bo = symbol_meta.get("breakout_type", "NONE")
+        intel_summary = symbol_meta.get("intel_summary", "")
+
+        if intel_summary:
+            prompt += f"""
+=== MARKET INTELLIGENCE SIGNALS ===
+Fear & Greed Index: {fear_greed}/100
+  → {"BUY opportunity — market oversold" if fear_greed < 30 else "SELL caution — market overbought" if fear_greed > 70 else "Neutral market sentiment"}
+Large-Trade Buy/Sell Pressure (Kraken, last 1000 trades): {whale_flow}
+  → {"Aggressive buyers dominating large trades — bullish accumulation signal" if whale_flow == "ACCUMULATION"
+     else "Aggressive sellers dominating large trades — bearish distribution signal" if whale_flow == "DISTRIBUTION"
+     else "Balanced large-trade activity — no directional bias"}
+Relative Strength vs BTC: {rs:+.2f}%
+  → {"Outperforming BTC — strong standalone momentum, prefer this over BTC" if rs > 0.5
+     else "Underperforming BTC — weak relative strength, proceed with caution" if rs < -0.5
+     else "Tracking BTC closely — no relative edge"}
+Breakout Signal: {bo}
+  → {"CONFIRMED BULLISH breakout with volume — high-probability long setup" if bo == "BULLISH"
+     else "BEARISH breakdown with volume — do NOT buy, consider avoiding" if bo == "BEARISH"
+     else "No breakout — price still within consolidation range"}
+Intel Summary: {intel_summary}
+
+Use these as high-conviction supporting evidence alongside technicals.
+Strongest possible BUY setup: Breakout=BULLISH + Flow=ACCUMULATION + FG<30.
+"""
+        # ── End Market Intelligence Context Block ─────────────────────────
+
         # Get scalping settings from config
         scalping_mode = self.config.signals.scalping_mode
         quick_profit_pct = self.config.risk.quick_profit_threshold

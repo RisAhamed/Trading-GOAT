@@ -38,6 +38,10 @@ class SymbolScanner:
             self._btc_price_cache: dict = {}
 
             self.political_scanner = PoliticalSignalScanner(config)
+            from .market_intelligence import MarketIntelligence
+            self.intelligence = MarketIntelligence(config)
+            self._btc_bars_cache: Optional[pd.DataFrame] = None
+            self._btc_bars_time: float = 0.0
             political_cfg = getattr(config, "political_signals", None)
             if political_cfg is None or bool(getattr(political_cfg, "enabled", False)):
                 self._political_enabled = True
@@ -53,6 +57,10 @@ class SymbolScanner:
             self._scan_interval = 120
             self._btc_price_cache = {}
             self.political_scanner = PoliticalSignalScanner(config)
+            from .market_intelligence import MarketIntelligence
+            self.intelligence = MarketIntelligence(config)
+            self._btc_bars_cache = None
+            self._btc_bars_time = 0.0
             self._political_enabled = False
 
     def _get_btc_change_pct(self) -> float:
@@ -93,6 +101,15 @@ class SymbolScanner:
             )
 
             btc_change_pct = self._get_btc_change_pct() if btc_guard_enabled else 0.0
+
+            # Fetch BTC bars once for relative strength calculations (cached 60s)
+            try:
+                if time.time() - self._btc_bars_time > 60:
+                    self._btc_bars_cache = self.market_data.fetch_bars("BTC/USD", "5Min", 50)
+                    self._btc_bars_time = time.time()
+            except Exception:
+                pass
+
             results: List[dict] = []
 
             for symbol in self._candidate_pool:
@@ -206,6 +223,34 @@ class SymbolScanner:
                                 logger.info(f"[POLITICAL] {symbol}: +{political_bonus}pts from political buys")
                         except Exception as e:
                             logger.debug(f"[POLITICAL] Bias error for {symbol}: {e}")
+
+                    # ── Market Intelligence Layer ──────────────────────────────────────
+                    try:
+                        if self._btc_bars_cache is not None:
+                            intel = self.intelligence.get_combined_intelligence(
+                                symbol, df, self._btc_bars_cache
+                            )
+                            final_score = max(0, min(100, total_score + intel["total_modifier"]))
+                            symbol_result["total_score"] = final_score
+                            symbol_result["intel_modifier"] = intel["total_modifier"]
+                            symbol_result["intel_summary"] = intel.get("summary", "")
+                            symbol_result["breakout_type"] = intel["breakout_type"]
+                            symbol_result["whale_flow"] = intel["whale_flow"]
+                            symbol_result["fear_greed"] = intel["fear_greed_score"]
+                            symbol_result["relative_strength"] = intel["relative_strength"]
+                            total_score = final_score
+                            symbol_result["tradeable"] = total_score >= min_score_to_trade
+                            if intel["breakout_type"] == "BULLISH":
+                                logger.info(
+                                    f"[BREAKOUT] {symbol}: BULLISH breakout confirmed! Score→{final_score}"
+                                )
+                            if intel["whale_flow"] == "ACCUMULATION":
+                                logger.info(
+                                    f"[WHALE] {symbol}: Smart money accumulating. Score→{final_score}"
+                                )
+                    except Exception as e:
+                        logger.error(f"[INTEL] Error applying intelligence for {symbol}: {e}")
+                    # ── End Market Intelligence Layer ──────────────────────────────────
 
                     results.append(symbol_result)
 
