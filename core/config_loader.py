@@ -26,15 +26,20 @@ class BotConfig:
 
 @dataclass
 class AIConfig:
-    """AI/LLM settings for Ollama Cloud."""
+    """AI/LLM settings for Ollama Cloud with Local Fallback."""
     provider: str = "ollama_cloud"
-    model: str = "minimax-m2.7"
-    base_url: str = "https://api.ollama.com/v1"
-    temperature: float = 0.3
-    max_tokens: int = 1000
+    model: str = "gpt-oss:120b"
+    base_url: str = "https://ollama.com"
+    temperature: float = 0.2
+    max_tokens: int = 800
     reasoning_prompt_style: str = "chain_of_thought"
-    timeout_seconds: int = 120
-    fallback_models: List[str] = field(default_factory=lambda: ["glm-4-plus", "gpt-120b", "deepseek-r1", "qwen-max"])
+    timeout_seconds: int = 60
+    fallback_models: List[str] = field(default_factory=lambda: ["deepseek-v3.1:671b", "mistral-large-3:675b"])
+    
+    # Local fallback settings
+    local_fallback_enabled: bool = True
+    local_fallback_model: str = "gemma4:e2b"
+    local_base_url: str = "http://localhost:11434"
 
 
 @dataclass
@@ -302,12 +307,15 @@ class ConfigLoader:
         self.ai = AIConfig(
             provider=ai_cfg.get("provider", "ollama_cloud"),
             model=ai_cfg.get("model", "minimax-m2.7"),
-            base_url=ai_cfg.get("base_url", "https://api.ollama.com/v1"),
-            temperature=ai_cfg.get("temperature", 0.3),
-            max_tokens=ai_cfg.get("max_tokens", 1000),
+            base_url=ai_cfg.get("base_url", "https://ollama.com"),
+            temperature=ai_cfg.get("temperature", 0.2),
+            max_tokens=ai_cfg.get("max_tokens", 800),
             reasoning_prompt_style=ai_cfg.get("reasoning_prompt_style", "chain_of_thought"),
-            timeout_seconds=ai_cfg.get("timeout_seconds", 120),
-            fallback_models=ai_cfg.get("fallback_models", ["glm-4-plus", "gpt-120b", "deepseek-r1", "qwen-max"]),
+            timeout_seconds=ai_cfg.get("timeout_seconds", 60),
+            fallback_models=ai_cfg.get("fallback_models", ["deepseek-v3.1:671b", "mistral-large-3:675b"]),
+            local_fallback_enabled=ai_cfg.get("local_fallback_enabled", True),
+            local_fallback_model=ai_cfg.get("local_fallback_model", "gemma4:e2b"),
+            local_base_url=ai_cfg.get("local_base_url", "http://localhost:11434"),
         )
         
         # Markets config

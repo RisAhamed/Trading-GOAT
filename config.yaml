@@ -29,11 +29,11 @@ web_ui:
   auto_open_browser: true          # Automatically open browser on startup
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# AI MODEL SETTINGS (Ollama Cloud)
+# AI MODEL SETTINGS (Ollama Cloud with Local Fallback)
 # ─────────────────────────────────────────────────────────────────────────────────
 ai:
   provider: "ollama_cloud"
-  # Available models: "gpt-oss:120b", "deepseek-v3.1:671b", "mistral-large-3:675b"
+  # Priority 1: Ollama Cloud models - "gpt-oss:120b", "deepseek-v3.1:671b", "mistral-large-3:675b"
   model: "gpt-oss:120b"
   base_url: "https://ollama.com"
   temperature: 0.2                 # 0.1-0.3 = decisive, 0.5+ = creative
@@ -43,6 +43,12 @@ ai:
   fallback_models:
     - "deepseek-v3.1:671b"
     - "mistral-large-3:675b"
+  
+  # Priority 2: Local Ollama models (fallback when cloud fails)
+  # These run on your local machine (http://localhost:11434)
+  local_fallback_enabled: true      # Enable local model fallback
+  local_fallback_model: "gemma4:e2b"  # Local model to use when cloud fails
+  local_base_url: "http://localhost:11434"
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # TRADING PAIRS - Add/remove pairs here

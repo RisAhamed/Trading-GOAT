@@ -102,14 +102,14 @@ class AIBrain:
     DEFAULT_CONFIDENCE = 0.5
     
     def __init__(self, config: Optional[ConfigLoader] = None) -> None:
-        """Initialize the AI Brain with Ollama Cloud configuration."""
+        """Initialize the AI Brain with Ollama Cloud + Local Fallback configuration."""
         self.config = config or get_config()
         
         self.model = self.config.ai.model
         self.temperature = self.config.ai.temperature
         self.max_tokens = self.config.ai.max_tokens
         self.fallback_models = self.config.ai.fallback_models
-        self.timeout = getattr(self.config.ai, 'timeout_seconds', 120)
+        self.timeout = getattr(self.config.ai, 'timeout_seconds', 60)
         
         # Ollama Cloud API key from env
         self.api_key = self.config.env.ollama_api_key
@@ -128,69 +128,116 @@ class AIBrain:
                 )
                 logger.info("Ollama Cloud client initialized with API key")
             except Exception as e:
-                logger.warning(f"Failed to initialize Ollama client: {e}")
+                logger.warning(f"Failed to initialize Ollama Cloud client: {e}")
+        
+        # Initialize Local Ollama client for fallback
+        self.local_ollama_client = None
+        self.local_fallback_enabled = getattr(self.config.ai, 'local_fallback_enabled', True)
+        self.local_fallback_model = getattr(self.config.ai, 'local_fallback_model', 'gemma4:e2b')
+        self.local_base_url = getattr(self.config.ai, 'local_base_url', 'http://localhost:11434')
+        
+        if self.local_fallback_enabled:
+            try:
+                self.local_ollama_client = OllamaClient(host=self.local_base_url)
+                logger.info(f"Local Ollama client initialized at {self.local_base_url}")
+            except Exception as e:
+                logger.warning(f"Failed to initialize local Ollama client at {self.local_base_url}: {e}")
         
         # Connection status
         self._connected = False
         self._active_model = self.model
+        self._using_local_fallback = False
         
         # Recent decisions for context
         self._recent_decisions: List[AIDecision] = []
         self._max_history = 10
         
-        logger.info(f"AIBrain initialized with Ollama Cloud model: {self.model}")
-        logger.info(f"API Host: https://ollama.com")
+        logger.info(f"AIBrain initialized - Primary: {self.model} @ https://ollama.com")
+        if self.local_fallback_enabled:
+            logger.info(f"AIBrain local fallback enabled - {self.local_fallback_model} @ {self.local_base_url}")
     
     def check_connection(self) -> Tuple[bool, str]:
         """
-        Check if Ollama Cloud API is reachable and authenticate.
-        Uses the native Ollama client library.
+        Check if Ollama Cloud API is reachable. If not, try local fallback.
         
         Returns:
             Tuple of (connected: bool, message: str)
         """
+        # Try cloud first
+        cloud_connected, cloud_msg = self._verify_cloud_connection()
+        if cloud_connected:
+            self._connected = True
+            self._using_local_fallback = False
+            return True, cloud_msg
+        
+        # If cloud failed and local fallback enabled, try local
+        if self.local_fallback_enabled:
+            logger.warning("Ollama Cloud connection failed, attempting local fallback...")
+            local_connected, local_msg = self._verify_local_connection()
+            if local_connected:
+                self._connected = True
+                self._using_local_fallback = True
+                logger.warning(f"Switched to local Ollama fallback: {local_msg}")
+                return True, local_msg
+            else:
+                self._connected = False
+                return False, f"Cloud failed: {cloud_msg}. Local failed: {local_msg}"
+        
+        self._connected = False
+        return False, cloud_msg
+    
+    def _verify_cloud_connection(self) -> Tuple[bool, str]:
+        """Verify connection to Ollama Cloud API."""
         if not self.api_key:
-            self._connected = False
             return False, "OLLAMA_API_KEY not configured in .env file"
         
         if not self.ollama_client:
-            self._connected = False
-            return False, "Ollama client not initialized"
+            return False, "Ollama Cloud client not initialized"
         
-        # Directly verify with a test chat - most reliable method
-        return self._verify_with_test_request()
+        return self._verify_with_test_request(use_local=False)
     
-    def _verify_with_test_request(self) -> Tuple[bool, str]:
-        """Verify connection by making a simple test chat request using Ollama native client."""
+    def _verify_local_connection(self) -> Tuple[bool, str]:
+        """Verify connection to local Ollama instance."""
+        if not self.local_ollama_client:
+            return False, "Local Ollama client not initialized"
+        
+        return self._verify_with_test_request(use_local=True)
+    
+    def _verify_with_test_request(self, use_local: bool = False) -> Tuple[bool, str]:
+        """Verify connection by making a simple test chat request."""
         try:
-            if not self.ollama_client:
-                self._connected = False
-                return False, "Ollama client not initialized"
+            client = self.local_ollama_client if use_local else self.ollama_client
+            model = self.local_fallback_model if use_local else self.model
+            endpoint = self.local_base_url if use_local else "https://ollama.com"
+            
+            if not client:
+                return False, f"Client not initialized for {endpoint}"
             
             # Use the Ollama native chat API
             messages = [{"role": "user", "content": "Say 'connected' in one word."}]
             
-            response = self.ollama_client.chat(
-                model=self.model,
+            response = client.chat(
+                model=model,
                 messages=messages,
                 options={"temperature": 0, "num_predict": 10}
             )
             
             if response and 'message' in response:
-                self._connected = True
-                self._active_model = self.model
-                model_info = OLLAMA_CLOUD_MODELS.get(self.model, {})
-                model_name = model_info.get('name', self.model)
-                return True, f"Connected to Ollama Cloud: {model_name}"
+                self._active_model = model
+                if use_local:
+                    return True, f"Connected to local Ollama: {model}"
+                else:
+                    model_info = OLLAMA_CLOUD_MODELS.get(model, {})
+                    model_name = model_info.get('name', model)
+                    return True, f"Connected to Ollama Cloud: {model_name}"
             else:
-                self._connected = False
-                return False, "Invalid response from Ollama Cloud"
+                return False, "Invalid response from Ollama"
                 
         except Exception as e:
-            self._connected = False
             error_msg = str(e)
-            logger.warning(f"Ollama test request failed: {error_msg}")
-            return False, f"Connection test failed: {error_msg}"
+            endpoint = self.local_base_url if use_local else "https://ollama.com"
+            logger.debug(f"Ollama test request failed on {endpoint}: {error_msg}")
+            return False, f"Connection test failed on {endpoint}"
     
     def get_active_model(self) -> str:
         """Get the currently active model name."""
@@ -612,7 +659,7 @@ Respond with ONLY the JSON, no additional text before or after."""
 
     def _call_ollama_cloud(self, prompt: str) -> Tuple[Optional[str], str]:
         """
-        Call Ollama Cloud API with active model and automatic failover models.
+        Call Ollama Cloud API with active model and automatic failover to local if needed.
         """
         model_candidates = [self._active_model] + [
             m for m in self.fallback_models if m != self._active_model
@@ -625,12 +672,92 @@ Respond with ONLY the JSON, no additional text before or after."""
                 if model != self._active_model:
                     logger.warning(f"Switched active model from {self._active_model} to {model}")
                     self._active_model = model
+                self._using_local_fallback = False
                 return response, thinking
             last_model_error = model
 
+        # All cloud models failed - try local fallback
+        if self.local_fallback_enabled and self.local_ollama_client:
+            logger.warning(f"All Ollama Cloud models failed (last: {last_model_error}) - switching to local fallback")
+            response, thinking = self._call_ollama_local(prompt)
+            if response:
+                self._using_local_fallback = True
+                logger.warning(f"Successfully switched to local Ollama: {self.local_fallback_model}")
+                return response, thinking
+
         if last_model_error:
-            logger.error(f"All Ollama Cloud model attempts failed (last tried: {last_model_error})")
+            logger.error(f"All model attempts failed - cloud (last: {last_model_error}) and local fallback")
         return None, ""
+    
+    def _call_ollama_local(self, prompt: str) -> Tuple[Optional[str], str]:
+        """
+        Call local Ollama API (fallback).
+        
+        Args:
+            prompt: The prompt to send
+            
+        Returns:
+            Tuple of (response_text, thinking_content)
+        """
+        if not self.local_ollama_client:
+            logger.error("Local Ollama client not initialized")
+            return None, ""
+
+        try:
+            # Build messages for chat (Ollama native format)
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are an expert quantitative trading analyst. Analyze market data and provide precise trading recommendations in JSON format."
+                },
+                {
+                    "role": "user", 
+                    "content": prompt
+                }
+            ]
+            
+            logger.info(f"Calling local Ollama with model: {self.local_fallback_model}")
+            
+            # Use Ollama native client chat method
+            response = self.local_ollama_client.chat(
+                model=self.local_fallback_model,
+                messages=messages,
+                options={
+                    "temperature": self.temperature,
+                    "num_predict": self.max_tokens,
+                }
+            )
+            
+            if response:
+                # Extract content from Ollama response format
+                content = ""
+                thinking = ""
+                
+                if 'message' in response:
+                    message = response['message']
+                    content = message.get('content', '')
+                    
+                    # Some models return thinking in a separate field
+                    if 'reasoning' in message:
+                        thinking = message.get('reasoning', '')
+                    elif 'thinking' in message:
+                        thinking = message.get('thinking', '')
+                
+                # Fallback for direct content in response
+                elif 'response' in response:
+                    content = response.get('response', '')
+                elif 'content' in response:
+                    content = response.get('content', '')
+                
+                logger.debug(f"Local Ollama response received: {len(content)} chars from {self.local_fallback_model}")
+                return content, thinking
+            
+            return None, ""
+                
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"Error calling local Ollama ({self.local_fallback_model}): {error_msg}")
+            return None, ""
     
     def _parse_response(self, response: str, symbol: str, thinking: str = "") -> AIDecision:
         """
@@ -685,7 +812,7 @@ Respond with ONLY the JSON, no additional text before or after."""
                     raw_response=response,
                     thinking_content=thinking,
                     is_fallback=False,
-                    model_used=self._active_model,
+                    model_used=f"{self._active_model}{'[LOCAL_FALLBACK]' if self._using_local_fallback else ''}",
                 )
             
             # No valid JSON found
@@ -708,7 +835,7 @@ Respond with ONLY the JSON, no additional text before or after."""
             raw_response=response,
             thinking_content=thinking,
             is_fallback=True,
-            model_used=self._active_model,
+            model_used=f"{self._active_model}[FALLBACK_PARSE_ERROR]{'[LOCAL]' if self._using_local_fallback else ''}",
         )
     
     def _rule_based_decision(
