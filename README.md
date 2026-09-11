@@ -1,473 +1,60 @@
-# AI Crypto Trader
+# Trading-GOAT — Real-Time AI-Assisted Paper-Trading Platform
 
-An autonomous AI-powered crypto and forex paper trading bot that uses **Ollama Cloud models** (MiniMax M2.7, GLM-4-Plus, GPT-120B, DeepSeek-R1) for market analysis and Alpaca for order execution.
+**PAPER TRADING ONLY. No live-money path exists by design** (`execution/broker.py` asserts `mode==paper` and fail-closes otherwise).
 
-**⚠️ PAPER TRADING ONLY - This bot never uses real money.**
+Separation of concerns is the core idea: **LLM reasons, technicals contextualize, signal engine validates, risk controls capital, broker paper-trades.**
 
-## Features
+## End-to-end cycle
 
-- 🤖 **Ollama Cloud AI Models**: Uses cloud-hosted thinking models (MiniMax M2.7, GLM-4-Plus, GPT-120B) for deep market reasoning
-- 📊 **Dual-Timeframe Analysis**: 10-minute trend + 5-minute entry precision
-- 📈 **Technical Indicators**: RSI, MACD, EMA, Bollinger Bands, ATR
-- 💰 **Risk Management**: Position sizing, stop loss, take profit, daily loss limits
-- 🖥️ **Rich Terminal Dashboard**: Beautiful real-time display of portfolio, positions, and signals
-- 📝 **Comprehensive Logging**: Rotating daily log files for auditing
-- ⚙️ **Fully Configurable**: Single config.yaml file for all settings
-
-## Supported Ollama Cloud Models
-
-| Model | Context | Best For |
-|-------|---------|----------|
-| `minimax-m2.7` | 80k | Strong reasoning, fast inference (Default) |
-| `glm-4-plus` | 128k | Analytical capabilities, long context |
-| `gpt-120b` | 64k | Deep reasoning, complex analysis |
-| `deepseek-r1` | 64k | Structured thinking, chain-of-thought |
-| `qwen-max` | 32k | General reasoning, balanced performance |
-
-## Prerequisites
-
-- **Python 3.10+** (tested with Python 3.10 - 3.14)
-- **Ollama Cloud API Key** from [ollama.com](https://ollama.com)
-- **Alpaca Account** with paper trading enabled ([alpaca.markets](https://alpaca.markets))
-
-## Quick Start
-
-### 1. Get Your Ollama Cloud API Key
-
-1. Sign up at [ollama.com](https://ollama.com)
-2. Navigate to your account settings
-3. Generate an API key
-4. Save the key - you'll need it for the `.env` file
-
-### 2. Configure Environment
-
-The `.env` file should already be configured with your API keys:
-
-```env
-OLLAMA_API_KEY=your_ollama_cloud_api_key
-TAAPI_API_KEY=your_taapi_key
-ALPACA_API_KEY=your_alpaca_key
-ALPACA_API_SECRET=your_alpaca_secret
-APCA_API_BASE_URL=https://paper-api.alpaca.markets
+```
+MARKET DATA -> quality gates -> FEATURES -> REGIME -> AI CONTEXT -> AI DECISION (strict JSON)
+-> SIGNAL CONFLUENCE (confirmations/rejections) -> RISK POLICY -> PAPER EXECUTION (idempotent)
+-> EXITS -> METRICS/EVENTS -> next cycle
 ```
 
-**Important**: The `OLLAMA_API_KEY` is used for authenticating with Ollama Cloud API.
+Every cycle carries `cycle_id`, per-stage latency, and typed state (`domain/models.py`: MarketSnapshot, FeatureSnapshot, AIAnalysis, SignalDecision, RiskDecision, OrderIntent, ExecutionResult, TradingCycleResult). Uncertain -> HOLD. Invalid AI -> HOLD.
 
-### 3. Create and Activate Virtual Environment
+## Why this stack
 
-**Windows (PowerShell):**
-```powershell
-# Navigate to project directory
-cd c:\Users\riswa\Desktop\mybot
+- Dual timeframe: 5Min x30 trend context + 1Min x20 entry timing.
+- Indicators (RSI/MACD/EMA/Bollinger/ATR/ADX/volume): different views of momentum/trend/volatility/position/participation; documented in `features/snapshot.py` and `docs/strategy.md`.
+- LLM (Ollama Cloud + local fallback): structured `MarketContext` in, strict JSON out (`intelligence/prompts/trading_analysis_v1.txt`, `schemas.py`). Unavailable/invalid -> HOLD.
+- Risk (deterministic, `risk/policy.py`): `risk=equity*risk%`, `stop=max(pct,1.5xATR)`, `qty=risk/stop`, exposure caps, daily-loss halt, kill switch.
+- Exits (`exits/engine.py`): stop / TP / trailing / reversal / timeout.
 
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-.\venv\Scripts\Activate.ps1
-
-# You should see (venv) in your prompt
-```
-
-**Windows (Command Prompt):**
-```cmd
-# Navigate to project directory
-cd c:\Users\riswa\Desktop\mybot
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-venv\Scripts\activate.bat
-
-# You should see (venv) in your prompt
-```
-
-**Linux / macOS:**
-```bash
-# Navigate to project directory
-cd ~/Desktop/mybot
-
-# Create virtual environment
-python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate
-
-# You should see (venv) in your prompt
-```
-
-### 4. Install Dependencies
-
-With the virtual environment activated:
+## Run
 
 ```bash
 pip install -r requirements.txt
+cp .env.example .env   # fill keys; .env never committed
+python scripts/run_bot.py --dry-run   # decide everything, submit nothing
+python scripts/run_bot.py --once --dry-run
+python main.py                          # legacy full loop (terminal + web dashboard)
+python scripts/health_check.py
+python scripts/run_backtest.py --csv tests/fixtures/bars.csv --symbol BTC/USD
+pytest -q
 ```
 
-**Note**: The bot uses the `ta` library (Technical Analysis Library) which is pure Python and works with Python 3.10 - 3.14+.
+Legacy `main.py` / `core/` / `dashboard/` / `backtest.py` still work; the new `scripts/run_bot.py` runs the same components through the structured pipeline (`orchestration/loop.py`) with startup checks (`app/bootstrap.py`: CONFIG VALIDATED -> ALPACA -> OLLAMA -> DATA -> FEATURES -> RISK -> SYSTEM READY).
 
-### 5. Configure the Bot
+## Audit fixes (this refactor)
 
-Edit `config.yaml` to set your preferred model and settings:
+- **Bollinger `int(std)` truncation**: `core/indicators.py` did `window_dev=int(1.8)->1`; now `float()`.
+- **Config drift**: `config_loader` defaults (RSI 14, EMA 9/21...) disagreed with `config.yaml` (RSI 7, EMA 5/13...); new `config/settings.py` canonical model + warnings for overlapping keys (`risk_per_trade_pct` vs `base_risk_pct`, `exit_engine` risk clamps).
+- **Silent failures**: broad `except: pass` paths now surface `quality_issues`, `errors[]`, events, and HOLD.
+- **Partial fills**: explicitly flagged, never treated as full.
+- **Duplicates**: `intent_id = cycle_id-symbol` registry + position-aware checks.
 
-```yaml
-ai:
-  provider: "ollama_cloud"
-  model: "minimax-m2.7"  # Options: minimax-m2.7, glm-4-plus, gpt-120b, deepseek-r1, qwen-max
-  base_url: "https://api.ollama.com/v1"
-  temperature: 0.3
-  max_tokens: 1000
-  timeout_seconds: 120
-  reasoning_prompt_style: "chain_of_thought"
-```
+## Observability / safety
 
-### 6. Run the Bot
+- Structured logs (rotating, secrets redacted), metrics (`observability/metrics.py`, Prometheus text), event bus (`observability/events.py`), health (`scripts/health_check.py`).
+- Backtests labeled **HISTORICAL SIMULATION**, no look-ahead (signal[i] -> open[i+1]), fees/slippage; never presented as live P&L.
+- No measured win-rate/ROI/Sharpe/latency claims: **not yet measured** — instrumentation is in place (`cycle_ms`, `llm_ms`, ...).
 
-With the virtual environment activated:
+## Layout
 
-```bash
-python main.py
-```
+`app/` bootstrap · `config/settings.py` · `domain/` · `data/` · `features/` · `intelligence/` · `strategy/` · `risk/` · `execution/` (paper-only) · `portfolio/` · `exits/` · `orchestration/` · `observability/` · `dashboard/` · `scripts/` · `tests/` · `docs/` · `Dockerfile` · `docker-compose.yml` · `Makefile`
 
-The rich terminal dashboard will display:
-- Current portfolio balance and equity
-- Open positions with P&L
-- Latest AI trading signals
-- Recent activity log
+## Interview demo (30s)
 
-### 7. Run the Web Dashboard (Optional)
-
-For a more detailed monitoring experience, run the web-based dashboard:
-
-```bash
-# In a separate terminal (with venv activated)
-python dashboard/web_ui.py
-```
-
-Then open your browser to **http://127.0.0.1:5000**
-
-The web dashboard shows:
-- 📊 **Real-time Portfolio** - Total value, cash, buying power, daily P&L
-- 📈 **Live Prices** - Current BTC/USD, ETH/USD prices
-- ⚙️ **Bot Status** - Running status, loop count, API connections
-- 📂 **Open Positions** - Entry price, current price, unrealized P&L
-- 🎯 **Recent Signals** - BUY/SELL/HOLD decisions with confidence %
-- 📝 **Recent Orders** - Filled orders with prices
-- 📋 **System Logs** - Real-time log viewer with filtering
-
-**Note**: You can run both the terminal UI (main.py) and web dashboard (web_ui.py) simultaneously. They share the same data.
-
-### 8. Deactivate Virtual Environment (When Done)
-
-```bash
-deactivate
-```
-
-## Virtual Environment Quick Reference
-
-| Task | Windows PowerShell | Windows CMD | Linux/macOS |
-|------|-------------------|-------------|-------------|
-| Create venv | `python -m venv venv` | `python -m venv venv` | `python3 -m venv venv` |
-| Activate | `.\venv\Scripts\Activate.ps1` | `venv\Scripts\activate.bat` | `source venv/bin/activate` |
-| Deactivate | `deactivate` | `deactivate` | `deactivate` |
-| Check Python | `python --version` | `python --version` | `python --version` |
-
-## Architecture
-
-```
-ai_trader/
-├── .env                    # API keys (never commit this!)
-├── config.yaml             # All bot settings
-├── requirements.txt        # Python dependencies
-├── main.py                 # Entry point
-├── core/
-│   ├── config_loader.py    # Loads config + environment
-│   ├── market_data.py      # Alpaca OHLCV data fetching
-│   ├── indicators.py       # Technical indicators (ta library)
-│   ├── ai_brain.py         # Ollama Cloud LLM integration
-│   ├── signal_engine.py    # Dual-timeframe signal generation
-│   ├── risk_manager.py     # Position sizing & risk limits
-│   ├── order_executor.py   # Alpaca order placement
-│   └── portfolio_tracker.py # Position & P&L tracking
-├── dashboard/
-│   └── terminal_ui.py      # Rich terminal dashboard
-└── logs/
-    └── trading.log         # Rotating daily logs
-```
-
-## How It Works
-
-### 1. Market Data Collection
-- Fetches OHLCV bars from Alpaca for both 10-minute (trend) and 5-minute (entry) timeframes
-- Caches data to minimize API calls
-- Supports crypto (BTC/USD, ETH/USD, SOL/USD, AVAX/USD) and forex (EUR/USD, GBP/USD)
-
-### 2. Technical Analysis
-- Calculates RSI, MACD, EMA (9/21), Bollinger Bands, and ATR on both timeframes
-- Determines trend direction from 10-minute data
-- Identifies entry opportunities from 5-minute data
-
-### 3. AI Reasoning (Ollama Cloud)
-The bot sends a detailed prompt to the Ollama Cloud model including:
-- Current price and recent price action
-- All technical indicator values
-- Market context and trend analysis
-
-The AI model uses **chain-of-thought reasoning** to:
-- Analyze the overall market structure
-- Evaluate bullish and bearish factors
-- Determine optimal action (BUY, SELL, or HOLD)
-- Provide a confidence score (0-100%)
-
-### 4. Risk Management
-Before any trade:
-- Check daily loss limits (halt if exceeded)
-- Check maximum concurrent positions
-- Calculate position size based on risk percentage
-- Set stop loss using ATR-based dynamic sizing
-- Set take profit at configured multiplier
-
-### 5. Order Execution
-- Paper trades only (never real money)
-- Market orders for immediate execution
-- Bracket orders with stop loss and take profit
-- Automatic order tracking and P&L calculation
-
-## Configuration Reference
-
-All trading parameters are configured in **config.yaml**. Edit this single file to customize the bot's behavior.
-
-### Bot Settings
-```yaml
-bot:
-  name: "AI Crypto Scalper"
-  mode: "paper"              # NEVER change to "live" - paper trading only!
-  base_currency: "USD"
-  loop_interval_seconds: 15  # How often to check markets (15s = aggressive)
-  log_level: "INFO"          # DEBUG | INFO | WARNING | ERROR
-```
-
-### AI Model Settings
-```yaml
-ai:
-  provider: "ollama_cloud"
-  model: "gpt-oss:120b"      # Cloud model to use
-  base_url: "https://ollama.com"
-  temperature: 0.2           # 0.1-0.3 = decisive, 0.5+ = creative
-  max_tokens: 800
-  timeout_seconds: 60
-  fallback_models:           # Backup models if primary fails
-    - "deepseek-v3.1:671b"
-    - "mistral-large-3:675b"
-```
-
-### Trading Pairs
-```yaml
-markets:
-  crypto:
-    enabled: true
-    pairs:                   # Add/remove crypto pairs
-      - "BTC/USD"            # Bitcoin
-      - "ETH/USD"            # Ethereum
-      # - "SOL/USD"          # Uncomment to enable
-      # - "DOGE/USD"
-    exchange: "alpaca"
-  forex:
-    enabled: false           # Requires paid Alpaca SIP subscription
-    pairs:
-      - "EUR/USD"
-      - "GBP/USD"
-```
-
-### Timeframes
-```yaml
-timeframes:
-  trend:
-    interval: "5Min"         # Trend analysis (1Min, 5Min, 15Min, 1Hour)
-    lookback_bars: 30
-  entry:
-    interval: "1Min"         # Entry timing (smaller = faster scalping)
-    lookback_bars: 20
-```
-
-### Technical Indicators
-```yaml
-indicators:
-  rsi:
-    period: 7                # 7 = fast, 14 = standard
-    oversold: 35             # Buy signal threshold
-    overbought: 65           # Sell signal threshold
-  macd:
-    fast: 8
-    slow: 17
-    signal: 9
-  ema:
-    short: 5
-    long: 13
-  bollinger_bands:
-    period: 14
-    std_dev: 1.8
-  atr:
-    period: 10
-```
-
-### Risk Management
-```yaml
-risk:
-  # Position Management
-  max_positions: 2           # Max concurrent open trades
-  max_portfolio_exposure_pct: 40.0  # Max % of portfolio in trades
-  max_symbol_exposure_pct: 25.0     # Max % per single symbol
-  
-  # Risk Per Trade
-  risk_per_trade_pct: 1.0    # % of portfolio risked per trade
-  
-  # Risk-Reward Ratio
-  stop_loss_pct: 0.5         # Stop loss % below entry (0.5% = tight)
-  take_profit_multiplier: 2.0 # Risk-Reward (2.0 = 2:1 ratio)
-                             # If stop_loss = 0.5%, take_profit = 1.0%
-  
-  # Daily Limits
-  max_daily_loss_pct: 3.0    # Stop trading if exceeded
-  
-  # AI Confidence
-  min_signal_confidence: 0.50 # Min AI confidence to trade (50%)
-  
-  # Scalping Settings
-  quick_profit_threshold: 0.3 # Take profit at this % gain
-  trailing_stop_pct: 0.25    # Trail stop below peak
-  max_hold_minutes: 30       # Force exit after N minutes
-  min_profit_to_exit: 3.0    # Exit if profit >= $3
-```
-
-### Signal Settings
-```yaml
-signals:
-  require_trend_confirmation: false  # false = trade against trend (scalping)
-  require_volume_confirmation: false
-  min_rsi_for_buy: 45        # Only buy when RSI <= this
-  max_rsi_for_sell: 55       # Only sell when RSI >= this
-  scalping_mode: true        # true = aggressive quick trades
-```
-
-### Understanding Risk-Reward Ratio
-
-| Setting | Example 1 | Example 2 | Example 3 |
-|---------|-----------|-----------|-----------|
-| `stop_loss_pct` | 0.5% | 1.0% | 2.0% |
-| `take_profit_multiplier` | 2.0 | 2.0 | 3.0 |
-| **Take Profit %** | 1.0% | 2.0% | 6.0% |
-| **Risk:Reward** | 2:1 | 2:1 | 3:1 |
-
-### Scalping Mode vs Swing Trading
-
-| Setting | Scalping | Swing Trading |
-|---------|----------|---------------|
-| `scalping_mode` | `true` | `false` |
-| `loop_interval_seconds` | 15 | 60 |
-| `entry.interval` | "1Min" | "5Min" |
-| `stop_loss_pct` | 0.5% | 2.0% |
-| `max_hold_minutes` | 30 | 180 |
-| `quick_profit_threshold` | 0.3% | 1.0% |
-
-## Changing AI Models
-
-To use a different Ollama Cloud model, update `config.yaml`:
-
-```yaml
-ai:
-  model: "gpt-120b"  # For deeper reasoning
-  # or
-  model: "glm-4-plus"  # For longer context analysis
-  # or
-  model: "deepseek-r1"  # For structured chain-of-thought
-```
-
-The bot will automatically use the specified model for all trading decisions.
-
-## Troubleshooting
-
-### "API key not valid"
-- Verify your `OLLAMA_API_KEY` in `.env` is correct
-- Ensure you have an active Ollama Cloud subscription
-- Check that the API key has not expired
-
-### "Model not found"
-- Verify the model name in `config.yaml` matches Ollama Cloud's available models
-- Try using `minimax-m2.7` as it's the recommended default
-
-### "Connection timeout"
-- Increase `timeout_seconds` in config (thinking models need more time)
-- Check your internet connection
-- Verify Ollama Cloud service status
-
-### "Rate limit exceeded"
-- Reduce `loop_interval_seconds` to slow down API calls
-- Upgrade your Ollama Cloud plan if needed
-
-### "Market data unavailable"
-- Verify your Alpaca API keys are correct
-- Check that the market is open (crypto trades 24/7, forex has specific hours)
-- Ensure you're using paper trading URL
-
-### "Failed to install pandas-ta / numba"
-- This project uses the `ta` library (Technical Analysis) instead of `pandas-ta`
-- The `ta` library is pure Python and works with Python 3.14+
-- Make sure you're using the updated `requirements.txt`
-
-### Virtual Environment Issues
-- Make sure you've activated the virtual environment before installing dependencies
-- If PowerShell blocks script execution, run: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-- Recreate the venv if corrupted: `Remove-Item -Recurse -Force venv` then create new one
-
-## Logging
-
-All activity is logged to `logs/trading.log`:
-- Trading decisions with AI reasoning
-- Order placements and fills
-- Errors and warnings
-- P&L updates
-
-Logs rotate daily to prevent disk space issues.
-
-## Backtesting
-
-Use the built-in deterministic backtester to validate strategy behavior on historical bars.
-
-### Backtest using Alpaca historical bars
-
-```bash
-python backtest.py --symbol BTC/USD --interval 5Min --lookback 1500 --out logs/results/backtest_btc.json
-```
-
-### Backtest using CSV data
-
-CSV must contain `open,high,low,close,volume` and optional `timestamp`.
-
-```bash
-python backtest.py --csv /absolute/path/to/bars.csv --symbol BTC/USD --initial-balance 100000 --fee-bps 5 --slippage-bps 2
-```
-
-## Safety Features
-
-1. **Paper Trading Only**: The `paper=True` flag is hardcoded in the Alpaca client
-2. **Daily Loss Limits**: Trading halts automatically if daily loss exceeds configured %
-3. **Position Limits**: Maximum concurrent positions enforced
-4. **Risk Per Trade**: Position sizing limits exposure per trade
-5. **Confidence Threshold**: Trades only execute when AI confidence ≥ configured minimum
-
-## Legal Disclaimer
-
-This software is for educational purposes only. Trading cryptocurrencies and forex carries significant risk. Past performance does not guarantee future results. Never trade with money you cannot afford to lose. This bot is designed for paper trading only and should not be used with real funds.
-
-
-Web Dashboard
-
-URL: http://127.0.0.1:5000
-Auto-refreshes every 5 seconds
-Shows all trading data in real-time
-
-## License
-
-MIT License - See LICENSE file for details.
+`python scripts/run_bot.py --once --dry-run` shows CYCLE -> REGIME -> AI -> SIGNAL (+reasons) -> RISK -> EXEC -> latency. Then: where does data come from? (`data/provider.py`), what does the LLM get/return? (`intelligence/`), how validated? (`schemas.py`+`strategy/confluence.py`), sizing? (`risk/policy.py`), duplicates? (`execution/broker.py`), exits? (`exits/engine.py`), failures? (`docs/operations.md`).

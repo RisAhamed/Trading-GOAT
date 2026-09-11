@@ -1,0 +1,9 @@
+services:
+  bot:
+    build: .
+    env_file: .env
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - ./logs:/app/logs
+    command: python scripts/run_bot.py --dry-run

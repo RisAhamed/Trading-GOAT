@@ -337,7 +337,7 @@ class IndicatorCalculator:
             bb = BollingerBands(
                 close=df['close'],
                 window=self.bb_period,
-                window_dev=int(self.bb_std),  # ta uses integer std dev multiplier
+                window_dev=float(self.bb_std),  # FIX: must stay float; int() truncated 1.8 -> 1
                 fillna=False
             )
             
