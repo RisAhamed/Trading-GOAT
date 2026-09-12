@@ -44,16 +44,19 @@ class CanonicalSettings:
     raw: dict = field(default_factory=dict)
 
     def safe_summary(self) -> str:
+        stop = self.stop_loss_pct
+        target = round(self.stop_loss_pct * self.take_profit_multiplier, 3)
         lines = [
-            f"MODE = {self.mode.upper()}",
-            f"SYMBOLS = {', '.join(self.symbols)}",
-            f"TREND TF = {self.trend_interval} x{self.trend_lookback}",
-            f"ENTRY TF = {self.entry_interval} x{self.entry_lookback}",
-            f"AI MODEL = {self.ai_model}",
-            f"MAX POSITIONS = {self.max_positions}",
-            f"RISK PER TRADE = {self.risk_per_trade_pct}%",
-            f"STOP = {self.stop_loss_pct}% | R:R = 1:{self.take_profit_multiplier}",
-            f"MIN CONFIDENCE = {self.min_signal_confidence}",
+            f"MODE={self.mode.upper()}",
+            f"SYMBOLS={', '.join(self.symbols)}",
+            f"TREND_TF={self.trend_interval} x{self.trend_lookback}",
+            f"ENTRY_TF={self.entry_interval} x{self.entry_lookback}",
+            f"AI_MODEL={self.ai_model}",
+            f"MAX_POSITIONS={self.max_positions}",
+            f"RISK_PER_TRADE={self.risk_per_trade_pct}%",
+            f"STOP={stop}%",
+            f"TARGET={target}%",
+            f"LOOP_INTERVAL={self.loop_interval_s}s",
         ]
         return "\n".join(lines)
 

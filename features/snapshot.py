@@ -26,7 +26,7 @@ def _finite(x: float, lo: float, hi: float) -> bool:
     return x is not None and lo <= x <= hi and math.isfinite(x)
 
 
-def build_snapshot(symbol: str, timeframe: str, df: pd.DataFrame, legacy_values) -> FeatureSnapshot:
+def build_snapshot(symbol: str, timeframe: str, df: pd.DataFrame, legacy_values, min_bars: int = 30) -> FeatureSnapshot:
     """Convert legacy IndicatorValues -> typed snapshot with explicit quality info."""
     now = datetime.now(timezone.utc)
     snap = FeatureSnapshot(
@@ -52,8 +52,8 @@ def build_snapshot(symbol: str, timeframe: str, df: pd.DataFrame, legacy_values)
     issues: list[str] = []
     if df is None or df.empty:
         issues.append("missing_ohlcv_data")
-    if snap.data_points < 30:
-        issues.append(f"insufficient_history n={snap.data_points}<30")
+    if snap.data_points < min_bars:
+        issues.append(f"insufficient_history n={snap.data_points}<{min_bars}")
     if not _finite(snap.rsi, 0, 100):
         issues.append(f"unrealistic_rsi {snap.rsi}")
     if not _finite(snap.bb_percent, 0, 1):

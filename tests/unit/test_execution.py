@@ -16,10 +16,10 @@ def test_paper_assertion():
         pass
 
 
-def test_duplicate_intent_blocked():
+def test_duplicate_intent_blocked(tmp_path):
     ex = MagicMock()
     ex.config.bot.mode = "paper"
-    b = AlpacaPaperBroker(ex, dry_run=True)
+    b = AlpacaPaperBroker(ex, dry_run=True, store_path=tmp_path / "intents.json")
     intent = OrderIntent("id1", "c1", "s1", "BTC/USD", "buy", 1.0)
     r1 = b.submit(intent)
     r2 = b.submit(intent)

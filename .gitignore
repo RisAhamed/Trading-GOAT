@@ -1,5 +1,6 @@
 logs/*
 .venv
+.verify
 .env
 __pycache__/
 *.py[cod]
@@ -220,3 +221,5 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+.pytest_cache
+.ruff_cache

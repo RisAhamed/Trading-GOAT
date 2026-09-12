@@ -143,6 +143,7 @@ class SignalDecision:
     confirmations: list[str] = field(default_factory=list)
     rejections: list[str] = field(default_factory=list)
     score: float = 0.0
+    hold_reason: str = ""  # AI_HOLD | AI_LOW_CONFIDENCE | AI_INVALID | TECHNICAL_VETO | ...
     timestamp: datetime = field(default_factory=utcnow)
 
     @property

@@ -420,10 +420,73 @@ def api_dashboard():
     })
 
 
+@app.route('/health')
+def health_route():
+    """Liveness: is the dashboard process alive. Unknown broker values stay None."""
+    try:
+        from observability.health import get_health
+        from observability.state import read_runtime_state
+
+        h = get_health()
+        st = read_runtime_state()
+        code = 200 if h.status in ("READY", "DEGRADED", "STARTING") else 503
+        return jsonify({
+            "status": h.status,
+            "components": h.components,
+            "uptime_s": round(h.uptime_s, 1),
+            "last_cycle": st.get("cycle"),
+            "state_updated_at": st.get("updated_at"),
+        }), code
+    except Exception as e:
+        return jsonify({"status": "UNKNOWN", "error": str(e)[:200]}), 503
+
+
+@app.route('/ready')
+def ready_route():
+    """Readiness for trading: READY only when critical deps healthy."""
+    try:
+        from observability.health import get_health
+
+        h = get_health()
+        ok = h.status == "READY"
+        return jsonify({"ready": ok, "status": h.status,
+                        "components": h.components}), (200 if ok else 503)
+    except Exception as e:
+        return jsonify({"ready": False, "error": str(e)[:200]}), 503
+
+
+@app.route('/metrics')
+def metrics_route():
+    """Prometheus-compatible metrics text plus runtime state (no invented data)."""
+    try:
+        from flask import Response
+        from observability.metrics import prometheus_text, snapshot
+
+        return Response(prometheus_text() + f"\n# runtime_state {json.dumps(snapshot())}\n",
+                        mimetype="text/plain")
+    except Exception as e:
+        return jsonify({"error": str(e)[:200]}), 500
+
+
+@app.route('/api/runtime')
+def api_runtime():
+    """Canonical runtime state: cycle, universe, AI/signal/risk/exec, HOLD breakdown."""
+    try:
+        from observability.state import read_runtime_state
+
+        st = read_runtime_state()
+        if not st:
+            return jsonify({"state": "NOT AVAILABLE",
+                            "detail": "canonical runtime has not published yet"}), 200
+        return jsonify(st)
+    except Exception as e:
+        return jsonify({"state": "NOT AVAILABLE", "error": str(e)[:200]}), 200
+
+
 def run_dashboard(host: str = "127.0.0.1", port: int = 5000, debug: bool = False):
     """Run the web dashboard."""
     print(f"\n{'='*60}")
-    print("🖥️  AI CRYPTO TRADER - MONITORING DASHBOARD")
+    print("AI CRYPTO TRADER - MONITORING DASHBOARD")
     print(f"{'='*60}")
     print(f"Dashboard URL: http://{host}:{port}")
     print(f"API Endpoint:  http://{host}:{port}/api/dashboard")
